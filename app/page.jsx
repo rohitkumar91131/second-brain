@@ -2,9 +2,12 @@
 
 import React from 'react'
 import Link from 'next/link'
-import { Brain, ArrowRight, CheckCircle2, Zap, Shield, Sparkles } from 'lucide-react'
+import { useSession } from 'next-auth/react'
+import { Brain, ArrowRight, CheckCircle2, Zap, Shield, Sparkles, Loader2 } from 'lucide-react'
 
 export default function LandingPage() {
+    const { status } = useSession()
+
     return (
         <div className="min-h-screen bg-[#ffffff] text-[#37352f] overflow-x-hidden">
             {/* Navigation */}
@@ -20,13 +23,29 @@ export default function LandingPage() {
                     <div className="hidden md:flex items-center gap-8 text-sm font-medium">
                         <a href="#features" className="hover:text-[#2eaadc] transition-colors">Features</a>
                         <a href="#about" className="hover:text-[#2eaadc] transition-colors">About</a>
-                        <Link href="/login" className="hover:text-[#2eaadc] transition-colors">Login</Link>
-                        <Link
-                            href="/register"
-                            className="px-4 py-2 bg-[#37352f] text-white rounded-full hover:bg-[#2f2d28] transition-all shadow-lg shadow-[#37352f]/10"
-                        >
-                            Get Started
-                        </Link>
+
+                        {status === 'loading' ? (
+                            <div className="w-20 flex justify-center">
+                                <Loader2 size={18} className="animate-spin text-[#9b9a97]" />
+                            </div>
+                        ) : status === 'authenticated' ? (
+                            <Link
+                                href="/dashboard"
+                                className="px-4 py-2 bg-[#37352f] text-white rounded-full hover:bg-[#2f2d28] transition-all shadow-lg shadow-[#37352f]/10"
+                            >
+                                Dashboard
+                            </Link>
+                        ) : (
+                            <>
+                                <Link href="/login" className="hover:text-[#2eaadc] transition-colors">Login</Link>
+                                <Link
+                                    href="/register"
+                                    className="px-4 py-2 bg-[#37352f] text-white rounded-full hover:bg-[#2f2d28] transition-all shadow-lg shadow-[#37352f]/10"
+                                >
+                                    Get Started
+                                </Link>
+                            </>
+                        )}
                     </div>
                 </div>
             </nav>

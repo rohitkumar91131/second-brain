@@ -1,10 +1,10 @@
-import './globals.css'
-import { AppProvider } from '@/context/AppContext'
+import './globals.css';
+import { AppProvider } from '@/context/AppContext';
 
 export const metadata = {
     title: 'Second Brain Tracker',
     description: 'Your personal knowledge management system',
-}
+};
 
 export default function RootLayout({ children }) {
     return (
@@ -15,5 +15,5 @@ export default function RootLayout({ children }) {
                 </AppProvider>
             </body>
         </html>
-    )
+    );
 }

@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { signIn } from 'next-auth/react'
+import { signIn, useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { Brain, Eye, EyeOff, Loader2, Check, X } from 'lucide-react'
 
@@ -17,6 +17,14 @@ function PasswordRule({ met, label }) {
 
 export default function RegisterPage() {
     const router = useRouter()
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'authenticated') {
+            router.push('/dashboard')
+        }
+    }, [status, router])
+
     const [form, setForm] = useState({ name: '', email: '', password: '', confirm: '' })
     const [error, setError] = useState('')
     const [loading, setLoading] = useState(false)

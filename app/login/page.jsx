@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, Suspense } from 'react'
-import { signIn } from 'next-auth/react'
+import { useState, Suspense, useEffect } from 'react'
+import { signIn, useSession } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Brain, Eye, EyeOff, Loader2, CheckCircle2 } from 'lucide-react'
@@ -25,7 +25,15 @@ function OAuthButton({ provider, icon, label, color }) {
 
 function LoginContent() {
     const router = useRouter()
+    const { status } = useSession()
     const searchParams = useSearchParams()
+
+    useEffect(() => {
+        if (status === 'authenticated') {
+            router.push('/dashboard')
+        }
+    }, [status, router])
+
     const urlMessage = searchParams.get('message')
     const urlError = searchParams.get('error')
 
