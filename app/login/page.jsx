@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
 import { signIn } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
@@ -23,7 +23,7 @@ function OAuthButton({ provider, icon, label, color }) {
     )
 }
 
-export default function LoginPage() {
+function LoginContent() {
     const router = useRouter()
     const searchParams = useSearchParams()
     const urlMessage = searchParams.get('message')
@@ -177,5 +177,17 @@ export default function LoginPage() {
                 </div>
             </div>
         </div>
+    )
+}
+
+export default function LoginPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-[#f7f7f5] flex items-center justify-center">
+                <Loader2 size={24} className="animate-spin text-[#37352f]" />
+            </div>
+        }>
+            <LoginContent />
+        </Suspense>
     )
 }
