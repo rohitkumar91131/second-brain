@@ -1,0 +1,4 @@
+next-env.d.js
+node_modules
+.next
+.env*.local
