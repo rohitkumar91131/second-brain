@@ -34,32 +34,96 @@ function AppContextInner({ children }) {
         if (isAuthenticated) fetchAllFromAPI()
         else loadFromLocalStorage()
     }, [status, isAuthenticated])
+    
+    
 
     const fetchAllFromAPI = async () => {
         setLoading(true)
         try {
-            const endpoints = ['tasks','projects','goals','notes','journal','resources']
-            const responses = await Promise.all(endpoints.map(e => fetch(`/api/${e}`)))
+            // Reduce initial load by fetching only the endpoint for the current dashboard tab
+            const pathname = typeof window !== 'undefined' ? window.location.pathname : '/'
+            const pickEndpointsForPath = (p) => {
+                if (p.startsWith('/dashboard/tasks')) return ['tasks']
+                if (p.startsWith('/dashboard/notes')) return ['notes']
+                if (p.startsWith('/dashboard/journal')) return ['journal']
+                if (p.startsWith('/dashboard/projects')) return ['projects']
+                if (p.startsWith('/dashboard/resources')) return ['resources']
+                if (p.startsWith('/dashboard/goals')) return ['goals']
+                // default: fetch only tasks to keep initial load light
+                return ['tasks']
+            }
+
+            const endpoints = pickEndpointsForPath(pathname)
+
+            // Always fetch profile (view preferences) and then the selected endpoints
             const profileRes = await fetch('/api/user/profile')
+            const responses = await Promise.all(endpoints.map(e => fetch(`/api/${e}`)))
 
             const data = await Promise.all(responses.map(r => r.json()))
             const profile = await profileRes.json()
 
-            setTasks(data[0] || [])
-            setProjects(data[1] || [])
-            setGoals(data[2] || [])
-            setNotes(data[3] || [])
-            setJournal(data[4] || [])
-            setResources(data[5] || [])
+            const resultMap = {}
+            endpoints.forEach((e, i) => resultMap[e] = data[i] || [])
+
+            const stored = getStorage('appData')
+            const localNotes = stored?.notes || []
+
+            if (resultMap.notes) {
+                const mergedNotesMap = new Map()
+                resultMap.notes.forEach(note => mergedNotesMap.set(note.id, note))
+                localNotes.forEach(note => mergedNotesMap.set(note.id, note))
+                setNotes(Array.from(mergedNotesMap.values()))
+            } else {
+                setNotes(localNotes.length ? localNotes : defaultData.notes)
+            }
+
+            setTasks(resultMap.tasks || (stored?.tasks || defaultData.tasks))
+            setProjects(resultMap.projects || (stored?.projects || defaultData.projects))
+            setGoals(resultMap.goals || (stored?.goals || defaultData.goals))
+            setJournal(resultMap.journal || (stored?.journal || defaultData.journal))
+            setResources(resultMap.resources || (stored?.resources || defaultData.resources || []))
             setViewPreferences(profile.viewPreferences || {})
             setAreas(getStorage('areas') || defaultData.areas)
             setArchive(getStorage('archive') || [])
-        } catch {
+
+        } catch (e) {
+            console.error('fetchAllFromAPI failed, falling back to local data', e)
             loadFromLocalStorage()
         } finally {
             setLoading(false)
         }
     }
+
+    // Fetch a single endpoint on demand (pages can call this when they mount)
+    const fetchEndpoint = useCallback(async (endpoint) => {
+        try {
+            setLoading(true)
+            const res = await fetch(`/api/${endpoint}`)
+            if (!res.ok) throw new Error('API error')
+            const data = await res.json()
+            const stored = getStorage('appData')
+            switch (endpoint) {
+                case 'tasks': setTasks(data); break
+                case 'projects': setProjects(data); break
+                case 'goals': setGoals(data); break
+                case 'notes': {
+                    const localNotes = stored?.notes || []
+                    const mergedNotesMap = new Map()
+                    (data || []).forEach(n => mergedNotesMap.set(n.id, n))
+                    localNotes.forEach(n => mergedNotesMap.set(n.id, n))
+                    setNotes(Array.from(mergedNotesMap.values()))
+                    break
+                }
+                case 'journal': setJournal(data); break
+                case 'resources': setResources(data); break
+                default: break
+            }
+        } catch (err) {
+            console.error('fetchEndpoint failed', endpoint, err)
+        } finally {
+            setLoading(false)
+        }
+    }, [])
 
     const loadFromLocalStorage = () => {
         setLoading(true)
@@ -110,8 +174,22 @@ function AppContextInner({ children }) {
             headers: { 'Content-Type': 'application/json' },
             body: body ? JSON.stringify(body) : undefined
         })
-        if (!res.ok) throw new Error('API error')
-        return res.json()
+        let data = null
+        try {
+            data = await res.json()
+        } catch (e) {
+            // Non-JSON response
+        }
+
+        if (!res.ok) {
+            const message = (data && (data.error || data.message)) || res.statusText || 'API error'
+            const err = new Error(message)
+            err.status = res.status
+            err.body = data
+            throw err
+        }
+
+        return data
     }, [])
 
     const makeCRUD = (setter, endpoint) => ({
@@ -131,25 +209,49 @@ function AppContextInner({ children }) {
                 return newItem
             }
         },
-
         update: async (id, updates) => {
-            if (isAuthenticated) {
-                const updated = await apiCall('PUT', `/api/${endpoint}/${id}`, updates)
-                setter(prev => prev.map(i => i.id === id ? updated : i))
-            } else {
-                setter(prev =>
-                    prev.map(i =>
-                        i.id === id
-                            ? { ...i, ...updates, updatedAt: new Date().toISOString() }
-                            : i
-                    )
+            // Store the original item before updating
+            let savedItem = null
+            
+            setter(prev => {
+                const item = prev.find(i => i.id === id)
+                savedItem = item ? { ...item } : null
+                return prev.map(i =>
+                    i.id === id
+                        ? { ...i, ...updates, updatedAt: new Date().toISOString() }
+                        : i
                 )
+            })
+            
+            if (isAuthenticated) {
+                try {
+                    const updated = await apiCall('PUT', `/api/${endpoint}/${id}`, updates)
+                    // Deep merge: keep original item data, then apply API updates, then ensure critical fields
+                    const merged = { ...savedItem, ...updated, id }
+                    console.debug(`[AppContext] Updated ${endpoint} ${id}:`, merged)
+                    setter(prev => prev.map(i => i.id === id ? merged : i))
+                    return merged
+                } catch (error) {
+                    // If API fails, keep the optimistic update
+                    console.error('Update failed:', error)
+                    // return the optimistic version
+                    const optimistic = { ...savedItem, ...updates, updatedAt: new Date().toISOString(), id }
+                    console.debug(`[AppContext] Update optimistic for ${endpoint} ${id}:`, optimistic)
+                    return optimistic
+                }
             }
-        },
 
+            // For unauthenticated (local) update, return the optimistic updated item
+            return { ...savedItem, ...updates, updatedAt: new Date().toISOString(), id }
+        },
         delete: async (id) => {
             if (isAuthenticated) {
-                await apiCall('DELETE', `/api/${endpoint}/${id}`)
+                try {
+                    await apiCall('DELETE', `/api/${endpoint}/${id}`)
+                } catch (error) {
+                    console.error(`Failed to delete ${endpoint}/${id}:`, error)
+                    // Proceed with local removal to avoid leaving UI in a broken state
+                }
             }
             setter(prev => prev.filter(i => i.id !== id))
         }
@@ -162,28 +264,9 @@ function AppContextInner({ children }) {
     const journalCRUD = makeCRUD(setJournal, 'journal')
     const resourceCRUD = makeCRUD(setResources, 'resources')
 
-    const setViewPreference = async (tabName, viewType) => {
-        const newPrefs = { ...viewPreferences, [tabName]: viewType }
-        setViewPreferences(newPrefs)
-
-        if (isAuthenticated) {
-            try {
-                await apiCall('PUT', '/api/user/profile', { viewPreferences: newPrefs })
-            } catch {}
-        }
-    }
-
-    const archiveItem = (item, type) => {
-        const archived = { ...item, type, archivedAt: new Date().toISOString() }
-        setArchive(prev => [archived, ...prev])
-    }
-
-    const updateAreas = (newAreas) => setAreas(newAreas)
-    const updateArchive = (newArchive) => setArchive(newArchive)
-
     const value = {
         tasks, projects, goals, notes, journal, areas, resources, archive,
-        viewPreferences, setViewPreference,
+        viewPreferences,
         sidebarCollapsed, setSidebarCollapsed,
         loading,
         session,
@@ -192,6 +275,8 @@ function AppContextInner({ children }) {
         addTask: taskCRUD.add,
         updateTask: taskCRUD.update,
         deleteTask: taskCRUD.delete,
+
+        fetchEndpoint,
 
         addProject: projectCRUD.add,
         updateProject: projectCRUD.update,
@@ -205,17 +290,13 @@ function AppContextInner({ children }) {
         updateNote: noteCRUD.update,
         deleteNote: noteCRUD.delete,
 
-        addJournalEntry: journalCRUD.add,
-        updateJournalEntry: journalCRUD.update,
-        deleteJournalEntry: journalCRUD.delete,
+        addJournal: journalCRUD.add,
+        updateJournal: journalCRUD.update,
+        deleteJournal: journalCRUD.delete,
 
         addResource: resourceCRUD.add,
         updateResource: resourceCRUD.update,
         deleteResource: resourceCRUD.delete,
-
-        updateAreas,
-        updateArchive,
-        archiveItem
     }
 
     return <AppContext.Provider value={value}>{children}</AppContext.Provider>

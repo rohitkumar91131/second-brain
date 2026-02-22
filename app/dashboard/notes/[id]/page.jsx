@@ -11,9 +11,17 @@ import { format } from 'date-fns'
 export default function NoteEditorPage() {
     const { id } = useParams()
     const router = useRouter()
-    const { notes, updateNote, deleteNote, loading } = useApp()
+    const { notes, updateNote, deleteNote, loading, projects, fetchEndpoint } = useApp()
 
     const note = notes.find(n => n.id === id)
+    const project = projects?.find(p => p.id === note?.projectId)
+
+    // Ensure projects are loaded when this note belongs to a project
+    useEffect(() => {
+        if (!note?.projectId) return
+        const has = projects && projects.find(p => p.id === note.projectId)
+        if (!has) fetchEndpoint('projects')
+    }, [note?.projectId, projects, fetchEndpoint])
 
     const [title, setTitle] = useState('')
     const [blocks, setBlocks] = useState([])
@@ -37,6 +45,18 @@ export default function NoteEditorPage() {
         setLastSaved(new Date())
         setIsSaving(false)
     }
+
+    // Save on Ctrl/Cmd+S
+    useEffect(() => {
+        const onKey = (e) => {
+            if ((e.ctrlKey || e.metaKey) && (e.key === 's' || e.key === 'S')) {
+                e.preventDefault()
+                handleSave()
+            }
+        }
+        window.addEventListener('keydown', onKey)
+        return () => window.removeEventListener('keydown', onKey)
+    }, [title, blocks, note])
 
     const handleDelete = () => {
         deleteNote(id)
@@ -100,6 +120,17 @@ export default function NoteEditorPage() {
                         </div>
 
                         <div className="flex items-center gap-4">
+                            {project && (
+                                <div className="group relative">
+                                    <span className="text-sm font-bold text-[#37352f] cursor-help">
+                                        {project.title}
+                                    </span>
+                                    <span className="absolute -top-8 right-0 bg-[#37352f] text-white text-[10px] font-semibold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                                        Project
+                                    </span>
+                                </div>
+                            )}
+
                             <div className="flex items-center gap-1.5">
                                 <div className={`w-1.5 h-1.5 rounded-full ${isSaving ? 'bg-yellow-500 animate-pulse' : 'bg-[#2eaadc]'}`} />
                                 <span className="text-[10px] font-bold text-[#9b9a97] uppercase tracking-tighter">

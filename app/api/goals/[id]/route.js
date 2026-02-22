@@ -25,7 +25,7 @@ export const PUT = withErrorHandler(async (request, { params }) => {
     const goal = await Goal.findOneAndUpdate(
         { _id: params.id, userId: session.user.id },
         { $set: validation.data },
-        { new: true, runValidators: true }
+        { returnDocument: 'after', runValidators: true }
     ).lean()
 
     if (!goal) return err('Goal not found', 404)

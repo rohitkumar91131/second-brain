@@ -118,7 +118,9 @@ export const authOptions = {
 
     secret: process.env.NEXTAUTH_SECRET,
 
-    debug: process.env.NODE_ENV === 'development',
+    // Enable debug only when explicitly requested via NEXTAUTH_DEBUG=true
+    // Keeps production logs clean even if NODE_ENV is misconfigured.
+    debug: process.env.NEXTAUTH_DEBUG === 'true',
 }
 
 const handler = NextAuth(authOptions)

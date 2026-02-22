@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useApp } from '@/context/AppContext'
 import ViewSwitcher from '@/components/views/ViewSwitcher'
 import TableView from '@/components/views/TableView'
@@ -8,7 +8,7 @@ import BoardView from '@/components/views/BoardView'
 import CalendarView from '@/components/views/CalendarView'
 import ListView from '@/components/views/ListView'
 import QuickAddModal from '@/components/ui/QuickAddModal'
-import { Plus } from 'lucide-react'
+import { Plus, LoaderIcon } from 'lucide-react'
 
 const COLUMNS = [
     { key: 'title', label: 'Title', type: 'text', width: 250 },
@@ -19,9 +19,31 @@ const COLUMNS = [
 ]
 
 export default function ProjectsPage() {
-    const { projects, addProject, updateProject, deleteProject, viewPreferences } = useApp()
+    const { projects, addProject, updateProject, deleteProject, viewPreferences, fetchEndpoint } = useApp()
     const [view, setView] = useState(viewPreferences['Projects'] || 'list')
     const [showAdd, setShowAdd] = useState(false)
+    const [isLoading, setIsLoading] = useState(!projects || projects.length === 0)
+
+    useEffect(() => {
+        if (!projects || projects.length === 0) {
+            fetchEndpoint('projects').then(() => setIsLoading(false))
+        } else {
+            setIsLoading(false)
+        }
+    }, [])
+
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center h-full relative overflow-hidden">
+                <div className="absolute inset-0 flex">
+                    <div className="relative w-full h-1 loading-bar-animation">
+                        <div className="w-1 h-1 bg-[#2eaadc] rounded-full"></div>
+                    </div>
+                </div>
+                <LoaderIcon className="w-6 h-6 text-[#9b9a97] animate-spin" />
+            </div>
+        )
+    }
 
     return (
         <div className="flex flex-col h-full">

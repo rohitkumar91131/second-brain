@@ -1,11 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useApp } from '@/context/AppContext'
 import ViewSwitcher from '@/components/views/ViewSwitcher'
 import TableView from '@/components/views/TableView'
 import ListView from '@/components/views/ListView'
-import { Plus, BookOpen, ExternalLink, Trash2 } from 'lucide-react'
+import { Plus, BookOpen, ExternalLink, Trash2, LoaderIcon } from 'lucide-react'
 import Modal from '@/components/ui/Modal'
 
 const COLUMNS = [
@@ -19,10 +19,11 @@ const COLUMNS = [
 const RESOURCE_TYPES = ['Book', 'Article', 'Website', 'Video', 'Course', 'Podcast', 'Tool', 'Other']
 
 export default function ResourcesPage() {
-    const { resources, addResource, updateResource, deleteResource, viewPreferences } = useApp()
+    const { resources, addResource, updateResource, deleteResource, viewPreferences, fetchEndpoint } = useApp()
     const [view, setView] = useState(viewPreferences['Resources'] || 'list')
     const [showAdd, setShowAdd] = useState(false)
     const [form, setForm] = useState({ title: '', type: 'Book', url: '', tags: '', status: 'To Read', notes: '' })
+    const [isLoading, setIsLoading] = useState(!resources || resources.length === 0)
 
     const handleAdd = (e) => {
         e.preventDefault()
@@ -33,6 +34,27 @@ export default function ResourcesPage() {
         })
         setForm({ title: '', type: 'Book', url: '', tags: '', status: 'To Read', notes: '' })
         setShowAdd(false)
+    }
+
+    useEffect(() => {
+        if (!resources || resources.length === 0) {
+            fetchEndpoint('resources').then(() => setIsLoading(false))
+        } else {
+            setIsLoading(false)
+        }
+    }, [])
+
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center h-full relative overflow-hidden">
+                <div className="absolute inset-0 flex">
+                    <div className="relative w-full h-1 loading-bar-animation">
+                        <div className="w-1 h-1 bg-[#2eaadc] rounded-full"></div>
+                    </div>
+                </div>
+                <LoaderIcon className="w-6 h-6 text-[#9b9a97] animate-spin" />
+            </div>
+        )
     }
 
     return (

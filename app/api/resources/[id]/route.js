@@ -25,7 +25,7 @@ export const PUT = withErrorHandler(async (request, { params }) => {
     const resource = await Resource.findOneAndUpdate(
         { _id: params.id, userId: session.user.id },
         { $set: validation.data },
-        { new: true, runValidators: true }
+        { returnDocument: 'after', runValidators: true }
     ).lean()
 
     if (!resource) return err('Resource not found', 404)

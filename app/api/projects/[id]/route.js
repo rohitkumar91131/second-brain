@@ -25,7 +25,7 @@ export const PUT = withErrorHandler(async (request, { params }) => {
     const project = await Project.findOneAndUpdate(
         { _id: params.id, userId: session.user.id },
         { $set: validation.data },
-        { new: true, runValidators: true }
+        { returnDocument: 'after', runValidators: true }
     ).lean()
 
     if (!project) return err('Project not found', 404)

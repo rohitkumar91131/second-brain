@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useApp } from '@/context/AppContext'
 import Modal from './Modal'
-import { CheckSquare, FileText, FolderOpen, Target } from 'lucide-react'
+import { CheckSquare, FileText, FolderOpen, Target, Loader } from 'lucide-react'
 import { format } from 'date-fns'
 
 const TYPES = [
@@ -14,35 +14,56 @@ const TYPES = [
     { key: 'goal', label: 'Goal', icon: Target, color: 'text-orange-600' },
 ]
 
-export default function QuickAddModal({ onClose, defaultType = 'task' }) {
+export default function QuickAddModal({ onClose, defaultType = 'task', prefilledData = {}, onNoteCreated = null }) {
     const router = useRouter()
-    const { addTask, addNote, addProject, addGoal } = useApp()
+    const { addTask, addNote, addProject, addGoal, projects } = useApp()
     const [type, setType] = useState(defaultType)
-    const [title, setTitle] = useState('')
+    const [isLoading, setIsLoading] = useState(false)
+    
+    // Set default title based on project context
+    const getDefaultTitle = () => {
+        if (prefilledData.projectName && prefilledData.date && (defaultType === 'task' || defaultType === 'note')) {
+            const dateStr = format(prefilledData.date, 'MMM d')
+            return `${prefilledData.projectName} - ${dateStr}`
+        }
+        return ''
+    }
+    
+    const [title, setTitle] = useState(getDefaultTitle())
     const [status, setStatus] = useState('Not Started')
-    const [dueDate, setDueDate] = useState(format(new Date(), 'yyyy-MM-dd'))
+    const [dueDate, setDueDate] = useState(prefilledData.date ? format(prefilledData.date, 'yyyy-MM-dd') : format(new Date(), 'yyyy-MM-dd'))
     const [tags, setTags] = useState('')
 
     const handleSubmit = async (e) => {
         e.preventDefault()
-        if (!title.trim()) return
+        if (!title.trim() || isLoading) return
+
+        setIsLoading(true)
 
         const tagArray = tags.split(',').map(t => t.trim()).filter(Boolean)
         const base = { title: title.trim(), status, tags: tagArray, dueDate }
 
-        let created
-        if (type === 'task') created = await addTask({ ...base, completed: false, priority: 'Medium', projectId: null, notes: '' })
-        if (type === 'note') created = await addNote({ ...base, content: [{ id: 'b1', type: 'paragraph', content: '' }] })
-        if (type === 'project') created = await addProject({ ...base, progress: 0, areaId: null, description: '' })
-        if (type === 'goal') created = await addGoal({ ...base, progress: 0, areaId: null, metric: '' })
+        try {
+            let created
+            if (type === 'task') created = await addTask({ ...base, completed: false, priority: 'Medium', projectId: prefilledData.projectId || null, notes: '' })
+            if (type === 'note') created = await addNote({ ...base, content: [{ id: 'b1', type: 'paragraph', content: '' }], projectId: prefilledData.projectId || null })
+            if (type === 'project') created = await addProject({ ...base, progress: 0, areaId: null, description: '' })
+            if (type === 'goal') created = await addGoal({ ...base, progress: 0, areaId: null, metric: '' })
 
-        if (created?.id) {
-            if (type === 'note') router.push(`/dashboard/notes/${created.id}`)
-            if (type === 'project') router.push(`/dashboard/projects/${created.id}`)
-            if (type === 'goal') router.push(`/dashboard/goals/${created.id}`)
+            if (created?.id) {
+                if (type === 'note' && onNoteCreated) {
+                    onNoteCreated(created)
+                } else if (type === 'note') {
+                    router.push(`/dashboard/notes/${created.id}`)
+                }
+                if (type === 'project') router.push(`/dashboard/projects/${created.id}`)
+                if (type === 'goal') router.push(`/dashboard/goals/${created.id}`)
+            }
+
+            onClose()
+        } finally {
+            setIsLoading(false)
         }
-
-        onClose()
     }
 
     return (
@@ -113,15 +134,24 @@ export default function QuickAddModal({ onClose, defaultType = 'task' }) {
                     <button
                         type="button"
                         onClick={onClose}
-                        className="flex-1 px-3 py-2 text-xs font-medium text-[#37352f] border border-[#e9e9e7] rounded-md hover:bg-[#f7f7f5] transition-colors"
+                        disabled={isLoading}
+                        className="flex-1 px-3 py-2 text-xs font-medium text-[#37352f] border border-[#e9e9e7] rounded-md hover:bg-[#f7f7f5] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         Cancel
                     </button>
                     <button
                         type="submit"
-                        className="flex-1 px-3 py-2 text-xs font-medium text-white bg-[#37352f] rounded-md hover:bg-[#2f2d28] transition-colors"
+                        disabled={isLoading}
+                        className="flex-1 px-3 py-2 text-xs font-medium text-white bg-[#37352f] rounded-md hover:bg-[#2f2d28] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
                     >
-                        Create
+                        {isLoading ? (
+                            <>
+                                <Loader size={13} className="animate-spin" />
+                                Creating...
+                            </>
+                        ) : (
+                            'Create'
+                        )}
                     </button>
                 </div>
             </form>

@@ -294,3 +294,19 @@ body {
   padding-left: 2rem;
   margin-left: 0.5rem;
 }
+
+/* Loading bar animation - top to bottom */
+@keyframes loadingBarTopBottom {
+  0% {
+    top: -4px;
+    opacity: 1;
+  }
+  100% {
+    top: 100%;
+    opacity: 0;
+  }
+}
+
+.loading-bar-animation {
+  animation: loadingBarTopBottom 1.5s ease-in-out infinite;
+}

@@ -39,7 +39,7 @@ export const PUT = withErrorHandler(async (request) => {
     const user = await User.findByIdAndUpdate(
         session.user.id,
         { $set: validation.data },
-        { new: true, runValidators: true }
+        { returnDocument: 'after', runValidators: true }
     ).lean()
 
     if (!user) return err('User not found', 404)

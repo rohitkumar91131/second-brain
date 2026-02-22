@@ -1,23 +1,24 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useApp } from '@/context/AppContext'
 import Link from 'next/link'
 import { Plus, FileText, Search, Trash2 } from 'lucide-react'
 import { format } from 'date-fns'
 import QuickAddModal from '@/components/ui/QuickAddModal'
+import LoadingScreen from '@/components/ui/LoadingScreen'
 
 export default function NotesPage() {
-    const { notes, deleteNote, loading } = useApp()
+    const { notes, deleteNote, loading, projects, fetchEndpoint } = useApp()
     const [search, setSearch] = useState('')
     const [showAdd, setShowAdd] = useState(false)
 
+    useEffect(() => {
+        if (!notes || notes.length === 0) fetchEndpoint('notes')
+    }, [])
+
     if (loading) {
-        return (
-            <div className="flex items-center justify-center h-full text-sm text-gray-500">
-                Loading...
-            </div>
-        )
+        return <LoadingScreen />
     }
 
     const filtered = notes.filter(n =>
@@ -61,6 +62,7 @@ export default function NotesPage() {
                             <NoteCard
                                 key={note.id}
                                 note={note}
+                                project={projects?.find(p => p.id === note.projectId)}
                                 onDelete={deleteNote}
                             />
                         ))}
@@ -78,7 +80,7 @@ export default function NotesPage() {
     )
 }
 
-function NoteCard({ note, onDelete }) {
+function NoteCard({ note, project, onDelete }) {
     const preview =
         note.content?.find(
             b => b.type === 'paragraph' && b.content
@@ -89,7 +91,7 @@ function NoteCard({ note, onDelete }) {
 
             <Link href={`/dashboard/notes/${note.id}`} className="block">
                 <h3 className="text-sm font-semibold text-[#37352f] mb-1 truncate">
-                    {note.title}
+                    {project ? `${note.title} / ${project.title}` : note.title}
                 </h3>
 
                 {preview && (

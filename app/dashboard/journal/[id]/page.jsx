@@ -51,6 +51,18 @@ export default function JournalEntryPage() {
         setIsSaving(false)
     }
 
+    // Save on Ctrl/Cmd+S
+    useEffect(() => {
+        const onKey = (e) => {
+            if ((e.ctrlKey || e.metaKey) && (e.key === 's' || e.key === 'S')) {
+                e.preventDefault()
+                handleSave()
+            }
+        }
+        window.addEventListener('keydown', onKey)
+        return () => window.removeEventListener('keydown', onKey)
+    }, [blocks, entry])
+
     const handleDelete = async () => {
         await deleteJournalEntry(id)
         router.push('/dashboard/journal')

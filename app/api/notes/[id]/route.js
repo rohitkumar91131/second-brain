@@ -25,7 +25,7 @@ export const PUT = withErrorHandler(async (request, { params }) => {
     const note = await Note.findOneAndUpdate(
         { _id: params.id, userId: session.user.id },
         { $set: validation.data },
-        { new: true, runValidators: true }
+        { returnDocument: 'after', runValidators: true }
     ).lean()
 
     if (!note) return err('Note not found', 404)

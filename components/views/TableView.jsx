@@ -5,13 +5,25 @@ import StatusTag from '@/components/properties/StatusTag'
 import ProgressBar from '@/components/properties/ProgressBar'
 import { Trash2, Plus, Check } from 'lucide-react'
 import { format } from 'date-fns'
+import { useRouter } from 'next/navigation'
 
 export default function TableView({ items, columns, onUpdate, onDelete, onAdd, entityType }) {
     const [editingCell, setEditingCell] = useState(null) // { rowId, colKey }
+    const router = useRouter()
 
     const handleCellEdit = (rowId, colKey, value, extraFields = {}) => {
         onUpdate(rowId, { [colKey]: value, ...extraFields })
         setEditingCell(null)
+    }
+
+    const handleRowClick = (item) => {
+        if (entityType === 'project') {
+            router.push(`/dashboard/projects/${item.id}`)
+        } else if (entityType === 'note') {
+            router.push(`/dashboard/notes/${item.id}`)
+        } else if (entityType === 'task') {
+            router.push(`/dashboard/tasks/${item.id}`)
+        }
     }
 
     return (
@@ -29,9 +41,12 @@ export default function TableView({ items, columns, onUpdate, onDelete, onAdd, e
                 </thead>
                 <tbody>
                     {items.map(item => (
-                        <tr key={item.id} className="group">
+                        <tr key={item.id} className="group hover:cursor-pointer" onClick={() => handleRowClick(item)}>
                             {columns.map(col => (
-                                <td key={col.key} onClick={() => setEditingCell({ rowId: item.id, colKey: col.key })}>
+                                <td key={col.key} onClick={(e) => {
+                                    e.stopPropagation()
+                                    setEditingCell({ rowId: item.id, colKey: col.key })
+                                }}>
                                     <CellRenderer
                                         col={col}
                                         value={item[col.key]}
@@ -41,7 +56,7 @@ export default function TableView({ items, columns, onUpdate, onDelete, onAdd, e
                                     />
                                 </td>
                             ))}
-                            <td>
+                            <td onClick={(e) => e.stopPropagation()}>
                                 <button
                                     onClick={() => onDelete(item.id)}
                                     className="hover-reveal p-1 rounded hover:bg-red-50 text-red-400 hover:text-red-600 transition-colors"

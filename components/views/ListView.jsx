@@ -4,8 +4,21 @@ import StatusTag from '@/components/properties/StatusTag'
 import ProgressBar from '@/components/properties/ProgressBar'
 import { Trash2, Plus, Check } from 'lucide-react'
 import { format } from 'date-fns'
+import { useRouter } from 'next/navigation'
 
 export default function ListView({ items, columns, onUpdate, onDelete, onAdd, entityType }) {
+    const router = useRouter()
+
+    const handleRowClick = (item) => {
+        if (entityType === 'project') {
+            router.push(`/dashboard/projects/${item.id}`)
+        } else if (entityType === 'note') {
+            router.push(`/dashboard/notes/${item.id}`)
+        } else if (entityType === 'task') {
+            router.push(`/dashboard/tasks/${item.id}`)
+        }
+    }
+
     return (
         <div className="divide-y divide-[#e9e9e7]">
             {items.map(item => (
@@ -15,6 +28,8 @@ export default function ListView({ items, columns, onUpdate, onDelete, onAdd, en
                     columns={columns}
                     onUpdate={onUpdate}
                     onDelete={onDelete}
+                    entityType={entityType}
+                    onRowClick={() => handleRowClick(item)}
                 />
             ))}
             <button
@@ -28,16 +43,22 @@ export default function ListView({ items, columns, onUpdate, onDelete, onAdd, en
     )
 }
 
-function ListRow({ item, columns, onUpdate, onDelete }) {
+function ListRow({ item, columns, onUpdate, onDelete, entityType, onRowClick }) {
     return (
-        <div className="flex items-center gap-3 px-4 py-2.5 hover:bg-[#fafafa] group">
+        <div 
+            className="flex items-center gap-3 px-4 py-2.5 hover:bg-[#fafafa] group cursor-pointer transition-colors"
+            onClick={onRowClick}
+        >
             {/* Checkbox if applicable */}
             {item.completed !== undefined && (
                 <button
-                    onClick={() => onUpdate(item.id, {
-                        completed: !item.completed,
-                        status: !item.completed ? 'Done' : 'Not Started',
-                    })}
+                    onClick={(e) => {
+                        e.stopPropagation()
+                        onUpdate(item.id, {
+                            completed: !item.completed,
+                            status: !item.completed ? 'Done' : 'Not Started',
+                        })
+                    }}
                     className={`w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 transition-colors ${item.completed ? 'bg-[#37352f] border-[#37352f]' : 'border-[#d3d1cb] hover:border-[#37352f]'
                         }`}
                 >
@@ -70,7 +91,10 @@ function ListRow({ item, columns, onUpdate, onDelete }) {
 
             {/* Delete */}
             <button
-                onClick={() => onDelete(item.id)}
+                onClick={(e) => {
+                    e.stopPropagation()
+                    onDelete(item.id)
+                }}
                 className="hover-reveal p-1 rounded hover:bg-red-50 text-red-400 hover:text-red-600 transition-colors"
             >
                 <Trash2 size={13} />

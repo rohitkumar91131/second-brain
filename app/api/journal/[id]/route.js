@@ -25,7 +25,7 @@ export const PUT = withErrorHandler(async (request, { params }) => {
     const entry = await JournalEntry.findOneAndUpdate(
         { _id: params.id, userId: session.user.id },
         { $set: validation.data },
-        { new: true, runValidators: true }
+        { returnDocument: 'after', runValidators: true }
     ).lean()
 
     if (!entry) return err('Journal entry not found', 404)

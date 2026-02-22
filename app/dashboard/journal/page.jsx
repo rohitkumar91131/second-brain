@@ -1,10 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useApp } from '@/context/AppContext'
 import Link from 'next/link'
-import { Plus, BookMarked, Trash2, Smile } from 'lucide-react'
+import { Plus, BookMarked, Trash2, Smile, LoaderIcon } from 'lucide-react'
 import { format, isToday, isYesterday, parseISO } from 'date-fns'
 
 const MOODS = ['Amazing', 'Good', 'Okay', 'Tough', 'Bad']
@@ -12,8 +12,30 @@ const MOOD_EMOJI = { Amazing: '🌟', Good: '😊', Okay: '😐', Tough: '😔',
 
 export default function JournalPage() {
     const router = useRouter()
-    const { journal, addJournalEntry, deleteJournalEntry } = useApp()
+    const { journal, addJournalEntry, deleteJournalEntry, fetchEndpoint } = useApp()
     const [selectedMood, setSelectedMood] = useState('Good')
+    const [isLoading, setIsLoading] = useState(!journal || journal.length === 0)
+
+    useEffect(() => {
+        if (!journal || journal.length === 0) {
+            fetchEndpoint('journal').then(() => setIsLoading(false))
+        } else {
+            setIsLoading(false)
+        }
+    }, [])
+
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center h-full relative overflow-hidden">
+                <div className="absolute inset-0 flex">
+                    <div className="relative w-full h-1 loading-bar-animation">
+                        <div className="w-1 h-1 bg-[#2eaadc] rounded-full"></div>
+                    </div>
+                </div>
+                <LoaderIcon className="w-6 h-6 text-[#9b9a97] animate-spin" />
+            </div>
+        )
+    }
 
     const sorted = [...journal].sort((a, b) => new Date(b.date) - new Date(a.date))
 

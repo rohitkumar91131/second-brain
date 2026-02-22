@@ -1,5 +1,6 @@
 import './globals.css';
 import { AppProvider } from '@/context/AppContext';
+import { ToastProvider } from '@/components/ui/Toast';
 
 export const metadata = {
     title: 'Second Brain Tracker',
@@ -10,9 +11,11 @@ export default function RootLayout({ children }) {
     return (
         <html lang="en">
             <body>
-                <AppProvider>
-                    {children}
-                </AppProvider>
+                <ToastProvider>
+                    <AppProvider>
+                        {children}
+                    </AppProvider>
+                </ToastProvider>
             </body>
         </html>
     );
