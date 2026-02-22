@@ -1,0 +1,7 @@
+Package: second-brain
+Version: 1.0.0
+Section: base
+Priority: optional
+Architecture: amd64
+Maintainer: Rohit Kumar
+Description: Second Brain Flutter App

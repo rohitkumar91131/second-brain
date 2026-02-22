@@ -25,7 +25,7 @@ export const GET = withErrorHandler(async () => {
 
 // PUT /api/user/profile
 export const PUT = withErrorHandler(async (request) => {
-    const { session, error } = await requireAuth()
+    const { session, error = null } = await requireAuth()
     if (error) return error
 
     const body = await request.json()

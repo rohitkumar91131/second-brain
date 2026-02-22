@@ -14,7 +14,7 @@ export const GET = withErrorHandler(async (request, { params }) => {
 })
 
 export const PUT = withErrorHandler(async (request, { params }) => {
-    const { session, error } = await requireAuth()
+    const { session, error = null } = await requireAuth()
     if (error) return error
 
     const body = await request.json()

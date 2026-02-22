@@ -1,0 +1,9 @@
+distribute:
+  output: dist
+
+  releases:
+    - name: deb
+      jobs:
+        - package:
+            platform: linux
+            target: deb

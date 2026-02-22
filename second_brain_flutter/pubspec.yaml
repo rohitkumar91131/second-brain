@@ -1,0 +1,30 @@
+name: second_brain_flutter
+description: A new Flutter project for Second Brain Tracker.
+publish_to: "none"
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.1.5 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  google_fonts: ^6.1.0
+  lucide_icons: ^0.257.0
+  flutter_svg: ^2.0.9
+  glassmorphism: ^3.0.0
+  http: ^1.1.0
+  shared_preferences: ^2.2.2
+  intl: ^0.18.1
+  flutter_animate: ^4.5.2
+  flutter_dotenv: ^6.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - .env
