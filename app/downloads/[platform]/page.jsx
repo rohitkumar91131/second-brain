@@ -207,11 +207,13 @@ export default function PlatformDownloadPage() {
                             <p className="text-white/70 text-sm">Free download · {platform.size}</p>
                         </div>
                         <button
-                            onClick={() => alert('Download starting... (demo)')}
-                            className="flex items-center gap-3 px-8 py-4 bg-white text-[#37352f] rounded-2xl font-bold text-lg hover:scale-105 active:scale-95 transition-all shadow-xl shadow-black/20 shrink-0"
+                            disabled
+                            aria-disabled="true"
+                            className="flex items-center gap-3 px-8 py-4 bg-white/50 text-[#37352f]/50 rounded-2xl font-bold text-lg cursor-not-allowed shadow-xl shadow-black/10 shrink-0"
+                            title="Coming Soon"
                         >
                             <Download size={22} />
-                            Download Now
+                            Coming Soon
                         </button>
                     </div>
 
