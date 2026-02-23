@@ -35,12 +35,9 @@ function AppContextInner({ children }) {
         else loadFromLocalStorage()
     }, [status, isAuthenticated])
     
-    
-
     const fetchAllFromAPI = async () => {
         setLoading(true)
         try {
-            // Reduce initial load by fetching only the endpoint for the current dashboard tab
             const pathname = typeof window !== 'undefined' ? window.location.pathname : '/'
             const pickEndpointsForPath = (p) => {
                 if (p.startsWith('/dashboard/tasks')) return ['tasks']
@@ -49,13 +46,11 @@ function AppContextInner({ children }) {
                 if (p.startsWith('/dashboard/projects')) return ['projects']
                 if (p.startsWith('/dashboard/resources')) return ['resources']
                 if (p.startsWith('/dashboard/goals')) return ['goals']
-                // default: fetch only tasks to keep initial load light
                 return ['tasks']
             }
 
             const endpoints = pickEndpointsForPath(pathname)
 
-            // Always fetch profile (view preferences) and then the selected endpoints
             const profileRes = await fetch('/api/user/profile')
             const responses = await Promise.all(endpoints.map(e => fetch(`/api/${e}`)))
 
@@ -94,7 +89,6 @@ function AppContextInner({ children }) {
         }
     }
 
-    // Fetch a single endpoint on demand (pages can call this when they mount)
     const fetchEndpoint = useCallback(async (endpoint) => {
         try {
             setLoading(true)
@@ -210,39 +204,33 @@ function AppContextInner({ children }) {
             }
         },
         update: async (id, updates) => {
-            // Store the original item before updating
-            let savedItem = null
-            
-            setter(prev => {
-                const item = prev.find(i => i.id === id)
-                savedItem = item ? { ...item } : null
-                return prev.map(i =>
-                    i.id === id
-                        ? { ...i, ...updates, updatedAt: new Date().toISOString() }
-                        : i
-                )
-            })
+            // 1. Apply optimistic update immediately
+            setter(prev => prev.map(i =>
+                i.id === id
+                    ? { ...i, ...updates, updatedAt: new Date().toISOString() }
+                    : i
+            ))
             
             if (isAuthenticated) {
                 try {
                     const updated = await apiCall('PUT', `/api/${endpoint}/${id}`, updates)
-                    // Deep merge: keep original item data, then apply API updates, then ensure critical fields
-                    const merged = { ...savedItem, ...updated, id }
-                    console.debug(`[AppContext] Updated ${endpoint} ${id}:`, merged)
-                    setter(prev => prev.map(i => i.id === id ? merged : i))
-                    return merged
+                    
+                    // 2. Merge API response but prioritize the latest local state ('i').
+                    // This prevents slow API responses from overwriting newer user keystrokes/blocks.
+                    setter(prev => prev.map(i => 
+                        i.id === id 
+                            ? { ...updated, ...i } 
+                            : i
+                    ))
+                    return updated
                 } catch (error) {
-                    // If API fails, keep the optimistic update
                     console.error('Update failed:', error)
-                    // return the optimistic version
-                    const optimistic = { ...savedItem, ...updates, updatedAt: new Date().toISOString(), id }
-                    console.debug(`[AppContext] Update optimistic for ${endpoint} ${id}:`, optimistic)
-                    return optimistic
+                    // Keep the optimistic update visible on failure
+                    return { ...updates, id }
                 }
             }
 
-            // For unauthenticated (local) update, return the optimistic updated item
-            return { ...savedItem, ...updates, updatedAt: new Date().toISOString(), id }
+            return { ...updates, updatedAt: new Date().toISOString(), id }
         },
         delete: async (id) => {
             if (isAuthenticated) {
@@ -250,7 +238,6 @@ function AppContextInner({ children }) {
                     await apiCall('DELETE', `/api/${endpoint}/${id}`)
                 } catch (error) {
                     console.error(`Failed to delete ${endpoint}/${id}:`, error)
-                    // Proceed with local removal to avoid leaving UI in a broken state
                 }
             }
             setter(prev => prev.filter(i => i.id !== id))

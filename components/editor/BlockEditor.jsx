@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useRef, useCallback } from 'react'
-import { Plus, ChevronRight, ChevronDown, Minus, AlertCircle, Heading1, Heading2, Heading3, List } from 'lucide-react'
+import { useState, useRef, useCallback, useEffect } from 'react'
+import { Plus, ChevronRight, ChevronDown, Minus, AlertCircle, Heading1, Heading2, Heading3, List, Image as ImageIcon } from 'lucide-react'
+import { CldUploadWidget } from 'next-cloudinary' 
 
 const BLOCK_TYPES = [
     { type: 'paragraph', label: 'Text', icon: null },
@@ -12,10 +13,54 @@ const BLOCK_TYPES = [
     { type: 'toggle', label: 'Toggle', icon: ChevronRight },
     { type: 'divider', label: 'Divider', icon: Minus },
     { type: 'callout', label: 'Callout', icon: AlertCircle },
+    { type: 'image', label: 'Image', icon: ImageIcon },
 ]
 
+// 🔥 NEW: Lazy Loading Wrapper for Virtualization
+function LazyRenderWrapper({ children, index }) {
+    // Show the first 20 blocks instantly on initial load, hide the rest until scrolled to
+    const [isVisible, setIsVisible] = useState(index < 20) 
+    const [height, setHeight] = useState(35) // Default estimated block height
+    const wrapperRef = useRef(null)
+
+    useEffect(() => {
+        const el = wrapperRef.current
+        if (!el) return
+
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting) {
+                    setIsVisible(true)
+                } else {
+                    // Capture exact height before unmounting so scrollbar doesn't jump
+                    if (el.getBoundingClientRect().height > 0) {
+                        setHeight(el.getBoundingClientRect().height)
+                    }
+                    setIsVisible(false) // Unmount from DOM when off-screen
+                }
+            },
+            { rootMargin: '500px 0px' } // Load items 500px before they appear on screen
+        )
+
+        observer.observe(el)
+        return () => observer.disconnect()
+    }, [])
+
+    return (
+        <div 
+            ref={wrapperRef} 
+            style={{ 
+                height: isVisible ? 'auto' : height, 
+                overflow: 'hidden' 
+            }}
+        >
+            {isVisible ? children : null}
+        </div>
+    )
+}
+
 export default function BlockEditor({ blocks, onChange, isDiary = false }) {
-    const [showMenu, setShowMenu] = useState(null) // blockId
+    const [showMenu, setShowMenu] = useState(null)
     const [toggleOpen, setToggleOpen] = useState({})
 
     const updateBlock = useCallback((id, updates) => {
@@ -44,40 +89,40 @@ export default function BlockEditor({ blocks, onChange, isDiary = false }) {
     return (
         <div className={`max-w-3xl mx-auto py-8 px-6 ${isDiary ? 'diary-serif' : ''}`}>
             {blocks.map((block, idx) => (
-                <BlockRow
-                    key={block.id}
-                    block={block}
-                    isDiary={isDiary}
-                    isFirst={idx === 0}
-                    showMenu={showMenu === block.id}
-                    toggleOpen={toggleOpen[block.id]}
-                    onToggleOpen={() => setToggleOpen(prev => ({ ...prev, [block.id]: !prev[block.id] }))}
-                    onUpdate={(updates) => updateBlock(block.id, updates)}
-                    onAddAfter={(type) => addBlock(block.id, type)}
-                    onDelete={() => deleteBlock(block.id)}
-                    onShowMenu={() => setShowMenu(showMenu === block.id ? null : block.id)}
-                    onHideMenu={() => setShowMenu(null)}
-                    onChangeType={(type) => changeType(block.id, type)}
-                    onEnter={() => {
-                        const newId = addBlock(block.id)
-                        // Focus new block
-                        setTimeout(() => {
-                            document.getElementById(`block-${newId}`)?.focus()
-                        }, 50)
-                    }}
-                    onBackspace={(isEmpty) => {
-                        if (isEmpty && blocks.length > 1) {
-                            const prevBlock = blocks[idx - 1]
-                            deleteBlock(block.id)
-                            if (prevBlock) {
-                                setTimeout(() => document.getElementById(`block-${prevBlock.id}`)?.focus(), 50)
+                // 🔥 WRAPPED EACH BLOCK ROW IN THE LAZY COMPONENT
+                <LazyRenderWrapper key={block.id} index={idx}>
+                    <BlockRow
+                        block={block}
+                        isDiary={isDiary}
+                        isFirst={idx === 0}
+                        showMenu={showMenu === block.id}
+                        toggleOpen={toggleOpen[block.id]}
+                        onToggleOpen={() => setToggleOpen(prev => ({ ...prev, [block.id]: !prev[block.id] }))}
+                        onUpdate={(updates) => updateBlock(block.id, updates)}
+                        onAddAfter={(type) => addBlock(block.id, type)}
+                        onDelete={() => deleteBlock(block.id)}
+                        onShowMenu={() => setShowMenu(showMenu === block.id ? null : block.id)}
+                        onHideMenu={() => setShowMenu(null)}
+                        onChangeType={(type) => changeType(block.id, type)}
+                        onEnter={() => {
+                            const newId = addBlock(block.id)
+                            setTimeout(() => {
+                                document.getElementById(`block-${newId}`)?.focus()
+                            }, 50)
+                        }}
+                        onBackspace={(isEmpty) => {
+                            if (isEmpty && blocks.length > 1) {
+                                const prevBlock = blocks[idx - 1]
+                                deleteBlock(block.id)
+                                if (prevBlock) {
+                                    setTimeout(() => document.getElementById(`block-${prevBlock.id}`)?.focus(), 50)
+                                }
                             }
-                        }
-                    }}
-                />
+                        }}
+                    />
+                </LazyRenderWrapper>
             ))}
 
-            {/* Add block button */}
             <button
                 onClick={() => {
                     const last = blocks[blocks.length - 1]
@@ -94,6 +139,18 @@ export default function BlockEditor({ blocks, onChange, isDiary = false }) {
 
 function BlockRow({ block, isDiary, showMenu, toggleOpen, onToggleOpen, onUpdate, onAddAfter, onDelete, onShowMenu, onHideMenu, onChangeType, onEnter, onBackspace }) {
     const inputRef = useRef(null)
+    const toggleChildRef = useRef(null)
+
+    useEffect(() => {
+        const resize = (ref) => {
+            if (ref && ref.current) {
+                ref.current.style.height = 'auto'
+                ref.current.style.height = ref.current.scrollHeight + 'px'
+            }
+        }
+        resize(inputRef)
+        resize(toggleChildRef)
+    }, [block.content, block.children, toggleOpen])
 
     const handleKeyDown = (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
@@ -117,6 +174,61 @@ function BlockRow({ block, isDiary, showMenu, toggleOpen, onToggleOpen, onUpdate
                     onClick={onDelete}
                     className="hover-reveal text-xs text-[#9b9a97] hover:text-red-400 transition-colors"
                 >×</button>
+            </div>
+        )
+    }
+
+    if (block.type === 'image') {
+        return (
+            <div className="group flex items-start gap-2 my-6 relative">
+                <div className="flex-1">
+                    {block.content ? (
+                        <div className="relative inline-block w-full">
+                            <img 
+                                src={block.content} 
+                                alt="Block" 
+                                className="max-w-full rounded-lg border border-[#e9e9e7]" 
+                            />
+                            <button 
+                                onClick={onDelete}
+                                className="absolute top-2 right-2 bg-white/80 p-1.5 rounded-md text-[#9b9a97] hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
+                            >
+                                <Minus size={14} />
+                            </button>
+                        </div>
+                    ) : (
+                        <CldUploadWidget
+                            uploadPreset="notes second brain" 
+                            onSuccess={(result) => {
+                                if (result.info?.secure_url) {
+                                    onUpdate({ content: result.info.secure_url });
+                                }
+                            }}
+                            options={{
+                                multiple: false, 
+                                resourceType: "image",
+                                clientAllowedFormats: ["jpeg", "png", "jpg", "webp", "gif"],
+                            }}
+                        >
+                            {({ open }) => {
+                                return (
+                                    <div 
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            open();
+                                        }}
+                                        className="border border-dashed border-[#e9e9e7] bg-[#f7f7f5]/50 hover:bg-[#f7f7f5] transition-colors rounded-lg p-8 flex flex-col items-center justify-center text-sm text-[#9b9a97] w-full cursor-pointer"
+                                    >
+                                        <ImageIcon size={24} className="mb-2 opacity-40" />
+                                        <span className="font-medium hover:text-[#37352f] transition-colors">
+                                            Click to add image via link, device, or camera
+                                        </span>
+                                    </div>
+                                )
+                            }}
+                        </CldUploadWidget>
+                    )}
+                </div>
             </div>
         )
     }
@@ -153,6 +265,7 @@ function BlockRow({ block, isDiary, showMenu, toggleOpen, onToggleOpen, onUpdate
                     </button>
                     <textarea
                         id={`block-${block.id}`}
+                        ref={inputRef}
                         value={block.content}
                         onChange={e => onUpdate({ content: e.target.value })}
                         onKeyDown={handleKeyDown}
@@ -165,6 +278,7 @@ function BlockRow({ block, isDiary, showMenu, toggleOpen, onToggleOpen, onUpdate
                 {toggleOpen && (
                     <div className="ml-6 pl-3 border-l border-[#e9e9e7] mt-1">
                         <textarea
+                            ref={toggleChildRef}
                             value={block.children || ''}
                             onChange={e => onUpdate({ children: e.target.value })}
                             placeholder="Toggle content..."
@@ -208,7 +322,6 @@ function BlockRow({ block, isDiary, showMenu, toggleOpen, onToggleOpen, onUpdate
                     onInput={e => { e.target.style.height = 'auto'; e.target.style.height = e.target.scrollHeight + 'px' }}
                 />
 
-                {/* Slash command menu */}
                 {showMenu && (
                     <div className="absolute top-full left-0 z-50 bg-white border border-[#e9e9e7] rounded-lg shadow-lg py-1 w-48 animate-fade-in">
                         {BLOCK_TYPES.map(({ type, label, icon: Icon }) => (
