@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react'
 import { Plus, ChevronRight, ChevronDown, Minus, AlertCircle, Heading1, Heading2, Heading3, List, Image as ImageIcon } from 'lucide-react'
-import { CldUploadWidget } from 'next-cloudinary' 
+import { CldUploadWidget } from 'next-cloudinary' // 🔥 Imported Cloudinary Widget
 
 const BLOCK_TYPES = [
     { type: 'paragraph', label: 'Text', icon: null },
@@ -15,49 +15,6 @@ const BLOCK_TYPES = [
     { type: 'callout', label: 'Callout', icon: AlertCircle },
     { type: 'image', label: 'Image', icon: ImageIcon },
 ]
-
-// 🔥 NEW: Lazy Loading Wrapper for Virtualization
-function LazyRenderWrapper({ children, index }) {
-    // Show the first 20 blocks instantly on initial load, hide the rest until scrolled to
-    const [isVisible, setIsVisible] = useState(index < 20) 
-    const [height, setHeight] = useState(35) // Default estimated block height
-    const wrapperRef = useRef(null)
-
-    useEffect(() => {
-        const el = wrapperRef.current
-        if (!el) return
-
-        const observer = new IntersectionObserver(
-            ([entry]) => {
-                if (entry.isIntersecting) {
-                    setIsVisible(true)
-                } else {
-                    // Capture exact height before unmounting so scrollbar doesn't jump
-                    if (el.getBoundingClientRect().height > 0) {
-                        setHeight(el.getBoundingClientRect().height)
-                    }
-                    setIsVisible(false) // Unmount from DOM when off-screen
-                }
-            },
-            { rootMargin: '500px 0px' } // Load items 500px before they appear on screen
-        )
-
-        observer.observe(el)
-        return () => observer.disconnect()
-    }, [])
-
-    return (
-        <div 
-            ref={wrapperRef} 
-            style={{ 
-                height: isVisible ? 'auto' : height, 
-                overflow: 'hidden' 
-            }}
-        >
-            {isVisible ? children : null}
-        </div>
-    )
-}
 
 export default function BlockEditor({ blocks, onChange, isDiary = false }) {
     const [showMenu, setShowMenu] = useState(null)
@@ -89,38 +46,36 @@ export default function BlockEditor({ blocks, onChange, isDiary = false }) {
     return (
         <div className={`max-w-3xl mx-auto py-8 px-6 ${isDiary ? 'diary-serif' : ''}`}>
             {blocks.map((block, idx) => (
-                // 🔥 WRAPPED EACH BLOCK ROW IN THE LAZY COMPONENT
-                <LazyRenderWrapper key={block.id} index={idx}>
-                    <BlockRow
-                        block={block}
-                        isDiary={isDiary}
-                        isFirst={idx === 0}
-                        showMenu={showMenu === block.id}
-                        toggleOpen={toggleOpen[block.id]}
-                        onToggleOpen={() => setToggleOpen(prev => ({ ...prev, [block.id]: !prev[block.id] }))}
-                        onUpdate={(updates) => updateBlock(block.id, updates)}
-                        onAddAfter={(type) => addBlock(block.id, type)}
-                        onDelete={() => deleteBlock(block.id)}
-                        onShowMenu={() => setShowMenu(showMenu === block.id ? null : block.id)}
-                        onHideMenu={() => setShowMenu(null)}
-                        onChangeType={(type) => changeType(block.id, type)}
-                        onEnter={() => {
-                            const newId = addBlock(block.id)
-                            setTimeout(() => {
-                                document.getElementById(`block-${newId}`)?.focus()
-                            }, 50)
-                        }}
-                        onBackspace={(isEmpty) => {
-                            if (isEmpty && blocks.length > 1) {
-                                const prevBlock = blocks[idx - 1]
-                                deleteBlock(block.id)
-                                if (prevBlock) {
-                                    setTimeout(() => document.getElementById(`block-${prevBlock.id}`)?.focus(), 50)
-                                }
+                <BlockRow
+                    key={block.id}
+                    block={block}
+                    isDiary={isDiary}
+                    isFirst={idx === 0}
+                    showMenu={showMenu === block.id}
+                    toggleOpen={toggleOpen[block.id]}
+                    onToggleOpen={() => setToggleOpen(prev => ({ ...prev, [block.id]: !prev[block.id] }))}
+                    onUpdate={(updates) => updateBlock(block.id, updates)}
+                    onAddAfter={(type) => addBlock(block.id, type)}
+                    onDelete={() => deleteBlock(block.id)}
+                    onShowMenu={() => setShowMenu(showMenu === block.id ? null : block.id)}
+                    onHideMenu={() => setShowMenu(null)}
+                    onChangeType={(type) => changeType(block.id, type)}
+                    onEnter={() => {
+                        const newId = addBlock(block.id)
+                        setTimeout(() => {
+                            document.getElementById(`block-${newId}`)?.focus()
+                        }, 50)
+                    }}
+                    onBackspace={(isEmpty) => {
+                        if (isEmpty && blocks.length > 1) {
+                            const prevBlock = blocks[idx - 1]
+                            deleteBlock(block.id)
+                            if (prevBlock) {
+                                setTimeout(() => document.getElementById(`block-${prevBlock.id}`)?.focus(), 50)
                             }
-                        }}
-                    />
-                </LazyRenderWrapper>
+                        }
+                    }}
+                />
             ))}
 
             <button
@@ -178,6 +133,7 @@ function BlockRow({ block, isDiary, showMenu, toggleOpen, onToggleOpen, onUpdate
         )
     }
 
+    // --- OFFICIAL CLOUDINARY WIDGET UI ---
     if (block.type === 'image') {
         return (
             <div className="group flex items-start gap-2 my-6 relative">
@@ -198,14 +154,15 @@ function BlockRow({ block, isDiary, showMenu, toggleOpen, onToggleOpen, onUpdate
                         </div>
                     ) : (
                         <CldUploadWidget
-                            uploadPreset="notes second brain" 
+                            uploadPreset="notes second brain" // 🔥 Apna Preset Name Daalo
                             onSuccess={(result) => {
+                                // Jab upload success ho jaye, URL save kar lo
                                 if (result.info?.secure_url) {
                                     onUpdate({ content: result.info.secure_url });
                                 }
                             }}
                             options={{
-                                multiple: false, 
+                                multiple: false, // Ek baar me ek hi image
                                 resourceType: "image",
                                 clientAllowedFormats: ["jpeg", "png", "jpg", "webp", "gif"],
                             }}
@@ -215,7 +172,7 @@ function BlockRow({ block, isDiary, showMenu, toggleOpen, onToggleOpen, onUpdate
                                     <div 
                                         onClick={(e) => {
                                             e.preventDefault();
-                                            open();
+                                            open(); // Click karne pe widget popup khulega
                                         }}
                                         className="border border-dashed border-[#e9e9e7] bg-[#f7f7f5]/50 hover:bg-[#f7f7f5] transition-colors rounded-lg p-8 flex flex-col items-center justify-center text-sm text-[#9b9a97] w-full cursor-pointer"
                                     >
