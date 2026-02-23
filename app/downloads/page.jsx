@@ -132,13 +132,15 @@ export default function DownloadsPage() {
 
                             {/* Buttons */}
                             <div className="flex flex-col gap-2">
-                                <Link
-                                    href={`/downloads/${platform.id}`}
-                                    className="flex items-center justify-center gap-2 w-full py-3 bg-[#37352f] text-white text-sm font-semibold rounded-xl hover:bg-[#2f2d28] hover:scale-105 active:scale-95 transition-all shadow-lg shadow-[#37352f]/10"
+                                <span
+                                    role="button"
+                                    aria-disabled="true"
+                                    className="flex items-center justify-center gap-2 w-full py-3 bg-[#c5c4c0] text-white text-sm font-semibold rounded-xl cursor-not-allowed opacity-70"
+                                    title="Coming Soon"
                                 >
                                     <Download size={16} />
-                                    Download Now
-                                </Link>
+                                    Coming Soon
+                                </span>
                                 <Link
                                     href={`/downloads/${platform.id}`}
                                     className="flex items-center justify-center gap-1 w-full py-2.5 bg-white border border-[#e9e9e7] text-[#37352f] text-xs font-medium rounded-xl hover:bg-[#f7f7f5] transition-all"
