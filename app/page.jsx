@@ -3,7 +3,7 @@
 import React from 'react'
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
-import { Brain, ArrowRight, CheckCircle2, Zap, Shield, Sparkles, Loader2 } from 'lucide-react'
+import { Brain, ArrowRight, CheckCircle2, Zap, Shield, Sparkles, Loader2, Download, Monitor, Apple, Terminal, Smartphone, Tablet } from 'lucide-react'
 
 export default function LandingPage() {
     const { status } = useSession()
@@ -23,6 +23,7 @@ export default function LandingPage() {
                     <div className="hidden md:flex items-center gap-8 text-sm font-medium">
                         <a href="#features" className="hover:text-[#2eaadc] transition-colors">Features</a>
                         <a href="#about" className="hover:text-[#2eaadc] transition-colors">About</a>
+                        <Link href="/downloads" className="hover:text-[#2eaadc] transition-colors">Downloads</Link>
 
                         {status === 'loading' ? (
                             <div className="w-20 flex justify-center">
@@ -136,6 +137,51 @@ export default function LandingPage() {
                     <span className="font-bold text-xl tracking-tighter">SECOND BRAIN</span>
                     <span className="font-bold text-xl tracking-tighter">HABIT TRACKER</span>
                     <span className="font-bold text-xl tracking-tighter italic">PRODUCTIVE</span>
+                </div>
+            </section>
+
+            {/* Downloads Section */}
+            <section id="downloads" className="py-24 px-6">
+                <div className="max-w-7xl mx-auto">
+                    <div className="text-center mb-14">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-600 text-xs font-semibold mb-4">
+                            <Download size={12} />
+                            <span>Available everywhere</span>
+                        </div>
+                        <h2 className="text-3xl font-bold mb-4">Download the App</h2>
+                        <p className="text-[#9b9a97] max-w-xl mx-auto">Get Second Brain on any device — your data syncs seamlessly across all platforms.</p>
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-5 mb-10">
+                        {[
+                            { id: 'windows', name: 'Windows', icon: <Monitor size={28} />, bg: 'bg-blue-50', color: 'text-blue-500' },
+                            { id: 'mac', name: 'macOS', icon: <Apple size={28} />, bg: 'bg-gray-50', color: 'text-gray-700' },
+                            { id: 'linux', name: 'Linux', icon: <Terminal size={28} />, bg: 'bg-orange-50', color: 'text-orange-500' },
+                            { id: 'android', name: 'Android', icon: <Smartphone size={28} />, bg: 'bg-green-50', color: 'text-green-500' },
+                            { id: 'ios', name: 'iOS', icon: <Tablet size={28} />, bg: 'bg-purple-50', color: 'text-purple-500' },
+                        ].map((platform) => (
+                            <Link
+                                key={platform.id}
+                                href={`/downloads/${platform.id}`}
+                                className="flex flex-col items-center gap-3 p-6 bg-white border border-[#e9e9e7] rounded-2xl hover:shadow-lg hover:border-[#d3d1cb] hover:-translate-y-1 transition-all duration-300 group"
+                            >
+                                <div className={`w-14 h-14 ${platform.bg} ${platform.color} rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                                    {platform.icon}
+                                </div>
+                                <span className="text-sm font-semibold">{platform.name}</span>
+                            </Link>
+                        ))}
+                    </div>
+
+                    <div className="text-center">
+                        <Link
+                            href="/downloads"
+                            className="inline-flex items-center gap-2 px-6 py-3 border border-[#37352f] text-[#37352f] rounded-xl font-semibold text-sm hover:bg-[#37352f] hover:text-white transition-all"
+                        >
+                            <Download size={16} />
+                            View all download options
+                        </Link>
+                    </div>
                 </div>
             </section>
 
