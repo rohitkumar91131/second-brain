@@ -65,8 +65,7 @@ export default function TasksPage() {
                         <div className="w-1 h-1 bg-[#2eaadc] rounded-full"></div>
                     </div>
                 </div>
-                <LoaderIcon className="w-6 h-6 text-[#9b9a97] animate-spin" />
-            </div>
+<LoaderIcon className="w-6 h-6 text-[#000000] animate-spin" />            </div>
         )
     }
 
