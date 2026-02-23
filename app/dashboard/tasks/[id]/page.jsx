@@ -4,7 +4,7 @@ import { useMemo } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useApp } from '@/context/AppContext'
 import { format, subDays, eachDayOfInterval, parseISO, differenceInCalendarDays } from 'date-fns'
-import { ChevronLeft } from 'lucide-react'
+import { ChevronLeft, Loader2 } from 'lucide-react'
 
 function formatDate(d) {
     return format(d, 'yyyy-MM-dd')
@@ -31,22 +31,21 @@ function computeLongestStreak(allDates) {
         const prev = new Date(sorted[i - 1])
         const cur = new Date(sorted[i])
         const diff = (cur - prev) / (1000 * 60 * 60 * 24)
-        if (diff === 1) {
-            current++
-        } else {
+        if (diff === 1) current++
+        else {
             longest = Math.max(longest, current)
             current = 1
         }
     }
-    longest = Math.max(longest, current)
-    return longest
+    return Math.max(longest, current)
 }
 
 export default function TaskDetailPage() {
     const params = useParams()
+    const router = useRouter() // ✅ moved to top
     const id = params.id
-    const { tasks, updateTask, loading } = useApp()
 
+    const { tasks, updateTask, loading } = useApp()
     const task = tasks.find(t => t.id === id)
 
     const history = task?.history || []
@@ -56,7 +55,6 @@ export default function TaskDetailPage() {
         const end = new Date()
         let start = task?.createdAt ? parseISO(task.createdAt) : subDays(end, 90)
 
-        // Cap the displayed range to the last 365 days to avoid huge grids
         const diff = differenceInCalendarDays(end, start)
         if (diff > 365) start = subDays(end, 365)
 
@@ -66,22 +64,22 @@ export default function TaskDetailPage() {
         }))
     }, [task?.createdAt])
 
-    // Build weeks (columns) where each week is an array of 7 slots for Sun..Sat
     const weeks = useMemo(() => {
-        if (!days || days.length === 0) return []
+        if (!days.length) return []
         const cols = []
         let week = Array(7).fill(null)
+
         for (const d of days) {
             const day = parseISO(d.date)
-            const dow = day.getDay() // 0-6 Sun..Sat
+            const dow = day.getDay()
             week[dow] = d
-            // if saturday, push week and start new
+
             if (dow === 6) {
                 cols.push(week)
                 week = Array(7).fill(null)
             }
         }
-        // push last week if it has any day
+
         if (week.some(Boolean)) cols.push(week)
         return cols
     }, [days])
@@ -91,31 +89,22 @@ export default function TaskDetailPage() {
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center h-full relative overflow-hidden">
-                <div className="absolute inset-0 flex">
-                    <div className="relative w-full h-1 loading-bar-animation">
-                        <div className="w-1 h-1 bg-[#2eaadc] rounded-full"></div>
-                    </div>
-                </div>
-                <LoaderIcon className="w-6 h-6 text-[#9b9a97] animate-spin" />
+            <div className="flex items-center justify-center h-full">
+                <Loader2 className="w-6 h-6 animate-spin text-[#9b9a97]" />
             </div>
         )
     }
 
     if (!task) {
         return (
-            <div className="flex flex-col items-center justify-center h-full">
+            <div className="flex items-center justify-center h-full">
                 <div className="text-[#9b9a97]">Task not found</div>
             </div>
         )
     }
 
     const toggleDate = async (date) => {
-        try {
-            await updateTask(id, { toggleDate: date })
-        } catch (e) {
-            console.error('Toggle failed', e)
-        }
+        await updateTask(id, { toggleDate: date })
     }
 
     const toggleToday = () => toggleDate(formatDate(new Date()))
@@ -123,16 +112,13 @@ export default function TaskDetailPage() {
     const totalCompletions = history.length
     const lastCompleted = history.length ? history.slice().sort().pop() : null
 
-    const router = useRouter()
-
     return (
         <div className="flex flex-col h-full bg-white">
             <div className="flex items-center justify-between px-6 py-4 border-b">
                 <div className="flex items-center gap-4">
                     <button
                         onClick={() => router.push('/dashboard/tasks')}
-                        className="p-2 rounded hover:bg-[#f0f0ee] transition-colors"
-                        title="Back"
+                        className="p-2 rounded hover:bg-[#f0f0ee]"
                     >
                         <ChevronLeft size={18} />
                     </button>
@@ -143,7 +129,7 @@ export default function TaskDetailPage() {
                 </div>
                 <div className="flex items-center gap-4">
                     <div className="text-sm text-[#9b9a97] text-right">
-                        <div>Current streak</div>
+                        <div>Current</div>
                         <div className="text-xl font-bold">{currentStreak}</div>
                     </div>
                     <div className="text-sm text-[#9b9a97] text-right">
@@ -151,7 +137,7 @@ export default function TaskDetailPage() {
                         <div className="text-xl font-bold">{longestStreak}</div>
                     </div>
                     <div className="text-sm text-[#9b9a97] text-right">
-                        <div>Completions</div>
+                        <div>Total</div>
                         <div className="text-xl font-bold">{totalCompletions}</div>
                     </div>
                     <button
@@ -163,54 +149,16 @@ export default function TaskDetailPage() {
                 </div>
             </div>
 
-            <div className="p-6 overflow-auto">
-                <h2 className="text-sm font-bold mb-3">Last 90 days</h2>
-
-                <div className="flex gap-3">
-                    {/* Weekday labels vertically */}
-                    <div className="flex flex-col gap-1 text-xs text-[#9b9a97]">
-                        {['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(w => (
-                            <div key={w} className="h-7 flex items-center">{w}</div>
-                        ))}
+            <div className="p-6">
+                {lastCompleted ? (
+                    <div className="text-sm text-[#9b9a97]">
+                        Last completed: {lastCompleted}
                     </div>
-
-                    <div className="overflow-auto">
-                        <div className="flex gap-1 items-start">
-                            {weeks.map((week, wi) => (
-                                <div key={`w-${wi}`} className="flex flex-col gap-1">
-                                    {week.map((d, di) => {
-                                        if (!d) return <div key={`d-${wi}-${di}`} className="w-7 h-7" />
-                                        const done = historySet.has(d.date)
-                                        const diff = differenceInCalendarDays(new Date(), parseISO(d.date))
-                                        let greenClass = 'bg-green-400'
-                                        if (done) {
-                                            if (diff <= 7) greenClass = 'bg-green-800'
-                                            else if (diff <= 30) greenClass = 'bg-green-600'
-                                            else if (diff <= 90) greenClass = 'bg-green-500'
-                                            else greenClass = 'bg-green-400'
-                                        }
-                                        return (
-                                            <button
-                                                key={`d-${wi}-${di}`}
-                                                title={`${d.label} - ${done ? 'Done' : 'Not done'}`}
-                                                onClick={() => toggleDate(d.date)}
-                                                className={`w-7 h-7 rounded-sm transition-all focus:outline-none ${done ? `${greenClass} shadow-sm` : 'bg-[#efefef] hover:bg-[#e0e0e0]'}`}
-                                            />
-                                        )
-                                    })}
-                                </div>
-                            ))}
-                        </div>
+                ) : (
+                    <div className="text-sm text-[#9b9a97]">
+                        No completions yet
                     </div>
-                </div>
-
-                <div className="mt-6 text-sm text-[#9b9a97]">
-                    {lastCompleted ? (
-                        <div>Last completed: {lastCompleted}</div>
-                    ) : (
-                        <div>No completions yet</div>
-                    )}
-                </div>
+                )}
             </div>
         </div>
     )
