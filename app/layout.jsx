@@ -1,6 +1,7 @@
 import './globals.css';
 import { AppProvider } from '@/context/AppContext';
 import { ToastProvider } from '@/components/ui/Toast';
+import { Analytics } from '@vercel/analytics/next';
 
 export const metadata = {
     title: 'Second Brain Tracker',
@@ -16,6 +17,7 @@ export default function RootLayout({ children }) {
                         {children}
                     </AppProvider>
                 </ToastProvider>
+                <Analytics />
             </body>
         </html>
     );
