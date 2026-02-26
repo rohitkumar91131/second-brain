@@ -2,16 +2,22 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Shield, Lock, Eye, FileText, ArrowLeft, Database, UserCheck } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Shield, Eye, FileText, ArrowLeft, Database, UserCheck } from 'lucide-react';
 
 export default function PrivacyPolicy() {
+    const router = useRouter();
+
     return (
         <div className="min-h-screen bg-white text-[#37352f] selection:bg-blue-100">
             <nav className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-[#e9e9e7]">
                 <div className="max-w-4xl mx-auto px-6 h-16 flex items-center justify-between">
-                    <Link href="/" className="inline-flex items-center gap-2 text-[#787774] hover:text-[#37352f] transition-colors font-medium text-sm">
-                        <ArrowLeft size={16} /> Back to Home
-                    </Link>
+                    <button
+                        onClick={() => router.back()}
+                        className="inline-flex items-center gap-2 text-[#787774] hover:text-[#37352f] transition-colors font-medium text-sm outline-none"
+                    >
+                        <ArrowLeft size={16} /> Back
+                    </button>
                     <div className="font-semibold text-sm">Privacy Policy</div>
                 </div>
             </nav>
@@ -63,8 +69,9 @@ export default function PrivacyPolicy() {
                                 </div>
                                 <h2 className="text-2xl font-bold m-0">Zero Tracking</h2>
                             </div>
+                            {/* FIXED LINE BELOW: Using &apos; instead of ' */}
                             <p className="text-[#787774] leading-relaxed">
-                                We do not sell, rent, or monetize your personal data. We don't use tracking cookies for advertising purposes. Our focus is solely on building a powerful tool for your productivity.
+                                We do not sell, rent, or monetize your personal data. We don&apos;t use tracking cookies for advertising purposes. Our focus is solely on building a powerful tool for your productivity.
                             </p>
                         </section>
 
