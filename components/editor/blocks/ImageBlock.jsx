@@ -6,6 +6,7 @@ import { CldUploadWidget } from 'next-cloudinary'
 
 export default function ImageBlock({ block, onUpdate, onDelete }) {
     const [isFullScreen, setIsFullScreen] = useState(false)
+    const [isDownloading, setIsDownloading] = useState(false)
 
     // Esc key se full screen close karne ke liye
     useEffect(() => {
@@ -15,6 +16,31 @@ export default function ImageBlock({ block, onUpdate, onDelete }) {
         window.addEventListener('keydown', handleEsc)
         return () => window.removeEventListener('keydown', handleEsc)
     }, [])
+
+    // --- SMART DOWNLOAD FUNCTION ---
+    const handleDownload = async (imageUrl) => {
+        try {
+            setIsDownloading(true)
+            const response = await fetch(imageUrl);
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+
+            const link = document.createElement('a');
+            link.href = url;
+            // File ka naam extract karna ya default dena
+            link.download = `second-brain-img-${Date.now()}.png`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error("Download failed:", error);
+            // Fallback: Agar blob fail ho jaye toh naye tab me khol do
+            window.open(imageUrl, '_blank');
+        } finally {
+            setIsDownloading(false)
+        }
+    }
 
     return (
         <div className="group flex items-start gap-2 my-6 relative w-full">
@@ -58,15 +84,14 @@ export default function ImageBlock({ block, onUpdate, onDelete }) {
                                     <span>Back</span>
                                 </button>
 
-                                {/* Quick Download Button */}
-                                <a
-                                    href={block.content}
-                                    download
-                                    target="_blank"
-                                    className="absolute top-6 right-6 p-2.5 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-all border border-white/10"
+                                {/* Quick Download Button - Updated to trigger handleDownload */}
+                                <button
+                                    onClick={() => handleDownload(block.content)}
+                                    disabled={isDownloading}
+                                    className="absolute top-6 right-6 p-2.5 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-all border border-white/10 disabled:opacity-50"
                                 >
-                                    <Download size={18} />
-                                </a>
+                                    <Download size={18} className={isDownloading ? 'animate-bounce' : ''} />
+                                </button>
 
                                 <img
                                     src={block.content}
