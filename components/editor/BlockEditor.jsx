@@ -30,10 +30,14 @@ export default function BlockEditor({ blocks, onChange, isDiary = false }) {
 
     const addBlock = useCallback((afterId, type = 'paragraph') => {
         const idx = blocks.findIndex(b => b.id === afterId)
-        const newBlock = { id: `b-${Date.now()}`, type, content: '' }
+        const newOrder = idx + 1
+        const newBlock = { id: `b-${Date.now()}`, type, content: '', order: newOrder }
         const newBlocks = [...blocks]
-        newBlocks.splice(idx + 1, 0, newBlock)
-        onChange(newBlocks)
+        newBlocks.splice(newOrder, 0, newBlock)
+
+        // Re-assign orders to all blocks to keep them consistent
+        const orderedBlocks = newBlocks.map((b, i) => ({ ...b, order: i }))
+        onChange(orderedBlocks)
         return newBlock.id
     }, [blocks, onChange])
 

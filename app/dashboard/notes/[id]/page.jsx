@@ -78,7 +78,7 @@ export default function NoteEditorPage() {
     // Ensure at least one block if loading is done and none exist
     useEffect(() => {
         if (initialized && activeBlocks?.length === 0 && !loading) {
-            setActiveBlocks([{ id: `b-init-${Date.now()}`, type: 'paragraph', content: '' }])
+            setActiveBlocks([{ id: `b-init-${Date.now()}`, type: 'paragraph', content: '', order: 0 }])
         }
     }, [initialized, activeBlocks?.length, loading, setActiveBlocks])
 

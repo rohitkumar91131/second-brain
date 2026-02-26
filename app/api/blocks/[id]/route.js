@@ -1,3 +1,4 @@
+import mongoose from 'mongoose'
 import connectDB from '@/lib/mongodb'
 import Block from '@/lib/models/Block'
 import Note from '@/lib/models/Note'
@@ -8,6 +9,11 @@ import { updateEntityPreview } from '@/lib/api/blocks'
 export const PATCH = withErrorHandler(async (request, { params }) => {
     const { session, error } = await requireAuth()
     if (error) return error
+
+    // Early exit if ID is not a valid MongoDB ObjectId (e.g. temporary ID)
+    if (!mongoose.Types.ObjectId.isValid(params.id)) {
+        return err('Invalid block ID', 404)
+    }
 
     const body = await request.json()
     const validation = validateBody(BlockUpdateSchema, body)
@@ -44,6 +50,11 @@ export const PATCH = withErrorHandler(async (request, { params }) => {
 export const DELETE = withErrorHandler(async (request, { params }) => {
     const { session, error } = await requireAuth()
     if (error) return error
+
+    // Early exit if ID is not a valid MongoDB ObjectId (e.g. temporary ID)
+    if (!mongoose.Types.ObjectId.isValid(params.id)) {
+        return err('Invalid block ID', 404)
+    }
 
     await connectDB()
 

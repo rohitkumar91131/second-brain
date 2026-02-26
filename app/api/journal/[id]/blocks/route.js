@@ -1,14 +1,19 @@
+import mongoose from 'mongoose'
 import connectDB from '@/lib/mongodb'
 import Block from '@/lib/models/Block'
 import { requireAuth, ok, err, withErrorHandler } from '@/lib/apiHelpers'
 import { BlockBulkUpdateSchema, validateBody } from '@/lib/validators/schemas'
-import mongoose from 'mongoose'
+import { updateEntityPreview } from '@/lib/api/blocks'
 
 export const GET = withErrorHandler(async (request, { params }) => {
     const { session, error } = await requireAuth()
     if (error) return error
 
     await connectDB()
+
+    if (!mongoose.Types.ObjectId.isValid(params.id)) {
+        return err('Invalid journal entry ID', 400)
+    }
 
     // Verify journal entry ownership
     const JournalEntry = mongoose.models.JournalEntry || mongoose.model('JournalEntry')
@@ -30,17 +35,54 @@ export const PATCH = withErrorHandler(async (request, { params }) => {
 
     await connectDB()
 
+    if (!mongoose.Types.ObjectId.isValid(params.id)) {
+        return err('Invalid journal entry ID', 400)
+    }
+
     // Verify journal entry ownership
     const JournalEntry = mongoose.models.JournalEntry || mongoose.model('JournalEntry')
     const entry = await JournalEntry.findOne({ _id: params.id, userId: session.user.id })
     if (!entry) return err('Journal entry not found', 404)
 
-    const operations = validation.data.map(item => ({
-        updateOne: {
-            filter: { _id: item.id, entityId: params.id, entityType: 'JournalEntry' },
-            update: { $set: { ...item, id: undefined, entityId: undefined, entityType: undefined } }
+    const operations = validation.data.map((item, index) => {
+        const isExisting = mongoose.Types.ObjectId.isValid(item.id)
+        const order = typeof item.order === 'number' ? item.order : index
+        const type = item.type || 'paragraph'
+
+        if (isExisting) {
+            return {
+                updateOne: {
+                    filter: { _id: item.id, entityId: params.id, entityType: 'JournalEntry' },
+                    update: {
+                        $set: {
+                            ...item,
+                            id: undefined,
+                            entityId: undefined,
+                            entityType: undefined,
+                            order,
+                            type,
+                            parentId: mongoose.Types.ObjectId.isValid(item.parentId) ? item.parentId : null
+                        }
+                    }
+                }
+            }
+        } else {
+            return {
+                insertOne: {
+                    document: {
+                        ...item,
+                        id: undefined,
+                        _id: undefined,
+                        entityId: params.id,
+                        entityType: 'JournalEntry',
+                        order,
+                        type,
+                        parentId: mongoose.Types.ObjectId.isValid(item.parentId) ? item.parentId : null
+                    }
+                }
+            }
         }
-    }))
+    })
 
     if (operations.length > 0) {
         await Block.bulkWrite(operations)

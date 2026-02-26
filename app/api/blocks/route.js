@@ -1,3 +1,4 @@
+import mongoose from 'mongoose'
 import connectDB from '@/lib/mongodb'
 import Block from '@/lib/models/Block'
 import Note from '@/lib/models/Note'
@@ -17,6 +18,10 @@ export const POST = withErrorHandler(async (request) => {
 
     const { entityId, entityType } = validation.data
 
+    if (!mongoose.Types.ObjectId.isValid(entityId)) {
+        return err(`Invalid ${entityType} ID`, 400)
+    }
+
     if (entityType === 'Note') {
         const note = await Note.findOne({ _id: entityId, userId: session.user.id })
         if (!note) return err('Note not found', 404)
@@ -26,7 +31,12 @@ export const POST = withErrorHandler(async (request) => {
         if (!entry) return err('Journal entry not found', 404)
     }
 
-    const block = await Block.create(validation.data)
+    const blockData = {
+        ...validation.data,
+        parentId: mongoose.Types.ObjectId.isValid(validation.data.parentId) ? validation.data.parentId : null
+    }
+
+    const block = await Block.create(blockData)
 
     // Update parent preview
     await updateEntityPreview(entityId, entityType)
