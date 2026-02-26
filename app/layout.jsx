@@ -1,7 +1,7 @@
 import './globals.css';
 import { AppProvider } from '@/context/AppContext';
 import { ToastProvider } from '@/components/ui/Toast';
-import { Analytics } from '@vercel/analytics/next';
+import { Analytics } from '@vercel/analytics/react';
 
 export const metadata = {
     title: 'Second Brain Tracker',
