@@ -2,7 +2,7 @@
 
 import { useApp } from '@/context/AppContext'
 import { useParams, useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import BlockEditor from '@/components/editor/BlockEditor'
 import { ArrowLeft, Trash2, Save } from 'lucide-react'
 import Link from 'next/link'
