@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useApp } from '@/context/AppContext'
 import { format, isToday, isTomorrow, parseISO, isAfter, addDays } from 'date-fns'
-import { CheckSquare, FolderOpen, Target, FileText, Plus, Check, ChevronRight, BookMarked } from 'lucide-react'
+import { CheckSquare, FolderOpen, Target, FileText, Plus, Check, ChevronRight, BookMarked, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 import QuickAddModal from '@/components/ui/QuickAddModal'
 import StatusTag from '@/components/properties/StatusTag'
@@ -45,15 +45,27 @@ export default function DashboardPage() {
                         { type: 'note', label: 'New Note', icon: FileText, color: 'text-green-600 bg-green-50/50 hover:bg-green-100/80 border-green-100' },
                         { type: 'project', label: 'New Project', icon: FolderOpen, color: 'text-purple-600 bg-purple-50/50 hover:bg-purple-100/80 border-purple-100' },
                         { type: 'goal', label: 'New Goal', icon: Target, color: 'text-orange-600 bg-orange-50/50 hover:bg-orange-100/80 border-orange-100' },
-                    ].map(({ type, label, icon: Icon, color }) => (
-                        <button
-                            key={type}
-                            onClick={() => openQuickAdd(type)}
-                            className={`flex items-center gap-2.5 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all hover:scale-105 active:scale-95 border ${color} shadow-sm`}
-                        >
-                            <Plus size={16} strokeWidth={2.5} />
-                            {label}
-                        </button>
+                        { href: '/dashboard/recycle-bin', label: 'Recycle Bin', icon: Trash2, color: 'text-red-600 bg-red-50/50 hover:bg-red-100/80 border-red-100' },
+                    ].map((item) => (
+                        item.href ? (
+                            <Link
+                                key={item.label}
+                                href={item.href}
+                                className={`flex items-center gap-2.5 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all hover:scale-105 active:scale-95 border ${item.color} shadow-sm`}
+                            >
+                                <item.icon size={16} strokeWidth={2.5} />
+                                {item.label}
+                            </Link>
+                        ) : (
+                            <button
+                                key={item.type}
+                                onClick={() => openQuickAdd(item.type)}
+                                className={`flex items-center gap-2.5 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all hover:scale-105 active:scale-95 border ${item.color} shadow-sm`}
+                            >
+                                <Plus size={16} strokeWidth={2.5} />
+                                {item.label}
+                            </button>
+                        )
                     ))}
                 </div>
 
