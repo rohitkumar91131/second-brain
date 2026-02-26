@@ -12,8 +12,8 @@ export default function MediaBankPage() {
     const [search, setSearch] = useState('')
 
     useEffect(() => {
-        if (!isFetched('blocks/media')) fetchMedia()
-    }, [fetchMedia, isFetched])
+        fetchMedia()
+    }, [fetchMedia])
 
     const filteredMedia = (media || []).filter(item =>
         item.noteTitle?.toLowerCase().includes(search.toLowerCase()) ||
@@ -30,7 +30,7 @@ export default function MediaBankPage() {
 
     return (
         <div className="flex flex-col h-full bg-[#fcfaf7]">
-            {/* Header / Search */}
+
             <div className="flex items-center gap-3 px-6 py-4 bg-white border-b border-[#e9e9e7] sticky top-0 z-10">
                 <div className="flex-1 flex items-center gap-2 px-3 py-1.5 border border-[#e9e9e7] rounded-md bg-[#f7f7f5]">
                     <Search size={14} className="text-[#9b9a97]" />
@@ -79,31 +79,51 @@ export default function MediaBankPage() {
                     ) : (
                         <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-4 space-y-4">
                             {filteredMedia.map((item, idx) => (
-                                <div key={`${item.id}-${idx}`} className="group bg-white rounded-xl border border-[#e9e9e7] overflow-hidden hover:shadow-lg transition-all flex flex-col break-inside-avoid">
+                                <div
+                                    key={`${item.id}-${idx}`}
+                                    className="group bg-white rounded-xl border border-[#e9e9e7] overflow-hidden hover:shadow-lg transition-all flex flex-col break-inside-avoid"
+                                >
                                     <div className={`relative flex items-center justify-center bg-[#f7f7f5] ${item.type === 'video' ? 'aspect-video' : 'aspect-auto'}`}>
                                         {item.type === 'image' && (
-                                            <img src={item.content} alt={item.noteTitle} className="w-full h-auto object-contain" />
+                                            <img
+                                                src={item.content}
+                                                alt={item.noteTitle}
+                                                className="w-full h-auto object-contain"
+                                            />
                                         )}
+
                                         {item.type === 'video' && (
                                             <div className="w-full h-full flex flex-col items-center justify-center gap-2">
                                                 <Video size={40} className="text-[#9b9a97]" />
-                                                <span className="text-[10px] font-bold text-[#9b9a97] uppercase">Video Embed</span>
+                                                <span className="text-[10px] font-bold text-[#9b9a97] uppercase">
+                                                    Video Embed
+                                                </span>
                                             </div>
                                         )}
+
                                         {item.type === 'audio' && (
                                             <div className="w-full h-24 flex flex-col items-center justify-center gap-2">
                                                 <Music size={40} className="text-[#9b9a97]" />
-                                                <span className="text-[10px] font-bold text-[#9b9a97] uppercase">Audio Embed</span>
+                                                <span className="text-[10px] font-bold text-[#9b9a97] uppercase">
+                                                    Audio Embed
+                                                </span>
                                             </div>
                                         )}
+
                                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                                            <Link href={`/dashboard/notes/${item.entityId}`} className="p-2 bg-white rounded-full hover:scale-110 transition-transform text-[#37352f]" title="Open Note">
+                                            <Link
+                                                href={`/dashboard/notes/${item.entityId}`}
+                                                className="p-2 bg-white rounded-full hover:scale-110 transition-transform text-[#37352f]"
+                                            >
                                                 <ExternalLink size={16} />
                                             </Link>
                                         </div>
                                     </div>
+
                                     <div className="p-3 bg-white">
-                                        <p className="text-xs font-semibold text-[#37352f] truncate mb-1">{item.noteTitle}</p>
+                                        <p className="text-xs font-semibold text-[#37352f] truncate mb-1">
+                                            {item.noteTitle}
+                                        </p>
                                         <div className="flex items-center justify-between">
                                             <span className="flex items-center gap-1 text-[10px] font-bold text-[#9b9a97] uppercase tracking-widest">
                                                 {item.type === 'image' && <ImageIcon size={10} />}
@@ -116,6 +136,7 @@ export default function MediaBankPage() {
                                             </span>
                                         </div>
                                     </div>
+
                                 </div>
                             ))}
                         </div>

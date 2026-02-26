@@ -15,8 +15,8 @@ export default function NotesPage() {
     const [showAdd, setShowAdd] = useState(false)
 
     useEffect(() => {
-        if (!isFetched('notes')) fetchEndpoint('notes')
-    }, [isFetched, fetchEndpoint])
+        fetchEndpoint('notes')
+    }, [fetchEndpoint])
 
     if (loading) {
         return <LoadingScreen />
@@ -43,8 +43,8 @@ export default function NotesPage() {
                 url: window.location.href + '/' + note.id,
             }).catch(() => { })
         } else {
-            alert('Share copied to clipboard!')
             navigator.clipboard.writeText(window.location.href + '/' + note.id)
+            alert('Share copied to clipboard!')
         }
     }
 
