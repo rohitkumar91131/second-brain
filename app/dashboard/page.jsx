@@ -1,25 +1,30 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useApp } from '@/context/AppContext'
 import { format, isToday, isTomorrow, parseISO, isAfter, addDays } from 'date-fns'
-import { CheckSquare, FolderOpen, Target, FileText, Plus, Check, ChevronRight, BookMarked, Trash2 } from 'lucide-react'
+import { CheckSquare, FolderOpen, Target, FileText, Plus, Check, ChevronRight, BookMarked, Trash2, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import QuickAddModal from '@/components/ui/QuickAddModal'
 import StatusTag from '@/components/properties/StatusTag'
 import ProgressBar from '@/components/properties/ProgressBar'
 
 export default function DashboardPage() {
-    const { tasks, projects, goals, notes, journal, updateTask, session } = useApp()
+    const { tasks, projects, goals, notes, journal, updateTask, session, loading } = useApp() // added loading from context
     const [showQuickAdd, setShowQuickAdd] = useState(false)
     const [quickAddType, setQuickAddType] = useState('task')
+    const [pageMounted, setPageMounted] = useState(false)
+
+    useEffect(() => {
+        setPageMounted(true)
+    }, [])
 
     const now = new Date()
     const todayTasks = tasks.filter(t => !t.completed && t.dueDate && isToday(parseISO(t.dueDate)))
     const upcomingTasks = tasks.filter(t => !t.completed && t.dueDate && isAfter(parseISO(t.dueDate), now) && !isToday(parseISO(t.dueDate))).slice(0, 5)
     const activeProjects = projects.filter(p => p.status === 'Active').slice(0, 4)
     const activeGoals = goals.filter(g => g.status === 'Active').slice(0, 4)
-    const recentNotes = [...notes].sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)).slice(0, 4)
+    const recentNotes = [...notes].sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()).slice(0, 4)
 
     const openQuickAdd = (type) => { setQuickAddType(type); setShowQuickAdd(true) }
 
@@ -27,18 +32,21 @@ export default function DashboardPage() {
     const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
     const userName = session?.user?.name?.split(' ')[0] || ''
 
+    // Global Loader check
+    const isDataLoading = !pageMounted || loading
+
     return (
         <div className="max-w-5xl mx-auto px-6 py-8">
             <div className="animate-fade-in-up">
-                {/* Welcome */}
+                {/* Welcome Section */}
                 <div className="mb-10">
                     <h1 className="text-4xl font-extrabold text-[#37352f] mb-2 tracking-tight">
-                        {greeting}{userName ? `, ${userName}` : ''} 👋
+                        {isDataLoading ? <div className="h-10 w-64 bg-[#f1f1ef] animate-pulse rounded-lg" /> : `${greeting}${userName ? `, ${userName}` : ''} 👋`}
                     </h1>
                     <p className="text-[#9b9a97] text-sm font-medium">{format(now, 'EEEE, MMMM d, yyyy')}</p>
                 </div>
 
-                {/* Quick Add */}
+                {/* Quick Add Buttons */}
                 <div className="flex flex-wrap gap-3 mb-10">
                     {[
                         { type: 'task', label: 'New Task', icon: CheckSquare, color: 'text-blue-600 bg-blue-50/50 hover:bg-blue-100/80 border-blue-100' },
@@ -72,13 +80,7 @@ export default function DashboardPage() {
                 {/* Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Today's Tasks */}
-                    <Widget
-                        title="Today's Tasks"
-                        icon={<CheckSquare size={16} className="text-blue-600" />}
-                        href="/dashboard/tasks"
-                        count={todayTasks.length}
-                        delay="0"
-                    >
+                    <Widget title="Today's Tasks" icon={<CheckSquare size={16} className="text-blue-600" />} href="/dashboard/tasks" count={todayTasks.length} loading={isDataLoading}>
                         {todayTasks.length === 0 ? <EmptyWidget text="No tasks due today 🎉" /> : (
                             <div className="space-y-2">
                                 {todayTasks.map(task => (
@@ -96,13 +98,7 @@ export default function DashboardPage() {
                     </Widget>
 
                     {/* Upcoming Tasks */}
-                    <Widget
-                        title="Upcoming"
-                        icon={<CheckSquare size={16} className="text-purple-600" />}
-                        href="/dashboard/tasks"
-                        count={upcomingTasks.length}
-                        delay="100ms"
-                    >
+                    <Widget title="Upcoming" icon={<CheckSquare size={16} className="text-purple-600" />} href="/dashboard/tasks" count={upcomingTasks.length} delay="100ms" loading={isDataLoading}>
                         {upcomingTasks.length === 0 ? <EmptyWidget text="No upcoming tasks" /> : (
                             <div className="space-y-2">
                                 {upcomingTasks.map(task => (
@@ -118,13 +114,7 @@ export default function DashboardPage() {
                     </Widget>
 
                     {/* Active Projects */}
-                    <Widget
-                        title="Active Projects"
-                        icon={<FolderOpen size={16} className="text-purple-600" />}
-                        href="/dashboard/projects"
-                        count={activeProjects.length}
-                        delay="200ms"
-                    >
+                    <Widget title="Active Projects" icon={<FolderOpen size={16} className="text-purple-600" />} href="/dashboard/projects" count={activeProjects.length} delay="200ms" loading={isDataLoading}>
                         {activeProjects.length === 0 ? <EmptyWidget text="No active projects" /> : (
                             <div className="space-y-4">
                                 {activeProjects.map(project => (
@@ -141,13 +131,7 @@ export default function DashboardPage() {
                     </Widget>
 
                     {/* Goal Progress */}
-                    <Widget
-                        title="Goal Progress"
-                        icon={<Target size={16} className="text-orange-600" />}
-                        href="/dashboard/goals"
-                        count={activeGoals.length}
-                        delay="300ms"
-                    >
+                    <Widget title="Goal Progress" icon={<Target size={16} className="text-orange-600" />} href="/dashboard/goals" count={activeGoals.length} delay="300ms" loading={isDataLoading}>
                         {activeGoals.length === 0 ? <EmptyWidget text="No active goals" /> : (
                             <div className="space-y-4">
                                 {activeGoals.map(goal => (
@@ -165,13 +149,7 @@ export default function DashboardPage() {
                     </Widget>
 
                     {/* Recent Notes */}
-                    <Widget
-                        title="Recent Notes"
-                        icon={<FileText size={16} className="text-green-600" />}
-                        href="/dashboard/notes"
-                        count={recentNotes.length}
-                        delay="400ms"
-                    >
+                    <Widget title="Recent Notes" icon={<FileText size={16} className="text-green-600" />} href="/dashboard/notes" count={recentNotes.length} delay="400ms" loading={isDataLoading}>
                         {recentNotes.length === 0 ? <EmptyWidget text="No notes yet" /> : (
                             <div className="space-y-1">
                                 {recentNotes.map(note => (
@@ -189,9 +167,8 @@ export default function DashboardPage() {
                     </Widget>
 
                     {/* Mini Calendar */}
-                    <MiniCalendar tasks={tasks} delay="500ms" />
+                    <MiniCalendar tasks={tasks} delay="500ms" loading={isDataLoading} />
                 </div>
-
             </div>
 
             {showQuickAdd && <QuickAddModal defaultType={quickAddType} onClose={() => setShowQuickAdd(false)} />}
@@ -199,7 +176,7 @@ export default function DashboardPage() {
     )
 }
 
-function Widget({ title, icon, href, count, children, delay = "0" }) {
+function Widget({ title, icon, href, count, children, delay = "0", loading = false }) {
     return (
         <div
             className="border border-[#e9e9e7] rounded-2xl p-5 bg-white hover-lift sexy-shadow animate-fade-in-up"
@@ -211,13 +188,20 @@ function Widget({ title, icon, href, count, children, delay = "0" }) {
                         {icon}
                     </div>
                     <h2 className="text-sm font-bold text-[#37352f] tracking-tight">{title}</h2>
-                    {count > 0 && <span className="px-2 py-0.5 bg-[#f1f1ef] text-[#787774] text-[10px] font-bold rounded-full">{count}</span>}
+                    {!loading && count > 0 && <span className="px-2 py-0.5 bg-[#f1f1ef] text-[#787774] text-[10px] font-bold rounded-full">{count}</span>}
                 </div>
                 <Link href={href} className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-[#f7f7f5] text-[#9b9a97] hover:text-[#37352f] transition-all">
                     <ChevronRight size={18} />
                 </Link>
             </div>
-            {children}
+
+            {loading ? (
+                <div className="space-y-3">
+                    <div className="h-4 bg-[#f1f1ef] animate-pulse rounded w-full" />
+                    <div className="h-4 bg-[#f1f1ef] animate-pulse rounded w-5/6" />
+                    <div className="h-4 bg-[#f1f1ef] animate-pulse rounded w-4/6" />
+                </div>
+            ) : children}
         </div>
     )
 }
@@ -226,7 +210,7 @@ function EmptyWidget({ text }) {
     return <p className="text-[13px] font-medium text-[#9b9a97] py-6 text-center italic">{text}</p>
 }
 
-function MiniCalendar({ tasks, delay = "0" }) {
+function MiniCalendar({ tasks, delay = "0", loading = false }) {
     const now = new Date()
     const days = Array.from({ length: 7 }, (_, i) => addDays(now, i))
     return (
@@ -240,26 +224,38 @@ function MiniCalendar({ tasks, delay = "0" }) {
                 </div>
                 <h2 className="text-sm font-bold text-[#37352f] tracking-tight">Next 7 Days</h2>
             </div>
-            <div className="space-y-3">
-                {days.map(day => {
-                    const dayTasks = tasks.filter(t => t.dueDate && format(parseISO(t.dueDate || '2000-01-01'), 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd'))
-                    return (
-                        <div key={day.toISOString()} className="flex items-center gap-4 group">
-                            <div className={`text-[11px] w-8 font-bold uppercase tracking-widest flex-shrink-0 ${isToday(day) ? 'text-blue-600' : 'text-[#9b9a97]'}`}>
-                                {isToday(day) ? 'Now' : format(day, 'EEE')}
-                            </div>
-                            <div className="flex-1 flex gap-2 flex-wrap">
-                                {dayTasks.slice(0, 3).map(t => (
-                                    <span key={t.id} className="text-[11px] font-bold px-2.5 py-1 bg-blue-50/50 text-blue-700 rounded-lg truncate max-w-[140px] border border-blue-100/50 group-hover:bg-blue-100 transition-colors">
-                                        {t.title}
-                                    </span>
-                                ))}
-                                {dayTasks.length === 0 && <div className="h-px bg-[#f1f1ef] flex-1 mt-2"></div>}
-                            </div>
+
+            {loading ? (
+                <div className="space-y-4">
+                    {[1, 2, 3, 4, 5].map(i => (
+                        <div key={i} className="flex gap-4">
+                            <div className="w-8 h-3 bg-[#f1f1ef] animate-pulse rounded" />
+                            <div className="flex-1 h-3 bg-[#f1f1ef] animate-pulse rounded" />
                         </div>
-                    )
-                })}
-            </div>
+                    ))}
+                </div>
+            ) : (
+                <div className="space-y-3">
+                    {days.map(day => {
+                        const dayTasks = tasks.filter(t => t.dueDate && format(parseISO(t.dueDate || '2000-01-01'), 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd'))
+                        return (
+                            <div key={day.toISOString()} className="flex items-center gap-4 group">
+                                <div className={`text-[11px] w-8 font-bold uppercase tracking-widest flex-shrink-0 ${isToday(day) ? 'text-blue-600' : 'text-[#9b9a97]'}`}>
+                                    {isToday(day) ? 'Now' : format(day, 'EEE')}
+                                </div>
+                                <div className="flex-1 flex gap-2 flex-wrap">
+                                    {dayTasks.slice(0, 3).map(t => (
+                                        <span key={t.id} className="text-[11px] font-bold px-2.5 py-1 bg-blue-50/50 text-blue-700 rounded-lg truncate max-w-[140px] border border-blue-100/50 group-hover:bg-blue-100 transition-colors">
+                                            {t.title}
+                                        </span>
+                                    ))}
+                                    {dayTasks.length === 0 && <div className="h-px bg-[#f1f1ef] flex-1 mt-2"></div>}
+                                </div>
+                            </div>
+                        )
+                    })}
+                </div>
+            )}
         </div>
     )
 }

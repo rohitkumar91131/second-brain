@@ -7,7 +7,7 @@ import { useSession } from 'next-auth/react'
 import {
     Brain, ArrowRight, CheckCircle2, Zap, Shield, Sparkles,
     Loader2, Download, Monitor, Apple, Terminal, Smartphone,
-    Tablet, Menu, X, Layout, Target, Clock
+    Tablet, Menu, X, Layout
 } from 'lucide-react'
 import { gsap } from 'gsap'
 
@@ -29,7 +29,6 @@ export default function LandingPage() {
     // --- GSAP MOBILE MENU ANIMATION ---
     useEffect(() => {
         if (mobileMenuOpen) {
-            // Drop down from top
             gsap.to(menuRef.current, {
                 y: 0,
                 duration: 0.6,
@@ -37,13 +36,11 @@ export default function LandingPage() {
                 display: "flex",
                 opacity: 1
             })
-            // Staggered fade-in for links
             gsap.fromTo(menuLinksRef.current,
                 { opacity: 0, y: -20 },
                 { opacity: 1, y: 0, duration: 0.4, stagger: 0.08, delay: 0.2, ease: "back.out(1.2)" }
             )
         } else {
-            // Slide back up
             gsap.to(menuRef.current, {
                 y: "-100%",
                 opacity: 0,
@@ -76,8 +73,12 @@ export default function LandingPage() {
                         <Link href="/versions" className="hover:text-[#2eaadc] transition-colors">Versions</Link>
                         <Link href="/downloads" className="hover:text-[#2eaadc] transition-colors">Downloads</Link>
 
-                        {status === 'authenticated' ? (
-                            <Link href="/dashboard" className="px-4 py-2 bg-[#37352f] text-white rounded-full hover:bg-black transition-all">Dashboard</Link>
+                        {status === 'loading' ? (
+                            <div className="w-20 flex justify-center">
+                                <Loader2 size={18} className="animate-spin text-[#9b9a97]" />
+                            </div>
+                        ) : status === 'authenticated' ? (
+                            <Link href="/dashboard" className="px-5 py-2.5 bg-[#37352f] text-white rounded-full hover:bg-black transition-all shadow-md">Dashboard</Link>
                         ) : (
                             <div className="flex items-center gap-6">
                                 <Link href="/login" className="hover:text-[#2eaadc] transition-colors">Login</Link>
@@ -104,7 +105,11 @@ export default function LandingPage() {
 
                     <div className="h-px bg-[#e9e9e7] my-2" ref={el => menuLinksRef.current[3] = el} />
 
-                    {status === 'authenticated' ? (
+                    {status === 'loading' ? (
+                        <div className="flex justify-center" ref={el => menuLinksRef.current[4] = el}>
+                            <Loader2 size={24} className="animate-spin text-[#37352f]" />
+                        </div>
+                    ) : status === 'authenticated' ? (
                         <Link href="/dashboard" ref={el => menuLinksRef.current[4] = el} className="text-center py-4 bg-[#37352f] text-white rounded-2xl shadow-lg">Dashboard</Link>
                     ) : (
                         <div className="flex flex-col gap-4" ref={el => menuLinksRef.current[5] = el}>
@@ -127,19 +132,23 @@ export default function LandingPage() {
                     </p>
 
                     <div className="flex justify-center">
-                        <Link
-                            href="/register"
-                            className="w-full sm:w-auto px-10 py-5 bg-[#37352f] text-white rounded-2xl font-bold text-xl hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2 shadow-2xl shadow-[#37352f]/30"
-                        >
-                            Start Building for Free <ArrowRight size={22} />
-                        </Link>
+                        {status === 'loading' ? (
+                            <div className="h-16 w-64 bg-[#f1f1ef] animate-pulse rounded-2xl" />
+                        ) : (
+                            <Link
+                                href={status === 'authenticated' ? "/dashboard" : "/register"}
+                                className="w-full sm:w-auto px-10 py-5 bg-[#37352f] text-white rounded-2xl font-bold text-xl hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2 shadow-2xl shadow-[#37352f]/30"
+                            >
+                                {status === 'authenticated' ? 'Go to Dashboard' : 'Start Building for Free'} <ArrowRight size={22} />
+                            </Link>
+                        )}
                     </div>
 
                     {/* Dashboard Preview Replacement */}
                     <div className="mt-24 relative max-w-4xl mx-auto">
                         <div className="absolute -top-10 -left-10 w-40 h-40 bg-blue-100 rounded-full blur-3xl opacity-30" />
                         <div className="relative grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="bg-white border border-[#e9e9e7] rounded-[2.5rem] p-8 shadow-xl text-left transform hover:-translate-y-2 transition-all">
+                            <div className="bg-white border border-[#e9e9e7] rounded-[2.5rem] p-8 shadow-xl text-left transform hover:-translate-y-2 transition-all duration-300">
                                 <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-6">
                                     <Layout size={24} />
                                 </div>
@@ -147,7 +156,7 @@ export default function LandingPage() {
                                 <p className="text-[#9b9a97] text-sm leading-relaxed">Organize everything exactly how you think. No rigid structures, just pure creative flow.</p>
                             </div>
 
-                            <div className="bg-[#37352f] rounded-[2.5rem] p-8 shadow-2xl text-left text-white transform md:translate-y-8 hover:-translate-y-0 transition-all">
+                            <div className="bg-[#37352f] rounded-[2.5rem] p-8 shadow-2xl text-left text-white transform md:translate-y-8 hover:-translate-y-0 transition-all duration-300">
                                 <div className="w-12 h-12 bg-white/10 text-blue-400 rounded-2xl flex items-center justify-center mb-6">
                                     <Sparkles size={24} />
                                 </div>
@@ -222,7 +231,7 @@ export default function LandingPage() {
                 </div>
             </section>
 
-            {/* Updated Footer */}
+            {/* Footer */}
             <footer className="py-20 border-t border-[#e9e9e7] bg-[#fcfcfc]">
                 <div className="max-w-7xl mx-auto px-6">
                     <div className="flex flex-col md:flex-row items-start justify-between gap-12 mb-16">
