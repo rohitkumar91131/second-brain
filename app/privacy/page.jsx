@@ -1,6 +1,8 @@
+'use client'
+
 import React from 'react';
 import Link from 'next/link';
-import { Shield, Lock, Eye, FileText, ArrowLeft } from 'lucide-react';
+import { Shield, Lock, Eye, FileText, ArrowLeft, Database, UserCheck } from 'lucide-react';
 
 export default function PrivacyPolicy() {
     return (
@@ -28,15 +30,29 @@ export default function PrivacyPolicy() {
                 <article className="prose prose-lg prose-headings:font-bold prose-headings:tracking-tight prose-p:text-[#37352f]/80 max-w-none">
                     <div className="space-y-12">
 
+                        {/* Realistic Security Section */}
                         <section className="bg-[#fcfcfc] border border-[#e9e9e7] rounded-3xl p-8 shadow-sm">
                             <div className="flex items-center gap-4 mb-4">
                                 <div className="p-3 bg-white rounded-xl shadow-sm border border-[#e9e9e7]">
-                                    <Lock className="text-purple-500" size={24} />
+                                    <Database className="text-purple-500" size={24} />
                                 </div>
-                                <h2 className="text-2xl font-bold m-0">End-to-End Security</h2>
+                                <h2 className="text-2xl font-bold m-0">Secure Infrastructure</h2>
                             </div>
                             <p className="text-[#787774] leading-relaxed">
-                                All of your habit data, notes, and personal information are encrypted in transit and at rest. We employ industry-leading standards to ensure your second brain remains impregnable.
+                                Your data is protected using industry-standard encryption protocols. We use Secure Socket Layer (SSL/TLS) technology to encrypt data in transit and employ encryption at rest to safeguard your notes on our servers.
+                            </p>
+                        </section>
+
+                        {/* User Control Section */}
+                        <section className="bg-[#fcfcfc] border border-[#e9e9e7] rounded-3xl p-8 shadow-sm">
+                            <div className="flex items-center gap-4 mb-4">
+                                <div className="p-3 bg-white rounded-xl shadow-sm border border-[#e9e9e7]">
+                                    <UserCheck className="text-blue-500" size={24} />
+                                </div>
+                                <h2 className="text-2xl font-bold m-0">Data Ownership</h2>
+                            </div>
+                            <p className="text-[#787774] leading-relaxed">
+                                You have full control over your content. You can modify, export, or permanently delete your data at any time. When you choose to delete your account, we ensure that all associated data is wiped from our active databases.
                             </p>
                         </section>
 
@@ -48,19 +64,19 @@ export default function PrivacyPolicy() {
                                 <h2 className="text-2xl font-bold m-0">Zero Tracking</h2>
                             </div>
                             <p className="text-[#787774] leading-relaxed">
-                                We do not sell, rent, or monetize your data. Our business model is based entirely on providing you with the best productivity tool, not turning you into a product.
+                                We do not sell, rent, or monetize your personal data. We don't use tracking cookies for advertising purposes. Our focus is solely on building a powerful tool for your productivity.
                             </p>
                         </section>
 
                         <section className="bg-[#fcfcfc] border border-[#e9e9e7] rounded-3xl p-8 shadow-sm">
                             <div className="flex items-center gap-4 mb-4">
                                 <div className="p-3 bg-white rounded-xl shadow-sm border border-[#e9e9e7]">
-                                    <FileText className="text-blue-500" size={24} />
+                                    <FileText className="text-orange-500" size={24} />
                                 </div>
-                                <h2 className="text-2xl font-bold m-0">Transparent Practices</h2>
+                                <h2 className="text-2xl font-bold m-0">Minimal Collection</h2>
                             </div>
                             <p className="text-[#787774] leading-relaxed">
-                                We collect only the bare minimum information needed to operate the service—an email address to identify your account and your encrypted notes. You can export or delete your data permanently at any given moment.
+                                We only collect essential information like your email address and basic profile details required for account management and synchronization across your devices.
                             </p>
                         </section>
                     </div>
@@ -68,9 +84,9 @@ export default function PrivacyPolicy() {
                     <div className="mt-16 pt-8 border-t border-[#e9e9e7]">
                         <h3 className="text-xl font-bold mb-4">Contacting Us</h3>
                         <p className="text-[#787774]">
-                            If you have any questions about our privacy practices or wish to submit a data deletion request, please reach out to our dedicated privacy team at <a href="mailto:privacy@secondbrain.demo" className="text-blue-600 hover:underline">privacy@secondbrain.demo</a>.
+                            If you have any questions about our privacy practices or wish to submit a data deletion request, please reach out to us at <a href="mailto:privacy@secondbrain.demo" className="text-blue-600 hover:underline">support@secondbrain.demo</a>.
                         </p>
-                        <p className="text-sm text-[#9b9a97] mt-8">Last updated: {new Date().toLocaleDateString()}</p>
+                        <p className="text-sm text-[#9b9a97] mt-8">Last updated: {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
                     </div>
                 </article>
             </main>

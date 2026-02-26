@@ -2,39 +2,52 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, CheckCircle2, History, Rocket, ScrollText } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { ArrowLeft, CheckCircle2, History, Rocket, ScrollText, Sparkles } from 'lucide-react';
 
 const VERSIONS = [
     {
+        id: '3.0.0',
+        title: 'Version 3.0.0',
+        date: 'February 27, 2026', // Aaj ki date
+        icon: <Sparkles size={20} className="text-yellow-500" />,
+        features: [
+            'Enhanced Slash Commands (/) with arrow-key navigation and instant Enter selection',
+            'Smart Command Filtering: Menu items now filter in real-time as you type after "/"',
+            'New "Link Block" for clean web bookmarks with automated URL validation',
+            'Full-screen Media Viewer for both Images and Videos with blurry backdrop',
+            'Blob-based Secure Downloading: Images now save directly to device bypassing CORS',
+            'GSAP Powered Mobile Navbar: Ultra-smooth slide-down animation and staggered link entry',
+            'Note Editor Responsiveness: Mobile-first layout adjustments for better writing space',
+            'Database Sync for Deletions: Blocks now permanently delete from MongoDB with auto-reordering',
+            'Schema Hardening: Zod and Mongoose validation synchronized for all new block types',
+            'Refurbished Landing Page: Clean hero section with modular dashboard preview cards'
+        ]
+    },
+    {
         id: '2.0.0',
         title: 'Version 2.0.0',
-        date: 'Upcoming',
+        date: 'February 22, 2026', // 5 din pehle
         icon: <Rocket size={20} className="text-purple-500" />,
         features: [
             'Global Loading Fixes with Turkey Animation',
             'Unified Editor with Rich Text (Lists, Tables, Bold, etc.)',
             'Video Embeds for YouTube, Instagram, etc. in Notes',
             'Client-side Note to PDF Conversion',
-            'Tab System for Notes (VS Code-like)',
             'Local Storage Fallback for Unsaved Notes',
-            'Dark & Bright Mode Implementation',
             'Resource & Task Addition via Quick Add & Notes',
             'Customizable Settings to Change "/" Dashboard Route',
             'Recycle Bin & Archive Functions',
             'GSAP Right-Click Context Menu (Archive, Download, Share)',
-            'Pinning and Starring Notes',
             'Lazy Loading for Large Documents',
-            'Shared Notes Import Feature',
             'Responsive Navbar for all Mobile Screens',
-            'Desktop Emoji Selector for Notes',
             'Content Schema Refactor (Foreign Keys & Bidirectional Links)',
-            'Redesigned Authentic Homepage'
         ]
     },
     {
         id: '1.0.0',
         title: 'Version 1.0.0',
-        date: 'February 2026',
+        date: 'February 17, 2026', // 10 din pehle
         icon: <History size={20} className="text-blue-500" />,
         features: [
             'Authentication (Login & Registration)',
@@ -48,21 +61,26 @@ const VERSIONS = [
 ];
 
 export default function VersionsPage() {
+    const router = useRouter();
     const [activeVersion, setActiveVersion] = useState(VERSIONS[0]);
 
     return (
         <div className="min-h-screen bg-[#fcfcfc] text-[#37352f] flex flex-col font-sans">
             <nav className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-[#e9e9e7]">
                 <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-                    <Link href="/" className="inline-flex items-center gap-2 text-[#787774] hover:text-[#37352f] transition-colors font-medium text-sm">
-                        <ArrowLeft size={16} /> Back to Home
-                    </Link>
-                    <div className="font-semibold text-sm flex items-center gap-2"><ScrollText size={16} /> Release Notes</div>
+                    <button
+                        onClick={() => router.back()}
+                        className="inline-flex items-center gap-2 text-[#787774] hover:text-[#37352f] transition-colors font-medium text-sm outline-none"
+                    >
+                        <ArrowLeft size={16} /> Back
+                    </button>
+                    <div className="font-semibold text-sm flex items-center gap-2">
+                        <ScrollText size={16} /> Release Notes
+                    </div>
                 </div>
             </nav>
 
             <div className="flex-1 mt-16 max-w-6xl mx-auto w-full px-4 py-8 flex flex-col md:flex-row gap-8">
-
                 {/* Sidebar */}
                 <aside className="md:w-64 flex-shrink-0">
                     <div className="sticky top-24 bg-white rounded-2xl border border-[#e9e9e7] shadow-sm p-4">
@@ -73,8 +91,8 @@ export default function VersionsPage() {
                                     key={v.id}
                                     onClick={() => setActiveVersion(v)}
                                     className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all text-sm font-medium ${activeVersion.id === v.id
-                                            ? 'bg-blue-50 text-blue-700 shadow-sm'
-                                            : 'text-[#787774] hover:bg-gray-100 hover:text-[#37352f]'
+                                        ? 'bg-blue-50 text-blue-700 shadow-sm'
+                                        : 'text-[#787774] hover:bg-gray-100 hover:text-[#37352f]'
                                         }`}
                                 >
                                     {v.icon}
@@ -85,17 +103,19 @@ export default function VersionsPage() {
                     </div>
                 </aside>
 
-                {/* Main Content */}
                 <main className="flex-1 bg-white rounded-2xl border border-[#e9e9e7] shadow-sm p-8 md:p-12">
                     <div className="mb-10">
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-100 text-gray-600 text-xs font-semibold mb-4">
+                        <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-4 ${activeVersion.id === '3.0.0' ? 'bg-yellow-50 text-yellow-700' : 'bg-gray-100 text-gray-600'
+                            }`}>
                             {activeVersion.date}
                         </div>
                         <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-4 flex items-center gap-4">
                             {activeVersion.title}
                         </h1>
                         <p className="text-[#787774] text-lg">
-                            Here are the detailed release notes for this version.
+                            {activeVersion.id === '3.0.0'
+                                ? 'The Experience Update: Making the editor and landing page feel elite.'
+                                : `Release summary for ${activeVersion.title}.`}
                         </p>
                     </div>
 
@@ -109,7 +129,6 @@ export default function VersionsPage() {
                     </div>
                 </main>
             </div>
-
         </div>
     );
 }
