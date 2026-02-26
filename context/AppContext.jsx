@@ -48,6 +48,7 @@ function AppContextInner({ children }) {
     const [journal, setJournal] = useState([])
     const [areas, setAreas] = useState([])
     const [resources, setResources] = useState([])
+    const [media, setMedia] = useState([])
     const [archive, setArchive] = useState([])
     const [viewPreferences, setViewPreferences] = useState({})
     const [activeBlocks, setActiveBlocks] = useState([])
@@ -86,6 +87,7 @@ function AppContextInner({ children }) {
                 if (p.startsWith('/dashboard/projects')) return ['projects']
                 if (p.startsWith('/dashboard/resources')) return ['resources']
                 if (p.startsWith('/dashboard/goals')) return ['goals']
+                if (p.startsWith('/dashboard/media')) return ['blocks/media']
                 return ['tasks']
             }
 
@@ -119,6 +121,7 @@ function AppContextInner({ children }) {
             setGoals(merge(resultMap.goals, stored.goals))
             setJournal(merge(resultMap.journal, stored.journal))
             setResources(merge(resultMap.resources, stored.resources))
+            setMedia(merge(resultMap['blocks/media'], stored.media))
 
             setNotes(merge(resultMap.notes, stored.notes))
             if (resultMap['notes?archived=true']) setArchivedNotes(merge(resultMap['notes?archived=true'], stored.archivedNotes))
@@ -164,6 +167,7 @@ function AppContextInner({ children }) {
                 }
                 case 'journal': setJournal(data); break
                 case 'resources': setResources(data); break
+                case 'blocks/media': setMedia(data); break
                 default: break
             }
         } catch (err) {
@@ -187,6 +191,7 @@ function AppContextInner({ children }) {
             setJournal(stored.journal || [])
             setAreas(stored.areas || safeGetStorage('sbt_areas') || safeGetStorage('areas') || [])
             setResources(stored.resources || [])
+            setMedia(stored.media || [])
             setArchive(stored.archive || safeGetStorage('sbt_archive') || safeGetStorage('archive') || [])
         } else {
             setTasks(safeGetStorage('sbt_tasks') || safeGetStorage('tasks') || [])
@@ -218,10 +223,11 @@ function AppContextInner({ children }) {
             journal,
             areas,
             resources,
+            media,
             archive
         })
         safeSetStorage('viewPreferences', viewPreferences)
-    }, [tasks, projects, goals, notes, archivedNotes, deletedNotes, journal, areas, resources, archive, viewPreferences, loading, isInitialized])
+    }, [tasks, projects, goals, notes, archivedNotes, deletedNotes, journal, areas, resources, media, archive, viewPreferences, loading, isInitialized])
 
     const apiCall = useCallback(async (method, url, body) => {
         const res = await fetch(url, {
@@ -443,14 +449,16 @@ function AppContextInner({ children }) {
         addBlock,
         updateBlock,
         deleteBlock,
-        bulkUpdateBlocks
+        bulkUpdateBlocks,
+        media,
+        fetchMedia: () => fetchEndpoint('blocks/media')
     }), [
         tasks, projects, goals, notes, journal, areas, resources, archive,
         viewPreferences, sidebarCollapsed, loading, session, isAuthenticated,
         taskCRUD, projectCRUD, goalCRUD, noteCRUD, journalCRUD, resourceCRUD,
         fetchEndpoint, archiveNote, recycleNote, restoreNote, deleteNotePermanently,
         archivedNotes, deletedNotes, activeBlocks, fetchEntity, fetchBlocks,
-        addBlock, updateBlock, deleteBlock, bulkUpdateBlocks
+        addBlock, updateBlock, deleteBlock, bulkUpdateBlocks, media
     ])
 
     return <AppContext.Provider value={value}>{children}</AppContext.Provider>

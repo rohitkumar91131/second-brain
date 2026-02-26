@@ -8,31 +8,19 @@ import Link from 'next/link'
 import Loader from '@/components/ui/Loader'
 
 export default function MediaBankPage() {
-    const { notes, addNote, fetchEndpoint, loading } = useApp()
+    const { media, fetchMedia, addNote, loading } = useApp()
     const [search, setSearch] = useState('')
 
     useEffect(() => {
-        if (!notes || notes.length === 0) fetchEndpoint('notes')
-    }, [notes, fetchEndpoint])
+        fetchMedia()
+    }, [fetchMedia])
 
-    // Extract all media blocks from all notes
-    const mediaItems = notes.flatMap(note => {
-        return (note.content || [])
-            .filter(block => ['image', 'video', 'audio'].includes(block.type) && block.content)
-            .map(block => ({
-                ...block,
-                noteId: note.id,
-                noteTitle: note.title,
-                updatedAt: note.updatedAt
-            }))
-    }).sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
-
-    const filteredMedia = mediaItems.filter(item =>
+    const filteredMedia = (media || []).filter(item =>
         item.noteTitle?.toLowerCase().includes(search.toLowerCase()) ||
-        item.type.toLowerCase().includes(search.toLowerCase())
+        item.type?.toLowerCase().includes(search.toLowerCase())
     )
 
-    if (loading && notes.length === 0) {
+    if (loading && (!media || media.length === 0)) {
         return (
             <div className="flex items-center justify-center h-full">
                 <Loader />
@@ -61,9 +49,9 @@ export default function MediaBankPage() {
                         if (result.info?.secure_url) {
                             addNote({
                                 title: `Media - ${new Date().toLocaleDateString()}`,
-                                content: [
-                                    { id: `m-${Date.now()}`, type: 'image', content: result.info.secure_url },
-                                    { id: `p-${Date.now()}`, type: 'paragraph', content: 'Uploaded to Media Bank' }
+                                blocks: [
+                                    { id: `b-${Date.now()}`, type: 'image', content: result.info.secure_url, order: 0 },
+                                    { id: `b-${Date.now() + 1}`, type: 'paragraph', content: 'Uploaded to Media Bank', order: 1 }
                                 ]
                             })
                         }
@@ -89,32 +77,32 @@ export default function MediaBankPage() {
                             <p className="text-sm font-medium text-[#9b9a97]">No media found. Upload your first item!</p>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                        <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-4 space-y-4">
                             {filteredMedia.map((item, idx) => (
-                                <div key={`${item.noteId}-${idx}`} className="group bg-white rounded-xl border border-[#e9e9e7] overflow-hidden hover:shadow-lg transition-all flex flex-col">
-                                    <div className="aspect-square relative flex items-center justify-center bg-[#f7f7f5]">
+                                <div key={`${item.id}-${idx}`} className="group bg-white rounded-xl border border-[#e9e9e7] overflow-hidden hover:shadow-lg transition-all flex flex-col break-inside-avoid">
+                                    <div className={`relative flex items-center justify-center bg-[#f7f7f5] ${item.type === 'video' ? 'aspect-video' : 'aspect-auto'}`}>
                                         {item.type === 'image' && (
-                                            <img src={item.content} alt={item.noteTitle} className="w-full h-full object-cover" />
+                                            <img src={item.content} alt={item.noteTitle} className="w-full h-auto object-contain" />
                                         )}
                                         {item.type === 'video' && (
-                                            <div className="flex flex-col items-center gap-2">
+                                            <div className="w-full h-full flex flex-col items-center justify-center gap-2">
                                                 <Video size={40} className="text-[#9b9a97]" />
                                                 <span className="text-[10px] font-bold text-[#9b9a97] uppercase">Video Embed</span>
                                             </div>
                                         )}
                                         {item.type === 'audio' && (
-                                            <div className="flex flex-col items-center gap-2">
+                                            <div className="w-full h-24 flex flex-col items-center justify-center gap-2">
                                                 <Music size={40} className="text-[#9b9a97]" />
                                                 <span className="text-[10px] font-bold text-[#9b9a97] uppercase">Audio Embed</span>
                                             </div>
                                         )}
                                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                                            <Link href={`/dashboard/notes/${item.noteId}`} className="p-2 bg-white rounded-full hover:scale-110 transition-transform text-[#37352f]" title="Open Note">
+                                            <Link href={`/dashboard/notes/${item.entityId}`} className="p-2 bg-white rounded-full hover:scale-110 transition-transform text-[#37352f]" title="Open Note">
                                                 <ExternalLink size={16} />
                                             </Link>
                                         </div>
                                     </div>
-                                    <div className="p-3">
+                                    <div className="p-3 bg-white">
                                         <p className="text-xs font-semibold text-[#37352f] truncate mb-1">{item.noteTitle}</p>
                                         <div className="flex items-center justify-between">
                                             <span className="flex items-center gap-1 text-[10px] font-bold text-[#9b9a97] uppercase tracking-widest">
