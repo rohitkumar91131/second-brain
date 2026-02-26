@@ -7,9 +7,10 @@ import { Plus, FileText, Search, Trash2 } from 'lucide-react'
 import { format } from 'date-fns'
 import QuickAddModal from '@/components/ui/QuickAddModal'
 import LoadingScreen from '@/components/ui/LoadingScreen'
+import ContextNoteCard from '@/components/ui/ContextNoteCard'
 
 export default function NotesPage() {
-    const { notes, deleteNote, loading, projects, fetchEndpoint } = useApp()
+    const { notes, archiveNote, recycleNote, loading, projects, fetchEndpoint } = useApp()
     const [search, setSearch] = useState('')
     const [showAdd, setShowAdd] = useState(false)
 
@@ -25,6 +26,31 @@ export default function NotesPage() {
         n.title?.toLowerCase().includes(search.toLowerCase()) ||
         n.tags?.some(t => t.toLowerCase().includes(search.toLowerCase()))
     )
+
+    const handlePdfContent = (note) => {
+        const preview = note.preview || ''
+        const html = `<html><head><title>${note.title}</title><style>body{font-family:sans-serif;padding:40px;line-height:1.6}h1{font-size:32px;margin-bottom:20px}p{font-size:16px;margin:10px 0;color:#333}</style></head><body><h1>${note.title}</h1><p>${preview}</p><p style="margin-top:50px;font-size:12px;color:grey;">Exported from Second Brain</p><script>window.onload=function(){window.print()}</script></body></html>`
+        const win = window.open('', '_blank')
+        win.document.write(html)
+        win.document.close()
+    }
+
+    const handleShare = (note) => {
+        if (navigator.share) {
+            navigator.share({
+                title: note.title,
+                text: 'Check out this note on Second Brain Tracker.',
+                url: window.location.href + '/' + note.id,
+            }).catch(() => { })
+        } else {
+            alert('Share copied to clipboard!')
+            navigator.clipboard.writeText(window.location.href + '/' + note.id)
+        }
+    }
+
+    const handleArchive = async (noteId) => {
+        await archiveNote(noteId)
+    }
 
     return (
         <div className="flex flex-col h-full">
@@ -59,11 +85,17 @@ export default function NotesPage() {
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                         {filtered.map(note => (
-                            <NoteCard
+                            <ContextNoteCard
                                 key={note.id}
                                 note={note}
                                 project={projects?.find(p => p.id === note.projectId)}
-                                onDelete={deleteNote}
+                                onUpdate={(id, updates) => updateNote(id, updates)}
+                                onDelete={async (id) => {
+                                    await recycleNote(id)
+                                }}
+                                onArchive={handleArchive}
+                                onPdf={handlePdfContent}
+                                onShare={handleShare}
                             />
                         ))}
                     </div>
@@ -76,59 +108,6 @@ export default function NotesPage() {
                     onClose={() => setShowAdd(false)}
                 />
             )}
-        </div>
-    )
-}
-
-function NoteCard({ note, project, onDelete }) {
-    const preview =
-        note.content?.find(
-            b => b.type === 'paragraph' && b.content
-        )?.content || ''
-
-    return (
-        <div className="group relative border border-[#e9e9e7] rounded-xl p-4 bg-white hover:shadow-md transition-all">
-
-            <Link href={`/dashboard/notes/${note.id}`} className="block">
-                <h3 className="text-sm font-semibold text-[#37352f] mb-1 truncate">
-                    {project ? `${note.title} / ${project.title}` : note.title}
-                </h3>
-
-                {preview && (
-                    <p className="text-xs text-[#9b9a97] line-clamp-2 mb-2">
-                        {preview}
-                    </p>
-                )}
-
-                <div className="flex items-center justify-between mt-2">
-                    <div className="flex flex-wrap gap-1">
-                        {note.tags?.slice(0, 2).map(tag => (
-                            <span
-                                key={tag}
-                                className="px-1.5 py-0.5 bg-[#f1f1ef] text-[#787774] text-[10px] rounded"
-                            >
-                                {tag}
-                            </span>
-                        ))}
-                    </div>
-
-                    <span className="text-[10px] text-[#9b9a97]">
-                        {note.updatedAt
-                            ? format(new Date(note.updatedAt), 'MMM d')
-                            : ''}
-                    </span>
-                </div>
-            </Link>
-
-            <button
-                onClick={(e) => {
-                    e.preventDefault()
-                    onDelete(note.id)
-                }}
-                className="absolute top-2 right-2 p-1 rounded hover:bg-red-50 text-red-400"
-            >
-                <Trash2 size={12} />
-            </button>
         </div>
     )
 }

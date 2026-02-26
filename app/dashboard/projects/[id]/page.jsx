@@ -8,13 +8,14 @@ import { Calendar, FileText, CheckSquare, ChevronLeft, ChevronRight, Plus, Save,
 import Link from 'next/link'
 import QuickAddModal from '@/components/ui/QuickAddModal'
 import BlockEditor from '@/components/editor/BlockEditor'
+import Loader from '@/components/ui/Loader'
 
 export default function ProjectDetailPage() {
     const params = useParams()
     const router = useRouter()
     const projectId = params.id
     const { projects, tasks, notes, addTask, updateTask, deleteTask, loading, updateNote, deleteNote, fetchEndpoint } = useApp()
-    
+
     const [selectedDate, setSelectedDate] = useState(new Date())
     const [project, setProject] = useState(null)
     const [projectsLoaded, setProjectsLoaded] = useState(false)
@@ -26,6 +27,7 @@ export default function ProjectDetailPage() {
     const [noteBlocks, setNoteBlocks] = useState([])
     const [isSaving, setIsSaving] = useState(false)
     const [lastSaved, setLastSaved] = useState(null)
+    const [notFoundDelay, setNotFoundDelay] = useState(false)
 
     // Ensure projects, tasks and notes are loaded when opening a project detail
     useEffect(() => {
@@ -43,6 +45,11 @@ export default function ProjectDetailPage() {
         if (projectsLoaded) {
             const foundProject = projects.find(p => p.id === projectId)
             setProject(foundProject)
+            if (foundProject) setNotFoundDelay(false)
+            else {
+                const timer = setTimeout(() => setNotFoundDelay(true), 400)
+                return () => clearTimeout(timer)
+            }
         }
     }, [projects, projectId, projectsLoaded])
 
@@ -103,7 +110,7 @@ export default function ProjectDetailPage() {
 
     const handleTaskToggle = async (taskId, completed) => {
         try {
-            const updated = await updateTask(taskId, { 
+            const updated = await updateTask(taskId, {
                 completed: !completed,
                 status: !completed ? 'Done' : 'Not Started'
             })
@@ -152,17 +159,13 @@ export default function ProjectDetailPage() {
 
     if (loading || !projectsLoaded) {
         return (
-            <div className="flex items-center justify-center h-full relative overflow-hidden">
-                <div className="absolute inset-0 flex">
-                    <div className="relative w-full h-1 loading-bar-animation">
-                        <div className="w-1 h-1 bg-[#2eaadc] rounded-full"></div>
-                    </div>
-                </div>
-<LoaderIcon className="w-6 h-6 text-[#000000] animate-spin" />            </div>
+            <div className="flex items-center justify-center h-full w-full relative overflow-hidden bg-white/50 backdrop-blur-sm z-50">
+                <Loader />
+            </div>
         )
     }
 
-    if (!project) {
+    if (!project && notFoundDelay) {
         return (
             <div className="flex flex-col items-center justify-center h-full">
                 <div className="text-[#9b9a97] mb-4">Project not found</div>
@@ -173,12 +176,20 @@ export default function ProjectDetailPage() {
         )
     }
 
+    if (!project && !notFoundDelay) {
+        return (
+            <div className="flex flex-col items-center justify-center h-full">
+                <Loader />
+            </div>
+        )
+    }
+
     // If a note is selected, show the note editor
     if (selectedNote) {
         return (
             <div className="flex flex-col h-full bg-white">
                 <div className="flex items-center gap-3 px-6 py-3 border-b border-[#e9e9e7] bg-white/80 backdrop-blur-md z-10">
-                    <button 
+                    <button
                         onClick={handleCloseNote}
                         className="p-1.5 rounded-lg hover:bg-[#efefef] text-[#9b9a97] hover:text-[#37352f] transition-all"
                     >
@@ -254,7 +265,7 @@ export default function ProjectDetailPage() {
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-[#e9e9e7]">
                 <div className="flex items-center gap-3">
-                    <Link 
+                    <Link
                         href="/dashboard/projects"
                         className="p-1.5 hover:bg-[#f0f0ee] rounded-md transition-colors"
                     >
@@ -416,11 +427,10 @@ export default function ProjectDetailPage() {
                                     >
                                         <button
                                             onClick={() => handleTaskToggle(task.id, task.completed)}
-                                            className={`w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-all ${
-                                                task.completed
+                                            className={`w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-all ${task.completed
                                                     ? 'bg-green-500 border-green-500'
                                                     : 'border-[#d3d1cb] group-hover:border-[#37352f]'
-                                            }`}
+                                                }`}
                                         >
                                             {task.completed && (
                                                 <svg
@@ -440,23 +450,21 @@ export default function ProjectDetailPage() {
                                         </button>
                                         <div className="flex-1 min-w-0">
                                             <p
-                                                className={`text-sm font-medium truncate ${
-                                                    task.completed
+                                                className={`text-sm font-medium truncate ${task.completed
                                                         ? 'line-through text-[#9b9a97]'
                                                         : 'text-[#37352f]'
-                                                }`}
+                                                    }`}
                                             >
                                                 {task.title}
                                             </p>
                                             {task.priority && (
                                                 <span
-                                                    className={`text-xs font-medium mt-1 inline-block px-2 py-0.5 rounded ${
-                                                        task.priority === 'High'
+                                                    className={`text-xs font-medium mt-1 inline-block px-2 py-0.5 rounded ${task.priority === 'High'
                                                             ? 'bg-red-100 text-red-700'
                                                             : task.priority === 'Medium'
-                                                            ? 'bg-yellow-100 text-yellow-700'
-                                                            : 'bg-green-100 text-green-700'
-                                                    }`}
+                                                                ? 'bg-yellow-100 text-yellow-700'
+                                                                : 'bg-green-100 text-green-700'
+                                                        }`}
                                                 >
                                                     {task.priority}
                                                 </span>
@@ -540,10 +548,10 @@ export default function ProjectDetailPage() {
 
             {/* Add Task Modal */}
             {showAddTask && (
-                <QuickAddModal 
-                    defaultType="task" 
+                <QuickAddModal
+                    defaultType="task"
                     onClose={() => setShowAddTask(false)}
-                    prefilledData={{ 
+                    prefilledData={{
                         projectId,
                         projectName: project?.title,
                         date: selectedDate
@@ -553,10 +561,10 @@ export default function ProjectDetailPage() {
 
             {/* Add Note Modal */}
             {showAddNote && (
-                <QuickAddModal 
-                    defaultType="note" 
+                <QuickAddModal
+                    defaultType="note"
                     onClose={() => setShowAddNote(false)}
-                    prefilledData={{ 
+                    prefilledData={{
                         projectId,
                         projectName: project?.title,
                         date: selectedDate

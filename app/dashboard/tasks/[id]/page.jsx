@@ -5,6 +5,8 @@ import { useParams, useRouter } from 'next/navigation'
 import { useApp } from '@/context/AppContext'
 import { format, subDays, eachDayOfInterval, parseISO, differenceInCalendarDays } from 'date-fns'
 import { ChevronLeft, Loader2 } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import Loader from '@/components/ui/Loader'
 
 function formatDate(d) {
     return format(d, 'yyyy-MM-dd')
@@ -50,6 +52,16 @@ export default function TaskDetailPage() {
 
     const history = task?.history || []
     const historySet = useMemo(() => new Set(history), [history])
+    const [notFoundDelay, setNotFoundDelay] = useState(false)
+
+    useEffect(() => {
+        if (!loading && !task) {
+            const t = setTimeout(() => setNotFoundDelay(true), 400)
+            return () => clearTimeout(t)
+        } else if (task) {
+            setNotFoundDelay(false)
+        }
+    }, [loading, task])
 
     const days = useMemo(() => {
         const end = new Date()
@@ -89,16 +101,24 @@ export default function TaskDetailPage() {
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center h-full">
-                <Loader2 className="w-6 h-6 animate-spin text-[#9b9a97]" />
+            <div className="flex items-center justify-center h-full w-full relative overflow-hidden bg-white/50 backdrop-blur-sm z-50">
+                <Loader />
             </div>
         )
     }
 
-    if (!task) {
+    if (!task && notFoundDelay) {
+        return (
+            <div className="flex items-center justify-center h-full text-[#9b9a97]">
+                Task not found
+            </div>
+        )
+    }
+
+    if (!task && !notFoundDelay) {
         return (
             <div className="flex items-center justify-center h-full">
-                <div className="text-[#9b9a97]">Task not found</div>
+                <Loader />
             </div>
         )
     }

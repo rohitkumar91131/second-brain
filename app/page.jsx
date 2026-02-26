@@ -1,12 +1,21 @@
 'use client'
 
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
-import { Brain, ArrowRight, CheckCircle2, Zap, Shield, Sparkles, Loader2, Download, Monitor, Apple, Terminal, Smartphone, Tablet } from 'lucide-react'
+import { Brain, ArrowRight, CheckCircle2, Zap, Shield, Sparkles, Loader2, Download, Monitor, Apple, Terminal, Smartphone, Tablet, Menu, X } from 'lucide-react'
 
 export default function LandingPage() {
     const { status } = useSession()
+    const router = useRouter()
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+
+    useEffect(() => {
+        if (localStorage.getItem('setting_homepage_dashboard') === 'true') {
+            router.push('/dashboard')
+        }
+    }, [router])
 
     return (
         <div className="min-h-screen bg-[#ffffff] text-[#37352f] overflow-x-hidden">
@@ -48,16 +57,53 @@ export default function LandingPage() {
                             </>
                         )}
                     </div>
+
+                    {/* Mobile Menu Toggle */}
+                    <button
+                        className="md:hidden p-2 text-[#37352f] z-[60]"
+                        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                    >
+                        {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+                    </button>
                 </div>
+
+                {/* Mobile Menu Dropdown */}
+                {mobileMenuOpen && (
+                    <div className="md:hidden absolute top-16 left-0 w-full bg-white border-b border-[#e9e9e7] shadow-lg py-4 px-6 flex flex-col gap-4 text-sm font-medium z-50 animate-fade-in">
+                        <a href="#features" onClick={() => setMobileMenuOpen(false)} className="py-2 hover:text-[#2eaadc] transition-colors">Features</a>
+                        <a href="#about" onClick={() => setMobileMenuOpen(false)} className="py-2 hover:text-[#2eaadc] transition-colors">About</a>
+                        <Link href="/downloads" onClick={() => setMobileMenuOpen(false)} className="py-2 hover:text-[#2eaadc] transition-colors">Downloads</Link>
+                        <div className="h-px bg-[#e9e9e7] my-2" />
+                        {status === 'loading' ? (
+                            <div className="flex justify-center py-2">
+                                <Loader2 size={18} className="animate-spin text-[#9b9a97]" />
+                            </div>
+                        ) : status === 'authenticated' ? (
+                            <Link
+                                href="/dashboard"
+                                className="text-center py-3 bg-[#37352f] text-white rounded-xl shadow-md"
+                            >
+                                Dashboard
+                            </Link>
+                        ) : (
+                            <div className="flex flex-col gap-3">
+                                <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="text-center py-3 border border-[#e9e9e7] rounded-xl hover:bg-[#f7f7f5] transition-colors">Login</Link>
+                                <Link
+                                    href="/register"
+                                    className="text-center py-3 bg-[#37352f] text-white rounded-xl shadow-md"
+                                >
+                                    Get Started
+                                </Link>
+                            </div>
+                        )}
+                    </div>
+                )}
             </nav>
 
             {/* Hero Section */}
             <section className="pt-32 pb-20 px-6">
                 <div className="max-w-5xl mx-auto text-center">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-600 text-xs font-semibold mb-6 animate-fade-in">
-                        <Sparkles size={12} />
-                        <span>AI-Powered Life Management</span>
-                    </div>
+                    {/* Tag removed */}
 
                     <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-8 leading-[1.1]">
                         Build your <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">Digital Second Brain</span>
@@ -92,9 +138,9 @@ export default function LandingPage() {
                                 <div className="w-2.5 h-2.5 rounded-full bg-[#28c840]" />
                             </div>
                             <img
-                                src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80"
-                                alt="App Screenshot"
-                                className="w-full h-auto opacity-90"
+                                src="/promo.gif"
+                                alt="App Promo GIF"
+                                className="w-full h-auto opacity-100 object-cover"
                             />
                         </div>
                     </div>
@@ -129,16 +175,7 @@ export default function LandingPage() {
                 </div>
             </section>
 
-            {/* Social Proof / Trust */}
-            <section className="py-20 text-center">
-                <h3 className="text-xs font-bold uppercase tracking-widest text-[#9b9a97] mb-8">Trusted by productive individuals</h3>
-                <div className="flex flex-wrap justify-center items-center gap-12 opacity-50 grayscale">
-                    <span className="font-bold text-xl tracking-tighter italic">NOTION-ISH</span>
-                    <span className="font-bold text-xl tracking-tighter">SECOND BRAIN</span>
-                    <span className="font-bold text-xl tracking-tighter">HABIT TRACKER</span>
-                    <span className="font-bold text-xl tracking-tighter italic">PRODUCTIVE</span>
-                </div>
-            </section>
+            {/* Social Proof Section Removed */}
 
             {/* Downloads Section */}
             <section id="downloads" className="py-24 px-6">

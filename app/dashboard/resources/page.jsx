@@ -5,7 +5,8 @@ import { useApp } from '@/context/AppContext'
 import ViewSwitcher from '@/components/views/ViewSwitcher'
 import TableView from '@/components/views/TableView'
 import ListView from '@/components/views/ListView'
-import { Plus, BookOpen, ExternalLink, Trash2, LoaderIcon } from 'lucide-react'
+import { Plus, BookOpen, ExternalLink, Trash2 } from 'lucide-react'
+import Loader from '@/components/ui/Loader'
 import Modal from '@/components/ui/Modal'
 
 const COLUMNS = [
@@ -46,13 +47,9 @@ export default function ResourcesPage() {
 
     if (isLoading) {
         return (
-            <div className="flex items-center justify-center h-full relative overflow-hidden">
-                <div className="absolute inset-0 flex">
-                    <div className="relative w-full h-1 loading-bar-animation">
-                        <div className="w-1 h-1 bg-[#2eaadc] rounded-full"></div>
-                    </div>
-                </div>
-<LoaderIcon className="w-6 h-6 text-[#000000] animate-spin" />            </div>
+            <div className="flex items-center justify-center h-full w-full relative overflow-hidden bg-white/50 backdrop-blur-sm z-50">
+                <Loader />
+            </div>
         )
     }
 

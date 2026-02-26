@@ -9,7 +9,8 @@ import CalendarView from '@/components/views/CalendarView'
 import ListView from '@/components/views/ListView'
 import QuickAddModal from '@/components/ui/QuickAddModal'
 import ProgressBar from '@/components/properties/ProgressBar'
-import { Plus, LoaderIcon } from 'lucide-react'
+import { Plus } from 'lucide-react'
+import Loader from '@/components/ui/Loader'
 
 const COLUMNS = [
     { key: 'title', label: 'Title', type: 'text', width: 250 },
@@ -40,13 +41,9 @@ export default function GoalsPage() {
 
     if (isLoading) {
         return (
-            <div className="flex items-center justify-center h-full relative overflow-hidden">
-                <div className="absolute inset-0 flex">
-                    <div className="relative w-full h-1 loading-bar-animation">
-                        <div className="w-1 h-1 bg-[#2eaadc] rounded-full"></div>
-                    </div>
-                </div>
-<LoaderIcon className="w-6 h-6 text-[#000000] animate-spin" />            </div>
+            <div className="flex items-center justify-center h-full w-full relative overflow-hidden bg-white/50 backdrop-blur-sm z-50">
+                <Loader />
+            </div>
         )
     }
 

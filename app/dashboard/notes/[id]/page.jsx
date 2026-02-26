@@ -7,13 +7,23 @@ import BlockEditor from '@/components/editor/BlockEditor'
 import { ArrowLeft, Trash2, FileText, Save } from 'lucide-react'
 import Link from 'next/link'
 import { format } from 'date-fns'
+import Loader from '@/components/ui/Loader'
 
 export default function NoteEditorPage() {
     const { id } = useParams()
     const router = useRouter()
-    const { notes, updateNote, deleteNote, loading, projects, fetchEndpoint } = useApp()
+    const {
+        notes, updateNote, deleteNote, loading, projects, fetchEndpoint,
+        activeBlocks, fetchBlocks, bulkUpdateBlocks, setActiveBlocks, fetchEntity
+    } = useApp()
 
     const note = notes.find(n => n.id === id)
+
+    useEffect(() => {
+        if (id && !note) {
+            fetchEntity('Note', id).catch(e => console.error('Fetch note failed', e))
+        }
+    }, [id, note, fetchEntity])
     const project = projects?.find(p => p.id === note?.projectId)
 
     // Ensure projects are loaded when this note belongs to a project
@@ -24,26 +34,75 @@ export default function NoteEditorPage() {
     }, [note?.projectId, projects, fetchEndpoint])
 
     const [title, setTitle] = useState('')
-    const [blocks, setBlocks] = useState([])
     const [isSaving, setIsSaving] = useState(false)
     const [lastSaved, setLastSaved] = useState(null)
     const [ready, setReady] = useState(false)
+    const [notFoundDelay, setNotFoundDelay] = useState(false)
+
+    const [initialized, setInitialized] = useState(false)
 
     useEffect(() => {
-        if (!loading && note) {
-            setTitle(note.title || '')
-            setBlocks(note.content || [{ id: 'b1', type: 'paragraph', content: '' }])
-            setLastSaved(note.updatedAt)
-            setTimeout(() => setReady(true), 50)
+        if (id) fetchBlocks(id, 'Note')
+    }, [id, fetchBlocks])
+
+    useEffect(() => {
+        if (!loading && note && !initialized) {
+            const draftStr = localStorage.getItem(`note_draft_${id}`)
+            if (draftStr) {
+                try {
+                    const draft = JSON.parse(draftStr)
+                    setTitle(draft.title || note.title || '')
+                    if (draft.blocks && draft.blocks.length > 0) {
+                        setActiveBlocks(draft.blocks)
+                    } else if (activeBlocks.length === 0) {
+                        // Keep current or wait for fetch
+                    }
+                    setLastSaved('Draft (Unsaved)')
+                } catch (e) {
+                    setTitle(note.title || '')
+                }
+            } else {
+                setTitle(note.title || '')
+                setLastSaved(note.updatedAt)
+            }
+
+            setInitialized(true)
+            setTimeout(() => setReady(true), 100)
+            setNotFoundDelay(false)
+        } else if (!loading && !note) {
+            const timer = setTimeout(() => { setNotFoundDelay(true) }, 400)
+            return () => clearTimeout(timer)
         }
-    }, [note, loading])
+    }, [note, loading, id, initialized])
+
+    // Ensure at least one block if loading is done and none exist
+    useEffect(() => {
+        if (initialized && activeBlocks?.length === 0 && !loading) {
+            setActiveBlocks([{ id: `b-init-${Date.now()}`, type: 'paragraph', content: '' }])
+        }
+    }, [initialized, activeBlocks?.length, loading, setActiveBlocks])
+
+    useEffect(() => {
+        if (ready) {
+            localStorage.setItem(`note_draft_${id}`, JSON.stringify({ title, blocks: activeBlocks }))
+        }
+    }, [title, activeBlocks, ready, id])
 
     const handleSave = async () => {
         if (!note) return
         setIsSaving(true)
-        await updateNote(id, { title, content: blocks })
-        setLastSaved(new Date())
-        setIsSaving(false)
+        try {
+            await Promise.all([
+                updateNote(id, { title }),
+                bulkUpdateBlocks(id, 'Note', activeBlocks)
+            ])
+            localStorage.removeItem(`note_draft_${id}`)
+            setLastSaved(new Date())
+        } catch (err) {
+            console.error('Save failed', err)
+        } finally {
+            setIsSaving(false)
+        }
     }
 
     // Save on Ctrl/Cmd+S
@@ -56,7 +115,7 @@ export default function NoteEditorPage() {
         }
         window.addEventListener('keydown', onKey)
         return () => window.removeEventListener('keydown', onKey)
-    }, [title, blocks, note])
+    }, [title, activeBlocks, note])
 
     const handleDelete = () => {
         deleteNote(id)
@@ -68,23 +127,13 @@ export default function NoteEditorPage() {
 
             {/* Skeleton */}
             {loading && (
-                <div className="absolute inset-0 animate-pulse transition-opacity duration-300">
-                    <div className="h-14 border-b border-[#e9e9e7] bg-[#f5f5f5]" />
-                    <div className="flex-1 py-12 px-6 bg-[#fcfcfc]">
-                        <div className="max-w-3xl mx-auto">
-                            <div className="h-12 bg-[#e5e5e5] rounded w-2/3 mb-10" />
-                            <div className="space-y-4">
-                                <div className="h-4 bg-[#e5e5e5] rounded w-full" />
-                                <div className="h-4 bg-[#e5e5e5] rounded w-5/6" />
-                                <div className="h-4 bg-[#e5e5e5] rounded w-4/6" />
-                            </div>
-                        </div>
-                    </div>
+                <div className="absolute inset-0 flex items-center justify-center bg-white/50 backdrop-blur-sm z-50">
+                    <Loader />
                 </div>
             )}
 
             {/* Not Found */}
-            {!loading && !note && (
+            {!loading && !note && notFoundDelay && (
                 <div className="flex items-center justify-center h-full transition-opacity duration-300 opacity-100">
                     <div className="text-center">
                         <p className="text-[#9b9a97] text-sm mb-3 font-medium">
@@ -100,9 +149,8 @@ export default function NoteEditorPage() {
             {/* Main Content */}
             {!loading && note && (
                 <div
-                    className={`flex flex-col h-full transition-all duration-300 ease-out ${
-                        ready ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'
-                    }`}
+                    className={`flex flex-col h-full transition-all duration-300 ease-out ${ready ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'
+                        }`}
                 >
                     <div className="flex items-center gap-3 px-6 py-3 border-b border-[#e9e9e7] bg-white/80 backdrop-blur-md z-10">
                         <Link href="/dashboard/notes" className="p-1.5 rounded-lg hover:bg-[#efefef] text-[#9b9a97] hover:text-[#37352f] transition-all">
@@ -136,9 +184,11 @@ export default function NoteEditorPage() {
                                 <span className="text-[10px] font-bold text-[#9b9a97] uppercase tracking-tighter">
                                     {isSaving
                                         ? 'Saving...'
-                                        : lastSaved
-                                            ? `Saved ${format(new Date(lastSaved), 'h:mm a')}`
-                                            : 'Not saved'}
+                                        : lastSaved === 'Draft (Unsaved)'
+                                            ? 'Unsaved Draft'
+                                            : lastSaved
+                                                ? `Saved ${format(new Date(lastSaved), 'h:mm a')}`
+                                                : 'Not saved'}
                                 </span>
                             </div>
 
@@ -185,8 +235,8 @@ export default function NoteEditorPage() {
 
                             <div className="min-h-[60vh] pb-32">
                                 <BlockEditor
-                                    blocks={blocks}
-                                    onChange={setBlocks}
+                                    blocks={activeBlocks}
+                                    onChange={setActiveBlocks}
                                     isDiary={false}
                                 />
                             </div>

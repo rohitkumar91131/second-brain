@@ -1,9 +1,31 @@
 'use client'
 
-import { createContext, useContext, useState, useEffect, useCallback } from 'react'
+import { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react'
 import { SessionProvider, useSession } from 'next-auth/react'
-import { getStorage, setStorage } from '@/lib/storage'
-import { defaultData } from '@/lib/defaultData'
+// Commented out the potentially faulty storage functions
+// import { getStorage, setStorage } from '@/lib/storage'
+
+// --- Added Safe Storage Wrappers ---
+const safeGetStorage = (key) => {
+    if (typeof window === 'undefined') return null;
+    try {
+        const item = window.localStorage.getItem(key);
+        return item ? JSON.parse(item) : null;
+    } catch (e) {
+        console.error(`Error parsing local storage key "${key}":`, e);
+        return null;
+    }
+}
+
+const safeSetStorage = (key, value) => {
+    if (typeof window === 'undefined') return;
+    try {
+        window.localStorage.setItem(key, JSON.stringify(value));
+    } catch (e) {
+        console.error(`Error saving to local storage key "${key}":`, e);
+    }
+}
+// -----------------------------------
 
 const AppContext = createContext(null)
 
@@ -21,27 +43,45 @@ function AppContextInner({ children }) {
     const [projects, setProjects] = useState([])
     const [goals, setGoals] = useState([])
     const [notes, setNotes] = useState([])
+    const [archivedNotes, setArchivedNotes] = useState([])
+    const [deletedNotes, setDeletedNotes] = useState([])
     const [journal, setJournal] = useState([])
     const [areas, setAreas] = useState([])
     const [resources, setResources] = useState([])
     const [archive, setArchive] = useState([])
     const [viewPreferences, setViewPreferences] = useState({})
+    const [activeBlocks, setActiveBlocks] = useState([])
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
     const [loading, setLoading] = useState(true)
+    const [isInitialized, setIsInitialized] = useState(false)
+    const [activeFetches, setActiveFetches] = useState(0)
+
+    const startFetch = useCallback(() => {
+        setActiveFetches(prev => prev + 1)
+        setLoading(true)
+    }, [])
+
+    const endFetch = useCallback(() => {
+        setActiveFetches(prev => {
+            const next = Math.max(0, prev - 1)
+            if (next === 0) setLoading(false)
+            return next
+        })
+    }, [])
 
     useEffect(() => {
         if (status === 'loading') return
         if (isAuthenticated) fetchAllFromAPI()
         else loadFromLocalStorage()
     }, [status, isAuthenticated])
-    
+
     const fetchAllFromAPI = async () => {
-        setLoading(true)
+        startFetch()
         try {
             const pathname = typeof window !== 'undefined' ? window.location.pathname : '/'
             const pickEndpointsForPath = (p) => {
                 if (p.startsWith('/dashboard/tasks')) return ['tasks']
-                if (p.startsWith('/dashboard/notes')) return ['notes']
+                if (p.startsWith('/dashboard/notes')) return ['notes', 'notes?archived=true', 'notes?deleted=true']
                 if (p.startsWith('/dashboard/journal')) return ['journal']
                 if (p.startsWith('/dashboard/projects')) return ['projects']
                 if (p.startsWith('/dashboard/resources')) return ['resources']
@@ -50,62 +90,76 @@ function AppContextInner({ children }) {
             }
 
             const endpoints = pickEndpointsForPath(pathname)
-
             const profileRes = await fetch('/api/user/profile')
             const responses = await Promise.all(endpoints.map(e => fetch(`/api/${e}`)))
 
-            const data = await Promise.all(responses.map(r => r.json()))
-            const profile = await profileRes.json()
+            const results = await Promise.all(responses.map(async (r) => {
+                if (!r.ok) return null
+                return await r.json()
+            }))
+            const profile = profileRes.ok ? await profileRes.json() : {}
 
             const resultMap = {}
-            endpoints.forEach((e, i) => resultMap[e] = data[i] || [])
+            endpoints.forEach((e, i) => {
+                if (results[i]) resultMap[e] = results[i]
+            })
 
-            const stored = getStorage('appData')
-            const localNotes = stored?.notes || []
+            const stored = safeGetStorage('appData') || {}
 
-            if (resultMap.notes) {
-                const mergedNotesMap = new Map()
-                resultMap.notes.forEach(note => mergedNotesMap.set(note.id, note))
-                localNotes.forEach(note => mergedNotesMap.set(note.id, note))
-                setNotes(Array.from(mergedNotesMap.values()))
-            } else {
-                setNotes(localNotes.length ? localNotes : defaultData.notes)
+            const merge = (apiData, localData) => {
+                if (!apiData) return localData || []
+                const map = new Map()
+                if (localData) localData.forEach(i => i.id && map.set(i.id, i))
+                apiData.forEach(i => i.id && map.set(i.id, i))
+                return Array.from(map.values())
             }
 
-            setTasks(resultMap.tasks || (stored?.tasks || defaultData.tasks))
-            setProjects(resultMap.projects || (stored?.projects || defaultData.projects))
-            setGoals(resultMap.goals || (stored?.goals || defaultData.goals))
-            setJournal(resultMap.journal || (stored?.journal || defaultData.journal))
-            setResources(resultMap.resources || (stored?.resources || defaultData.resources || []))
-            setViewPreferences(profile.viewPreferences || {})
-            setAreas(getStorage('areas') || defaultData.areas)
-            setArchive(getStorage('archive') || [])
+            setTasks(merge(resultMap.tasks, stored.tasks))
+            setProjects(merge(resultMap.projects, stored.projects))
+            setGoals(merge(resultMap.goals, stored.goals))
+            setJournal(merge(resultMap.journal, stored.journal))
+            setResources(merge(resultMap.resources, stored.resources))
 
+            setNotes(merge(resultMap.notes, stored.notes))
+            if (resultMap['notes?archived=true']) setArchivedNotes(merge(resultMap['notes?archived=true'], stored.archivedNotes))
+            else setArchivedNotes(stored.archivedNotes || [])
+
+            if (resultMap['notes?deleted=true']) setDeletedNotes(merge(resultMap['notes?deleted=true'], stored.deletedNotes))
+            else setDeletedNotes(stored.deletedNotes || [])
+
+            setAreas(stored.areas || safeGetStorage('sbt_areas') || safeGetStorage('areas') || [])
+            setArchive(stored.archive || safeGetStorage('sbt_archive') || safeGetStorage('archive') || [])
+
+            if (profile.viewPreferences) setViewPreferences(profile.viewPreferences)
+            else if (safeGetStorage('viewPreferences')) setViewPreferences(safeGetStorage('viewPreferences'))
+
+            setIsInitialized(true)
         } catch (e) {
             console.error('fetchAllFromAPI failed, falling back to local data', e)
             loadFromLocalStorage()
         } finally {
-            setLoading(false)
+            endFetch()
         }
     }
 
     const fetchEndpoint = useCallback(async (endpoint) => {
         try {
-            setLoading(true)
+            startFetch()
             const res = await fetch(`/api/${endpoint}`)
             if (!res.ok) throw new Error('API error')
             const data = await res.json()
-            const stored = getStorage('appData')
             switch (endpoint) {
                 case 'tasks': setTasks(data); break
                 case 'projects': setProjects(data); break
                 case 'goals': setGoals(data); break
                 case 'notes': {
-                    const localNotes = stored?.notes || []
-                    const mergedNotesMap = new Map()
-                    (data || []).forEach(n => mergedNotesMap.set(n.id, n))
-                    localNotes.forEach(n => mergedNotesMap.set(n.id, n))
-                    setNotes(Array.from(mergedNotesMap.values()))
+                    const { searchParams } = new URL(res.url, window.location.origin)
+                    const isArchived = searchParams.get('archived') === 'true'
+                    const isDeleted = searchParams.get('deleted') === 'true'
+
+                    if (isDeleted) setDeletedNotes(data)
+                    else if (isArchived) setArchivedNotes(data)
+                    else setNotes(data)
                     break
                 }
                 case 'journal': setJournal(data); break
@@ -115,52 +169,59 @@ function AppContextInner({ children }) {
         } catch (err) {
             console.error('fetchEndpoint failed', endpoint, err)
         } finally {
-            setLoading(false)
+            endFetch()
         }
-    }, [])
+    }, [startFetch, endFetch])
 
     const loadFromLocalStorage = () => {
-        setLoading(true)
-        const stored = getStorage('appData')
+        startFetch()
+        const stored = safeGetStorage('appData')
 
         if (stored) {
             setTasks(stored.tasks || [])
             setProjects(stored.projects || [])
             setGoals(stored.goals || [])
             setNotes(stored.notes || [])
+            setArchivedNotes(stored.archivedNotes || [])
+            setDeletedNotes(stored.deletedNotes || [])
             setJournal(stored.journal || [])
-            setAreas(stored.areas || defaultData.areas)
+            setAreas(stored.areas || safeGetStorage('sbt_areas') || safeGetStorage('areas') || [])
             setResources(stored.resources || [])
-            setArchive(stored.archive || [])
+            setArchive(stored.archive || safeGetStorage('sbt_archive') || safeGetStorage('archive') || [])
         } else {
-            setTasks(defaultData.tasks)
-            setProjects(defaultData.projects)
-            setGoals(defaultData.goals)
-            setNotes(defaultData.notes)
-            setJournal(defaultData.journal)
-            setAreas(defaultData.areas)
-            setResources(defaultData.resources || [])
-            setArchive([])
+            setTasks(safeGetStorage('sbt_tasks') || safeGetStorage('tasks') || [])
+            setProjects(safeGetStorage('sbt_projects') || safeGetStorage('projects') || [])
+            setGoals(safeGetStorage('sbt_goals') || safeGetStorage('goals') || [])
+            setNotes(safeGetStorage('sbt_notes') || safeGetStorage('notes') || [])
+            setJournal(safeGetStorage('sbt_journal') || safeGetStorage('journal') || [])
+            setAreas(safeGetStorage('sbt_areas') || safeGetStorage('areas') || [])
+            setResources(safeGetStorage('sbt_resources') || safeGetStorage('resources') || [])
+            setArchive(safeGetStorage('sbt_archive') || safeGetStorage('archive') || [])
+            setArchivedNotes([])
+            setDeletedNotes([])
         }
 
-        setViewPreferences(getStorage('viewPreferences') || {})
-        setLoading(false)
+        setViewPreferences(safeGetStorage('viewPreferences') || safeGetStorage('sbt_settings') || {})
+        setIsInitialized(true)
+        endFetch()
     }
 
     useEffect(() => {
-        if (loading) return
-        setStorage('appData', {
+        if (!isInitialized || loading) return
+        safeSetStorage('appData', {
             tasks,
             projects,
             goals,
             notes,
+            archivedNotes,
+            deletedNotes,
             journal,
             areas,
             resources,
             archive
         })
-        setStorage('viewPreferences', viewPreferences)
-    }, [tasks, projects, goals, notes, journal, areas, resources, archive, viewPreferences, loading])
+        safeSetStorage('viewPreferences', viewPreferences)
+    }, [tasks, projects, goals, notes, archivedNotes, deletedNotes, journal, areas, resources, archive, viewPreferences, loading, isInitialized])
 
     const apiCall = useCallback(async (method, url, body) => {
         const res = await fetch(url, {
@@ -186,7 +247,7 @@ function AppContextInner({ children }) {
         return data
     }, [])
 
-    const makeCRUD = (setter, endpoint) => ({
+    const makeCRUD = useCallback((setter, endpoint) => ({
         add: async (item) => {
             if (isAuthenticated) {
                 const created = await apiCall('POST', `/api/${endpoint}`, item)
@@ -204,32 +265,26 @@ function AppContextInner({ children }) {
             }
         },
         update: async (id, updates) => {
-            // 1. Apply optimistic update immediately
             setter(prev => prev.map(i =>
                 i.id === id
                     ? { ...i, ...updates, updatedAt: new Date().toISOString() }
                     : i
             ))
-            
+
             if (isAuthenticated) {
                 try {
                     const updated = await apiCall('PUT', `/api/${endpoint}/${id}`, updates)
-                    
-                    // 2. Merge API response but prioritize the latest local state ('i').
-                    // This prevents slow API responses from overwriting newer user keystrokes/blocks.
-                    setter(prev => prev.map(i => 
-                        i.id === id 
-                            ? { ...updated, ...i } 
+                    setter(prev => prev.map(i =>
+                        i.id === id
+                            ? { ...updated, ...i }
                             : i
                     ))
                     return updated
                 } catch (error) {
                     console.error('Update failed:', error)
-                    // Keep the optimistic update visible on failure
                     return { ...updates, id }
                 }
             }
-
             return { ...updates, updatedAt: new Date().toISOString(), id }
         },
         delete: async (id) => {
@@ -242,16 +297,104 @@ function AppContextInner({ children }) {
             }
             setter(prev => prev.filter(i => i.id !== id))
         }
-    })
+    }), [apiCall, isAuthenticated])
 
-    const taskCRUD = makeCRUD(setTasks, 'tasks')
-    const projectCRUD = makeCRUD(setProjects, 'projects')
-    const goalCRUD = makeCRUD(setGoals, 'goals')
-    const noteCRUD = makeCRUD(setNotes, 'notes')
-    const journalCRUD = makeCRUD(setJournal, 'journal')
-    const resourceCRUD = makeCRUD(setResources, 'resources')
+    const taskCRUD = useMemo(() => makeCRUD(setTasks, 'tasks'), [makeCRUD])
+    const projectCRUD = useMemo(() => makeCRUD(setProjects, 'projects'), [makeCRUD])
+    const goalCRUD = useMemo(() => makeCRUD(setGoals, 'goals'), [makeCRUD])
+    const noteCRUD = useMemo(() => makeCRUD(setNotes, 'notes'), [makeCRUD])
+    const journalCRUD = useMemo(() => makeCRUD(setJournal, 'journal'), [makeCRUD])
+    const resourceCRUD = useMemo(() => makeCRUD(setResources, 'resources'), [makeCRUD])
 
-    const value = {
+    const archiveNote = useCallback(async (id) => {
+        await noteCRUD.update(id, { isArchived: true })
+        setNotes(prev => prev.filter(n => n.id !== id))
+    }, [noteCRUD])
+
+    const recycleNote = useCallback(async (id) => {
+        await noteCRUD.update(id, { deletedAt: new Date().toISOString() })
+        setNotes(prev => prev.filter(n => n.id !== id))
+        setArchivedNotes(prev => prev.filter(n => n.id !== id))
+    }, [noteCRUD])
+
+    const restoreNote = useCallback(async (id) => {
+        await noteCRUD.update(id, { deletedAt: null, isArchived: false })
+        setDeletedNotes(prev => prev.filter(n => n.id !== id))
+        setArchivedNotes(prev => prev.filter(n => n.id !== id))
+    }, [noteCRUD])
+
+    const deleteNotePermanently = useCallback(async (id) => {
+        await noteCRUD.delete(id)
+        setDeletedNotes(prev => prev.filter(n => n.id !== id))
+    }, [noteCRUD])
+
+    const fetchEntity = useCallback(async (entityType, entityId) => {
+        const endpoint = entityType === 'Note' ? 'notes' : 'journal'
+        const item = await apiCall('GET', `/api/${endpoint}/${entityId}`)
+        if (entityType === 'Note') {
+            setNotes(prev => {
+                const exists = prev.find(n => n.id === entityId)
+                if (exists) return prev.map(n => n.id === entityId ? item : n)
+                return [item, ...prev]
+            })
+        } else {
+            setJournal(prev => {
+                const exists = prev.find(j => j.id === entityId)
+                if (exists) return prev.map(j => j.id === entityId ? item : j)
+                return [item, ...prev]
+            })
+        }
+        return item
+    }, [apiCall])
+
+    const fetchBlocks = useCallback(async (entityId, entityType = 'Note') => {
+        const endpoint = entityType === 'Note' ? 'notes' : 'journal'
+        const blocks = await apiCall('GET', `/api/${endpoint}/${entityId}/blocks`)
+        setActiveBlocks(blocks)
+        return blocks
+    }, [apiCall])
+
+    const addBlock = useCallback(async (entityId, entityType, blockData) => {
+        const block = await apiCall('POST', '/api/blocks', { ...blockData, entityId, entityType })
+        setActiveBlocks(prev => [...prev, block].sort((a, b) => a.order - b.order))
+        return block
+    }, [apiCall])
+
+    const updateBlock = useCallback(async (blockId, updates) => {
+        setActiveBlocks(prev => prev.map(b => b.id === blockId ? { ...b, ...updates } : b))
+        try {
+            const updated = await apiCall('PATCH', `/api/blocks/${blockId}`, updates)
+            setActiveBlocks(prev => prev.map(b => b.id === blockId ? updated : b))
+            return updated
+        } catch (err) {
+            console.error('Block update failed', err)
+            return null
+        }
+    }, [apiCall])
+
+    const deleteBlock = useCallback(async (blockId) => {
+        setActiveBlocks(prev => prev.filter(b => b.id !== blockId))
+        try {
+            await apiCall('DELETE', `/api/blocks/${blockId}`)
+        } catch (err) {
+            console.error('Block deletion failed', err)
+        }
+    }, [apiCall])
+
+    const bulkUpdateBlocks = useCallback(async (entityId, entityType, blocks) => {
+        setActiveBlocks(blocks)
+        try {
+            const endpoint = entityType === 'Note' ? 'notes' : 'journal'
+            const updated = await apiCall('PATCH', `/api/${endpoint}/${entityId}/blocks`, blocks)
+            setActiveBlocks(updated)
+            return updated
+        } catch (err) {
+            console.error('Bulk update failed', err)
+            return null
+        }
+    }, [apiCall])
+
+    const value = useMemo(() => ({
         tasks, projects, goals, notes, journal, areas, resources, archive,
         viewPreferences,
         sidebarCollapsed, setSidebarCollapsed,
@@ -277,14 +420,38 @@ function AppContextInner({ children }) {
         updateNote: noteCRUD.update,
         deleteNote: noteCRUD.delete,
 
-        addJournal: journalCRUD.add,
-        updateJournal: journalCRUD.update,
-        deleteJournal: journalCRUD.delete,
+        archiveNote,
+        recycleNote,
+        restoreNote,
+        deleteNotePermanently,
+
+        archivedNotes,
+        deletedNotes,
+
+        addJournalEntry: journalCRUD.add,
+        updateJournalEntry: journalCRUD.update,
+        deleteJournalEntry: journalCRUD.delete,
 
         addResource: resourceCRUD.add,
         updateResource: resourceCRUD.update,
         deleteResource: resourceCRUD.delete,
-    }
+
+        activeBlocks,
+        setActiveBlocks,
+        fetchEntity,
+        fetchBlocks,
+        addBlock,
+        updateBlock,
+        deleteBlock,
+        bulkUpdateBlocks
+    }), [
+        tasks, projects, goals, notes, journal, areas, resources, archive,
+        viewPreferences, sidebarCollapsed, loading, session, isAuthenticated,
+        taskCRUD, projectCRUD, goalCRUD, noteCRUD, journalCRUD, resourceCRUD,
+        fetchEndpoint, archiveNote, recycleNote, restoreNote, deleteNotePermanently,
+        archivedNotes, deletedNotes, activeBlocks, fetchEntity, fetchBlocks,
+        addBlock, updateBlock, deleteBlock, bulkUpdateBlocks
+    ])
 
     return <AppContext.Provider value={value}>{children}</AppContext.Provider>
 }

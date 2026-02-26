@@ -23,32 +23,61 @@ export default function JournalEntryPage() {
         journal,
         updateJournalEntry,
         deleteJournalEntry,
-        loading
+        loading,
+        activeBlocks,
+        fetchBlocks,
+        bulkUpdateBlocks,
+        setActiveBlocks,
+        fetchEntity
     } = useApp()
 
     const entry = journal.find(j => j.id === id)
 
-    const [blocks, setBlocks] = useState([])
+    useEffect(() => {
+        if (id && !entry) {
+            fetchEntity('JournalEntry', id).catch(e => console.error('Fetch entry failed', e))
+        }
+    }, [id, entry, fetchEntity])
+
     const [isSaving, setIsSaving] = useState(false)
     const [lastSaved, setLastSaved] = useState(null)
     const [visible, setVisible] = useState(false)
 
+    const [initialized, setInitialized] = useState(false)
+
     useEffect(() => {
-        if (!loading && entry) {
-            setBlocks(entry.content || [
-                { id: crypto.randomUUID(), type: 'paragraph', content: '' }
-            ])
+        if (id) fetchBlocks(id, 'JournalEntry')
+    }, [id, fetchBlocks])
+
+    useEffect(() => {
+        if (!loading && entry && !initialized) {
             setLastSaved(entry.updatedAt)
+            setInitialized(true)
             requestAnimationFrame(() => setVisible(true))
         }
-    }, [entry, loading])
+    }, [entry, loading, initialized])
+
+    // Ensure at least one block if loading is done and none exist
+    useEffect(() => {
+        if (initialized && activeBlocks?.length === 0 && !loading) {
+            setActiveBlocks([{ id: `b-init-${Date.now()}`, type: 'paragraph', content: '' }])
+        }
+    }, [initialized, activeBlocks?.length, loading, setActiveBlocks])
 
     const handleSave = async () => {
         if (!entry) return
         setIsSaving(true)
-        await updateJournalEntry(id, { content: blocks })
-        setLastSaved(new Date())
-        setIsSaving(false)
+        try {
+            await Promise.all([
+                updateJournalEntry(id, {}),
+                bulkUpdateBlocks(id, 'JournalEntry', activeBlocks)
+            ])
+            setLastSaved(new Date())
+        } catch (err) {
+            console.error('Save failed', err)
+        } finally {
+            setIsSaving(false)
+        }
     }
 
     // Save on Ctrl/Cmd+S
@@ -61,7 +90,7 @@ export default function JournalEntryPage() {
         }
         window.addEventListener('keydown', onKey)
         return () => window.removeEventListener('keydown', onKey)
-    }, [blocks, entry])
+    }, [activeBlocks, entry])
 
     const handleDelete = async () => {
         await deleteJournalEntry(id)
@@ -73,9 +102,8 @@ export default function JournalEntryPage() {
 
             {/* PREMIUM SKELETON */}
             <div
-                className={`absolute inset-0 transition-opacity duration-300 ${
-                    loading ? 'opacity-100' : 'opacity-0 pointer-events-none'
-                }`}
+                className={`absolute inset-0 transition-opacity duration-300 ${loading ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                    }`}
             >
                 <div className="flex flex-col h-full bg-[#fcfaf7] animate-pulse">
 
@@ -131,9 +159,8 @@ export default function JournalEntryPage() {
             {/* MAIN CONTENT */}
             {!loading && entry && (
                 <div
-                    className={`flex flex-col h-full transition-all duration-300 ease-out ${
-                        visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'
-                    }`}
+                    className={`flex flex-col h-full transition-all duration-300 ease-out ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'
+                        }`}
                 >
 
                     {/* HEADER */}
@@ -158,18 +185,17 @@ export default function JournalEntryPage() {
                         <div className="flex items-center gap-4">
                             <div className="flex items-center gap-1.5">
                                 <div
-                                    className={`w-1.5 h-1.5 rounded-full ${
-                                        isSaving
-                                            ? 'bg-yellow-500 animate-pulse'
-                                            : 'bg-green-400'
-                                    }`}
+                                    className={`w-1.5 h-1.5 rounded-full ${isSaving
+                                        ? 'bg-yellow-500 animate-pulse'
+                                        : 'bg-green-400'
+                                        }`}
                                 />
                                 <span className="text-[10px] font-bold text-[#9b9a97] uppercase tracking-tighter">
                                     {isSaving
                                         ? 'Saving...'
                                         : lastSaved
-                                        ? `Saved ${format(new Date(lastSaved), 'h:mm a')}`
-                                        : 'Not saved'}
+                                            ? `Saved ${format(new Date(lastSaved), 'h:mm a')}`
+                                            : 'Not saved'}
                                 </span>
                             </div>
 
@@ -226,8 +252,8 @@ export default function JournalEntryPage() {
                                 </div>
 
                                 <BlockEditor
-                                    blocks={blocks}
-                                    onChange={setBlocks}
+                                    blocks={activeBlocks}
+                                    onChange={setActiveBlocks}
                                     isDiary={true}
                                 />
 

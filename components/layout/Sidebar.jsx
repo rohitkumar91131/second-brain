@@ -8,12 +8,14 @@ import Image from 'next/image'
 import {
     LayoutDashboard, CheckSquare, FolderOpen, Target, Map,
     BookOpen, FileText, BookMarked, Archive, ChevronLeft,
-    ChevronRight, Brain, LogOut, User
+    ChevronRight, Brain, LogOut, User, Settings, Trash2,
+    Image as ImageIcon
 } from 'lucide-react'
 
 const navItems = [
     { href: '/dashboard', label: 'Overview', icon: LayoutDashboard },
     { href: '/dashboard/tasks', label: 'Tasks', icon: CheckSquare },
+    { href: '/dashboard/media', label: 'Media Bank', icon: ImageIcon },
     { href: '/dashboard/projects', label: 'Projects', icon: FolderOpen },
     { href: '/dashboard/goals', label: 'Goals', icon: Target },
     { href: '/dashboard/areas', label: 'Areas', icon: Map },
@@ -21,6 +23,8 @@ const navItems = [
     { href: '/dashboard/notes', label: 'Notes', icon: FileText },
     { href: '/dashboard/journal', label: 'Journal', icon: BookMarked },
     { href: '/dashboard/archive', label: 'Archive', icon: Archive },
+    { href: '/dashboard/recycle-bin', label: 'Recycle Bin', icon: Trash2 },
+    { href: '/dashboard/settings', label: 'Settings', icon: Settings },
 ]
 
 export default function Sidebar({ mobileOpen, onMobileClose }) {

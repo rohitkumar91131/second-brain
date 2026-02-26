@@ -16,6 +16,8 @@ const pageTitles = {
     '/dashboard/notes': 'Notes',
     '/dashboard/journal': 'Journal',
     '/dashboard/archive': 'Archive',
+    '/dashboard/media': 'Media Bank',
+    '/dashboard/settings': 'Settings',
 }
 
 export default function Header({ onMobileMenuClick }) {

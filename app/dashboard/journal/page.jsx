@@ -4,42 +4,29 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useApp } from '@/context/AppContext'
 import Link from 'next/link'
-import { Plus, BookMarked, Trash2, Smile, LoaderIcon } from 'lucide-react'
+import { Plus, BookMarked, Trash2, Smile } from 'lucide-react'
+import Loader from '@/components/ui/Loader'
 import { format, isToday, isYesterday, parseISO } from 'date-fns'
 
 const MOODS = ['Amazing', 'Good', 'Okay', 'Tough', 'Bad']
 const MOOD_EMOJI = { Amazing: '🌟', Good: '😊', Okay: '😐', Tough: '😔', Bad: '😢' }
 
 export default function JournalPage() {
+    const { journal, addJournalEntry, loading, bulkUpdateBlocks } = useApp()
     const router = useRouter()
-    const { journal, addJournalEntry, deleteJournalEntry, fetchEndpoint } = useApp()
     const [selectedMood, setSelectedMood] = useState('Good')
-    const [isLoading, setIsLoading] = useState(!journal || journal.length === 0)
 
-    useEffect(() => {
-        if (!journal || journal.length === 0) {
-            fetchEndpoint('journal').then(() => setIsLoading(false))
-        } else {
-            setIsLoading(false)
-        }
-    }, [])
-
-    if (isLoading) {
+    if (loading) {
         return (
-            <div className="flex items-center justify-center h-full relative overflow-hidden">
-                <div className="absolute inset-0 flex">
-                    <div className="relative w-full h-1 loading-bar-animation">
-                        <div className="w-1 h-1 bg-[#2eaadc] rounded-full"></div>
-                    </div>
-                </div>
-                <LoaderIcon className="w-6 h-6 text-black animate-spin" />
+            <div className="flex items-center justify-center h-full w-full relative overflow-hidden bg-white/50 backdrop-blur-sm z-50">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
             </div>
         )
     }
 
     const sorted = [...journal].sort((a, b) => new Date(b.date) - new Date(a.date))
 
-    const handleNewEntry = () => {
+    const handleNewEntry = async () => {
         const today = format(new Date(), 'yyyy-MM-dd')
         const existing = journal.find(j => j.date === today)
         if (existing) {
@@ -47,21 +34,29 @@ export default function JournalPage() {
             return
         }
 
-        addJournalEntry({
-            title: `Journal - ${format(new Date(), 'MMMM d, yyyy')}`,
-            date: today,
-            mood: selectedMood,
-            content: [
-                { id: 'b1', type: 'heading2', content: 'Morning Reflection' },
-                { id: 'b2', type: 'paragraph', content: '' },
-                { id: 'b3', type: 'heading2', content: 'Gratitude' },
-                { id: 'b4', type: 'bullet', content: '' },
-                { id: 'b5', type: 'heading2', content: 'Intentions' },
-                { id: 'b6', type: 'bullet', content: '' },
-            ],
-        }).then(newEntry => {
-            if (newEntry?.id) router.push(`/dashboard/journal/${newEntry.id}`)
-        })
+        try {
+            const newEntry = await addJournalEntry({
+                title: `Journal - ${format(new Date(), 'MMMM d, yyyy')}`,
+                date: today,
+                mood: selectedMood,
+            })
+
+            if (newEntry?.id) {
+                const initialBlocks = [
+                    { type: 'heading2', content: 'Morning Reflection', order: 100 },
+                    { type: 'paragraph', content: '', order: 200 },
+                    { type: 'heading2', content: 'Gratitude', order: 300 },
+                    { type: 'bullet', content: '', order: 400 },
+                    { type: 'heading2', content: 'Intentions', order: 500 },
+                    { type: 'bullet', content: '', order: 600 },
+                ]
+
+                await bulkUpdateBlocks(newEntry.id, 'JournalEntry', initialBlocks)
+                router.push(`/dashboard/journal/${newEntry.id}`)
+            }
+        } catch (err) {
+            console.error('Failed to create entry:', err)
+        }
     }
 
     const getDateLabel = (dateStr) => {
@@ -144,11 +139,9 @@ export default function JournalPage() {
                                         {/* Content Preview */}
                                         <div className="pl-16 relative">
                                             <div className="absolute left-6 top-0 bottom-0 w-[1px] bg-[#f1f1ef]" />
-                                            {entry.content && (
-                                                <p className="text-sm text-[#787774] line-clamp-2 diary-serif leading-relaxed italic">
-                                                    {entry.content.find(b => b.type === 'paragraph' && b.content)?.content || 'Dear Diary... content awaited.'}
-                                                </p>
-                                            )}
+                                            <p className="text-sm text-[#787774] line-clamp-2 diary-serif leading-relaxed italic">
+                                                {entry.preview || 'Dear Diary... content awaited.'}
+                                            </p>
                                         </div>
 
                                         <div className="mt-4 flex justify-end">
