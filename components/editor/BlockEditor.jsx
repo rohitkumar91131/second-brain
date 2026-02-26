@@ -24,9 +24,34 @@ export default function BlockEditor({ blocks, onChange, isDiary = false }) {
         return newBlock.id
     }, [blocks, onChange])
 
-    const deleteBlock = useCallback((id) => {
+    // --- UPDATED DELETE LOGIC WITH API CALL ---
+    const deleteBlock = useCallback(async (id) => {
         if (blocks.length <= 1) return
-        onChange(blocks.filter(b => b.id !== id))
+
+        // Agar ID 'b-' se shuru nahi ho rahi, matlab ye Database mein save hai
+        const isSavedInDb = !id.startsWith('b-');
+
+        if (isSavedInDb) {
+            try {
+                const response = await fetch(`/api/blocks/${id}`, {
+                    method: 'DELETE',
+                });
+
+                if (!response.ok) {
+                    console.error("Failed to delete from database");
+                    return; // Stop if API fails
+                }
+            } catch (error) {
+                console.error("Network error during deletion:", error);
+                return;
+            }
+        }
+
+        // State update aur re-ordering (Important for DB sync)
+        const filteredBlocks = blocks.filter(b => b.id !== id);
+        const reOrderedBlocks = filteredBlocks.map((b, i) => ({ ...b, order: i }));
+
+        onChange(reOrderedBlocks);
     }, [blocks, onChange])
 
     const changeType = useCallback((id, type) => {
@@ -34,17 +59,15 @@ export default function BlockEditor({ blocks, onChange, isDiary = false }) {
         setShowMenu(null)
     }, [updateBlock])
 
-    // Numbered list ko properly count karne ke liye variable
     let currentListNumber = 0;
 
     return (
         <div className={`max-w-3xl mx-auto py-8 px-6 ${isDiary ? 'diary-serif' : ''}`}>
             {blocks.map((block, idx) => {
-                // List numbering calculation
                 if (block.type === 'numbered') {
                     currentListNumber++;
                 } else {
-                    currentListNumber = 0; // Agar list ke beech me kuch aur aa jaye toh reset kardo
+                    currentListNumber = 0;
                 }
 
                 return (
@@ -53,18 +76,17 @@ export default function BlockEditor({ blocks, onChange, isDiary = false }) {
                         block={block}
                         isDiary={isDiary}
                         index={idx}
-                        listNumber={currentListNumber} // Ye naya prop pass kiya hai
+                        listNumber={currentListNumber}
                         showMenu={showMenu === block.id}
                         toggleOpen={toggleOpen[block.id]}
                         onToggleOpen={() => setToggleOpen(prev => ({ ...prev, [block.id]: !prev[block.id] }))}
                         onUpdate={(updates) => updateBlock(block.id, updates)}
                         onAddAfter={(type) => addBlock(block.id, type)}
-                        onDelete={() => deleteBlock(block.id)}
+                        onDelete={() => deleteBlock(block.id)} // Calls the new async delete
                         onShowMenu={() => setShowMenu(showMenu === block.id ? null : block.id)}
                         onHideMenu={() => setShowMenu(null)}
                         onChangeType={(type) => changeType(block.id, type)}
                         onEnter={() => {
-                            // Automatically keep the list going if hitting enter on a list item
                             const newType = (block.type === 'bullet' || block.type === 'numbered') ? block.type : 'paragraph';
                             const newId = addBlock(block.id, newType);
                             setTimeout(() => {
@@ -73,7 +95,6 @@ export default function BlockEditor({ blocks, onChange, isDiary = false }) {
                         }}
                         onBackspace={(isEmpty) => {
                             if (isEmpty) {
-                                // Agar list block empty hai, toh delete hone se pehle normal text ban jaye
                                 if (block.type !== 'paragraph') {
                                     changeType(block.id, 'paragraph');
                                 } else if (blocks.length > 1) {
