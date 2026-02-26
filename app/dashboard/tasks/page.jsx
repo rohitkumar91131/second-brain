@@ -21,7 +21,7 @@ const COLUMNS = [
 ]
 
 export default function TasksPage() {
-    const { tasks, addTask, updateTask, deleteTask, viewPreferences, fetchEndpoint } = useApp()
+    const { tasks, addTask, updateTask, deleteTask, viewPreferences, fetchEndpoint, isFetched } = useApp()
     const [view, setView] = useState(viewPreferences['Tasks'] || 'list')
     const [showAdd, setShowAdd] = useState(false)
     const [filter, setFilter] = useState('all')
@@ -50,13 +50,12 @@ export default function TasksPage() {
     }
 
     useEffect(() => {
-        // ensure tasks are loaded when this page mounts (useful for client-side navigation)
-        if (!tasks || tasks.length === 0) {
+        if (!isFetched('tasks')) {
             fetchEndpoint('tasks').then(() => setIsLoading(false))
         } else {
             setIsLoading(false)
         }
-    }, [tasks, fetchEndpoint])
+    }, [isFetched, fetchEndpoint])
 
     if (isLoading) {
         return (

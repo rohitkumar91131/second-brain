@@ -12,8 +12,8 @@ export default function MediaBankPage() {
     const [search, setSearch] = useState('')
 
     useEffect(() => {
-        fetchMedia()
-    }, [fetchMedia])
+        if (!isFetched('blocks/media')) fetchMedia()
+    }, [fetchMedia, isFetched])
 
     const filteredMedia = (media || []).filter(item =>
         item.noteTitle?.toLowerCase().includes(search.toLowerCase()) ||

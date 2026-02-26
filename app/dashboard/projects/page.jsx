@@ -20,18 +20,18 @@ const COLUMNS = [
 ]
 
 export default function ProjectsPage() {
-    const { projects, addProject, updateProject, deleteProject, viewPreferences, fetchEndpoint } = useApp()
+    const { projects, addProject, updateProject, deleteProject, viewPreferences, fetchEndpoint, isFetched } = useApp()
     const [view, setView] = useState(viewPreferences['Projects'] || 'list')
     const [showAdd, setShowAdd] = useState(false)
     const [isLoading, setIsLoading] = useState(!projects || projects.length === 0)
 
     useEffect(() => {
-        if (!projects || projects.length === 0) {
+        if (!isFetched('projects')) {
             fetchEndpoint('projects').then(() => setIsLoading(false))
         } else {
             setIsLoading(false)
         }
-    }, [projects, fetchEndpoint])
+    }, [isFetched, fetchEndpoint])
 
     if (isLoading) {
         return (

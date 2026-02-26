@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react'
+import { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { SessionProvider, useSession } from 'next-auth/react'
 // Commented out the potentially faulty storage functions
 // import { getStorage, setStorage } from '@/lib/storage'
@@ -56,6 +56,8 @@ function AppContextInner({ children }) {
     const [loading, setLoading] = useState(true)
     const [isInitialized, setIsInitialized] = useState(false)
     const [activeFetches, setActiveFetches] = useState(0)
+    const [fetchedEndpoints, setFetchedEndpoints] = useState(new Set())
+    const fetchRegistry = useRef(new Set())
 
     const startFetch = useCallback(() => {
         setActiveFetches(prev => prev + 1)
@@ -76,7 +78,8 @@ function AppContextInner({ children }) {
         else loadFromLocalStorage()
     }, [status, isAuthenticated])
 
-    const fetchAllFromAPI = async () => {
+    const fetchAllFromAPI = async (force = false) => {
+        if (!force && fetchedEndpoints.has('all')) return
         startFetch()
         try {
             const pathname = typeof window !== 'undefined' ? window.location.pathname : '/'
@@ -136,6 +139,12 @@ function AppContextInner({ children }) {
             if (profile.viewPreferences) setViewPreferences(profile.viewPreferences)
             else if (safeGetStorage('viewPreferences')) setViewPreferences(safeGetStorage('viewPreferences'))
 
+            setFetchedEndpoints(prev => {
+                const next = new Set(prev)
+                next.add('all')
+                endpoints.forEach(e => next.add(e))
+                return next
+            })
             setIsInitialized(true)
         } catch (e) {
             console.error('fetchAllFromAPI failed, falling back to local data', e)
@@ -145,7 +154,10 @@ function AppContextInner({ children }) {
         }
     }
 
-    const fetchEndpoint = useCallback(async (endpoint) => {
+    const fetchEndpoint = useCallback(async (endpoint, force = false) => {
+        if (!force && fetchRegistry.current.has(endpoint)) return
+        fetchRegistry.current.add(endpoint)
+
         try {
             startFetch()
             const res = await fetch(`/api/${endpoint}`)
@@ -170,12 +182,16 @@ function AppContextInner({ children }) {
                 case 'blocks/media': setMedia(data); break
                 default: break
             }
+            setFetchedEndpoints(prev => new Set(prev).add(endpoint))
         } catch (err) {
             console.error('fetchEndpoint failed', endpoint, err)
         } finally {
+            fetchRegistry.current.delete(endpoint)
             endFetch()
         }
     }, [startFetch, endFetch])
+
+    const fetchMedia = useCallback(() => fetchEndpoint('blocks/media'), [fetchEndpoint])
 
     const loadFromLocalStorage = () => {
         startFetch()
@@ -451,14 +467,15 @@ function AppContextInner({ children }) {
         deleteBlock,
         bulkUpdateBlocks,
         media,
-        fetchMedia: () => fetchEndpoint('blocks/media')
+        fetchMedia,
+        isFetched: (endpoint) => fetchedEndpoints.has(endpoint)
     }), [
         tasks, projects, goals, notes, journal, areas, resources, archive,
         viewPreferences, sidebarCollapsed, loading, session, isAuthenticated,
         taskCRUD, projectCRUD, goalCRUD, noteCRUD, journalCRUD, resourceCRUD,
-        fetchEndpoint, archiveNote, recycleNote, restoreNote, deleteNotePermanently,
+        fetchEndpoint, fetchMedia, archiveNote, recycleNote, restoreNote, deleteNotePermanently,
         archivedNotes, deletedNotes, activeBlocks, fetchEntity, fetchBlocks,
-        addBlock, updateBlock, deleteBlock, bulkUpdateBlocks, media
+        addBlock, updateBlock, deleteBlock, bulkUpdateBlocks, media, fetchedEndpoints
     ])
 
     return <AppContext.Provider value={value}>{children}</AppContext.Provider>

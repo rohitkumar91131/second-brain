@@ -22,7 +22,7 @@ const COLUMNS = [
 ]
 
 export default function GoalsPage() {
-    const { goals, addGoal, updateGoal, deleteGoal, viewPreferences, fetchEndpoint } = useApp()
+    const { goals, addGoal, updateGoal, deleteGoal, viewPreferences, fetchEndpoint, isFetched } = useApp()
     const [view, setView] = useState(viewPreferences['Goals'] || 'list')
     const [showAdd, setShowAdd] = useState(false)
     const [isLoading, setIsLoading] = useState(!goals || goals.length === 0)
@@ -32,12 +32,12 @@ export default function GoalsPage() {
         : 0
 
     useEffect(() => {
-        if (!goals || goals.length === 0) {
+        if (!isFetched('goals')) {
             fetchEndpoint('goals').then(() => setIsLoading(false))
         } else {
             setIsLoading(false)
         }
-    }, [goals, fetchEndpoint])
+    }, [isFetched, fetchEndpoint])
 
     if (isLoading) {
         return (

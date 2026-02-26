@@ -15,8 +15,8 @@ export default function NotesPage() {
     const [showAdd, setShowAdd] = useState(false)
 
     useEffect(() => {
-        if (!notes || notes.length === 0) fetchEndpoint('notes')
-    }, [notes, fetchEndpoint])
+        if (!isFetched('notes')) fetchEndpoint('notes')
+    }, [isFetched, fetchEndpoint])
 
     if (loading) {
         return <LoadingScreen />

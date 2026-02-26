@@ -7,11 +7,11 @@ import { format } from 'date-fns'
 import StatusTag from '@/components/properties/StatusTag'
 
 export default function ArchivePage() {
-    const { archivedNotes, restoreNote, recycleNote, fetchEndpoint, loading } = useApp()
+    const { archivedNotes, restoreNote, recycleNote, fetchEndpoint, loading, isFetched } = useApp()
 
     useEffect(() => {
-        fetchEndpoint('notes?archived=true')
-    }, [fetchEndpoint])
+        if (!isFetched('notes?archived=true')) fetchEndpoint('notes?archived=true')
+    }, [fetchEndpoint, isFetched])
 
     if (loading && archivedNotes.length === 0) {
         return (

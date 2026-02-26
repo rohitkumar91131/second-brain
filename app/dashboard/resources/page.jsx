@@ -20,7 +20,7 @@ const COLUMNS = [
 const RESOURCE_TYPES = ['Book', 'Article', 'Website', 'Video', 'Course', 'Podcast', 'Tool', 'Other']
 
 export default function ResourcesPage() {
-    const { resources, addResource, updateResource, deleteResource, viewPreferences, fetchEndpoint } = useApp()
+    const { resources, addResource, updateResource, deleteResource, viewPreferences, fetchEndpoint, isFetched } = useApp()
     const [view, setView] = useState(viewPreferences['Resources'] || 'list')
     const [showAdd, setShowAdd] = useState(false)
     const [form, setForm] = useState({ title: '', type: 'Book', url: '', tags: '', status: 'To Read', notes: '' })
@@ -38,12 +38,12 @@ export default function ResourcesPage() {
     }
 
     useEffect(() => {
-        if (!resources || resources.length === 0) {
+        if (!isFetched('resources')) {
             fetchEndpoint('resources').then(() => setIsLoading(false))
         } else {
             setIsLoading(false)
         }
-    }, [resources, fetchEndpoint])
+    }, [isFetched, fetchEndpoint])
 
     if (isLoading) {
         return (
