@@ -13,7 +13,7 @@ export default function MediaBankPage() {
 
     useEffect(() => {
         if (!notes || notes.length === 0) fetchEndpoint('notes')
-    }, [])
+    }, [notes, fetchEndpoint])
 
     // Extract all media blocks from all notes
     const mediaItems = notes.flatMap(note => {

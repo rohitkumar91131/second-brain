@@ -10,7 +10,7 @@ export default function RecycleBinPage() {
 
     useEffect(() => {
         fetchEndpoint('notes?deleted=true')
-    }, [])
+    }, [fetchEndpoint])
 
     if (loading && deletedNotes.length === 0) {
         return (

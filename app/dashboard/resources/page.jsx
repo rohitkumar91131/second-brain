@@ -43,7 +43,7 @@ export default function ResourcesPage() {
         } else {
             setIsLoading(false)
         }
-    }, [])
+    }, [resources, fetchEndpoint])
 
     if (isLoading) {
         return (

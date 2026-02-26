@@ -11,7 +11,7 @@ export default function ArchivePage() {
 
     useEffect(() => {
         fetchEndpoint('notes?archived=true')
-    }, [])
+    }, [fetchEndpoint])
 
     if (loading && archivedNotes.length === 0) {
         return (

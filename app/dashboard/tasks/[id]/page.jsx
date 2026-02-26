@@ -50,7 +50,7 @@ export default function TaskDetailPage() {
     const { tasks, updateTask, loading } = useApp()
     const task = tasks.find(t => t.id === id)
 
-    const history = task?.history || []
+    const history = useMemo(() => task?.history || [], [task?.history])
     const historySet = useMemo(() => new Set(history), [history])
     const [notFoundDelay, setNotFoundDelay] = useState(false)
 

@@ -56,7 +56,7 @@ export default function TasksPage() {
         } else {
             setIsLoading(false)
         }
-    }, [])
+    }, [tasks, fetchEndpoint])
 
     if (isLoading) {
         return (

@@ -31,7 +31,7 @@ export default function ProjectsPage() {
         } else {
             setIsLoading(false)
         }
-    }, [])
+    }, [projects, fetchEndpoint])
 
     if (isLoading) {
         return (

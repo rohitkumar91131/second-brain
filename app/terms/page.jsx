@@ -63,7 +63,7 @@ export default function TermsOfService() {
                                 <h2 className="text-xl font-bold m-0 text-gray-900">Limitation of Liability</h2>
                             </div>
                             <p className="text-[#787774] leading-relaxed">
-                                We continuously strive to maintain high availability and data integrity. However, we cannot guarantee that the service will be entirely free from errors, interruptions, or data loss. We provide the service 'as is' without explicit warranties.
+                                We continuously strive to maintain high availability and data integrity. However, we cannot guarantee that the service will be entirely free from errors, interruptions, or data loss. We provide the service &apos;as is&apos; without explicit warranties.
                             </p>
                         </div>
                     </div>

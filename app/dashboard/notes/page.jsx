@@ -16,7 +16,7 @@ export default function NotesPage() {
 
     useEffect(() => {
         if (!notes || notes.length === 0) fetchEndpoint('notes')
-    }, [])
+    }, [notes, fetchEndpoint])
 
     if (loading) {
         return <LoadingScreen />

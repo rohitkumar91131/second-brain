@@ -38,7 +38,7 @@ export default function ProjectDetailPage() {
         }
         if (!tasks || tasks.length === 0) fetchEndpoint('tasks')
         if (!notes || notes.length === 0) fetchEndpoint('notes')
-    }, [])
+    }, [projects, tasks, notes, fetchEndpoint])
 
     // Find the project
     useEffect(() => {
@@ -428,8 +428,8 @@ export default function ProjectDetailPage() {
                                         <button
                                             onClick={() => handleTaskToggle(task.id, task.completed)}
                                             className={`w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-all ${task.completed
-                                                    ? 'bg-green-500 border-green-500'
-                                                    : 'border-[#d3d1cb] group-hover:border-[#37352f]'
+                                                ? 'bg-green-500 border-green-500'
+                                                : 'border-[#d3d1cb] group-hover:border-[#37352f]'
                                                 }`}
                                         >
                                             {task.completed && (
@@ -451,8 +451,8 @@ export default function ProjectDetailPage() {
                                         <div className="flex-1 min-w-0">
                                             <p
                                                 className={`text-sm font-medium truncate ${task.completed
-                                                        ? 'line-through text-[#9b9a97]'
-                                                        : 'text-[#37352f]'
+                                                    ? 'line-through text-[#9b9a97]'
+                                                    : 'text-[#37352f]'
                                                     }`}
                                             >
                                                 {task.title}
@@ -460,10 +460,10 @@ export default function ProjectDetailPage() {
                                             {task.priority && (
                                                 <span
                                                     className={`text-xs font-medium mt-1 inline-block px-2 py-0.5 rounded ${task.priority === 'High'
-                                                            ? 'bg-red-100 text-red-700'
-                                                            : task.priority === 'Medium'
-                                                                ? 'bg-yellow-100 text-yellow-700'
-                                                                : 'bg-green-100 text-green-700'
+                                                        ? 'bg-red-100 text-red-700'
+                                                        : task.priority === 'Medium'
+                                                            ? 'bg-yellow-100 text-yellow-700'
+                                                            : 'bg-green-100 text-green-700'
                                                         }`}
                                                 >
                                                     {task.priority}

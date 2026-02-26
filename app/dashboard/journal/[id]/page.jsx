@@ -64,7 +64,7 @@ export default function JournalEntryPage() {
         }
     }, [initialized, activeBlocks?.length, loading, setActiveBlocks])
 
-    const handleSave = async () => {
+    const handleSave = useCallback(async () => {
         if (!entry) return
         setIsSaving(true)
         try {
@@ -78,7 +78,7 @@ export default function JournalEntryPage() {
         } finally {
             setIsSaving(false)
         }
-    }
+    }, [entry, id, activeBlocks, updateJournalEntry, bulkUpdateBlocks])
 
     // Save on Ctrl/Cmd+S
     useEffect(() => {
@@ -90,7 +90,7 @@ export default function JournalEntryPage() {
         }
         window.addEventListener('keydown', onKey)
         return () => window.removeEventListener('keydown', onKey)
-    }, [activeBlocks, entry])
+    }, [handleSave])
 
     const handleDelete = async () => {
         await deleteJournalEntry(id)

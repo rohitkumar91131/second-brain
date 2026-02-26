@@ -73,7 +73,7 @@ export default function NoteEditorPage() {
             const timer = setTimeout(() => { setNotFoundDelay(true) }, 400)
             return () => clearTimeout(timer)
         }
-    }, [note, loading, id, initialized])
+    }, [note, loading, id, initialized, activeBlocks?.length, setActiveBlocks])
 
     // Ensure at least one block if loading is done and none exist
     useEffect(() => {
@@ -88,7 +88,7 @@ export default function NoteEditorPage() {
         }
     }, [title, activeBlocks, ready, id])
 
-    const handleSave = async () => {
+    const handleSave = useCallback(async () => {
         if (!note) return
         setIsSaving(true)
         try {
@@ -103,7 +103,7 @@ export default function NoteEditorPage() {
         } finally {
             setIsSaving(false)
         }
-    }
+    }, [note, id, title, activeBlocks, updateNote, bulkUpdateBlocks])
 
     // Save on Ctrl/Cmd+S
     useEffect(() => {
@@ -115,7 +115,7 @@ export default function NoteEditorPage() {
         }
         window.addEventListener('keydown', onKey)
         return () => window.removeEventListener('keydown', onKey)
-    }, [title, activeBlocks, note])
+    }, [handleSave])
 
     const handleDelete = () => {
         deleteNote(id)

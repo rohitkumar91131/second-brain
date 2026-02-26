@@ -37,7 +37,7 @@ export default function GoalsPage() {
         } else {
             setIsLoading(false)
         }
-    }, [])
+    }, [goals, fetchEndpoint])
 
     if (isLoading) {
         return (
