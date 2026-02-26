@@ -17,29 +17,33 @@ export const POST = withErrorHandler(async (request) => {
     await connectDB()
 
     const { entityId, entityType } = validation.data
+    const userId = new mongoose.Types.ObjectId(session.user.id)
+    const castedEntityId = new mongoose.Types.ObjectId(entityId)
 
     if (!mongoose.Types.ObjectId.isValid(entityId)) {
-        return err(`Invalid ${entityType} ID`, 400)
+        return err(`Invalid ${entityType} ID format`, 400)
     }
 
     if (entityType === 'Note') {
-        const note = await Note.findOne({ _id: entityId, userId: session.user.id })
-        if (!note) return err('Note not found', 404)
+        const note = await Note.findOne({ _id: castedEntityId, userId }).lean()
+        if (!note) return err('Note not found for block creation', 404)
     } else if (entityType === 'JournalEntry') {
         const JournalEntry = mongoose.models.JournalEntry || mongoose.model('JournalEntry')
-        const entry = await JournalEntry.findOne({ _id: entityId, userId: session.user.id })
-        if (!entry) return err('Journal entry not found', 404)
+        const entry = await JournalEntry.findOne({ _id: castedEntityId, userId }).lean()
+        if (!entry) return err('Journal entry not found for block creation', 404)
     }
 
+    const { parentId, ...rest } = validation.data
     const blockData = {
-        ...validation.data,
-        parentId: mongoose.Types.ObjectId.isValid(validation.data.parentId) ? validation.data.parentId : null
+        ...rest,
+        entityId: castedEntityId,
+        parentId: mongoose.Types.ObjectId.isValid(parentId) ? new mongoose.Types.ObjectId(parentId) : null
     }
 
     const block = await Block.create(blockData)
 
     // Update parent preview
-    await updateEntityPreview(entityId, entityType)
+    await updateEntityPreview(entityId.toString(), entityType)
 
     return ok({ ...block.toObject(), id: block._id.toString(), _id: undefined })
 })

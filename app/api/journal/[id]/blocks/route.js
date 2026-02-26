@@ -12,15 +12,18 @@ export const GET = withErrorHandler(async (request, { params }) => {
     await connectDB()
 
     if (!mongoose.Types.ObjectId.isValid(params.id)) {
-        return err('Invalid journal entry ID', 400)
+        return err('Invalid journal entry ID format', 400)
     }
 
-    // Verify journal entry ownership
-    const JournalEntry = mongoose.models.JournalEntry || mongoose.model('JournalEntry')
-    const entry = await JournalEntry.findOne({ _id: params.id, userId: session.user.id })
-    if (!entry) return err('Journal entry not found', 404)
+    // Verify journal entry ownership with explicit casting
+    const entryId = new mongoose.Types.ObjectId(params.id)
+    const userId = new mongoose.Types.ObjectId(session.user.id)
 
-    const blocks = await Block.find({ entityId: params.id, entityType: 'JournalEntry' }).sort({ order: 1 }).lean()
+    const JournalEntry = mongoose.models.JournalEntry || mongoose.model('JournalEntry')
+    const entry = await JournalEntry.findOne({ _id: entryId, userId }).lean()
+    if (!entry) return err('Journal entry not found or access denied for retrieval', 404)
+
+    const blocks = await Block.find({ entityId: entryId, entityType: 'JournalEntry' }).sort({ order: 1 }).lean()
 
     return ok(blocks.map(b => ({ ...b, id: b._id.toString(), _id: undefined })))
 })
@@ -36,13 +39,16 @@ export const PATCH = withErrorHandler(async (request, { params }) => {
     await connectDB()
 
     if (!mongoose.Types.ObjectId.isValid(params.id)) {
-        return err('Invalid journal entry ID', 400)
+        return err('Invalid journal entry ID format', 400)
     }
 
-    // Verify journal entry ownership
+    // Verify journal entry ownership with explicit casting
+    const entryId = new mongoose.Types.ObjectId(params.id)
+    const userId = new mongoose.Types.ObjectId(session.user.id)
+
     const JournalEntry = mongoose.models.JournalEntry || mongoose.model('JournalEntry')
-    const entry = await JournalEntry.findOne({ _id: params.id, userId: session.user.id })
-    if (!entry) return err('Journal entry not found', 404)
+    const entry = await JournalEntry.findOne({ _id: entryId, userId }).lean()
+    if (!entry) return err('Journal entry not found or access denied for update', 404)
 
     const operations = validation.data.map((item, index) => {
         const isExisting = mongoose.Types.ObjectId.isValid(item.id)
@@ -52,7 +58,7 @@ export const PATCH = withErrorHandler(async (request, { params }) => {
         if (isExisting) {
             return {
                 updateOne: {
-                    filter: { _id: item.id, entityId: params.id, entityType: 'JournalEntry' },
+                    filter: { _id: item.id, entityId: entryId, entityType: 'JournalEntry' },
                     update: {
                         $set: {
                             ...item,
@@ -73,7 +79,7 @@ export const PATCH = withErrorHandler(async (request, { params }) => {
                         ...item,
                         id: undefined,
                         _id: undefined,
-                        entityId: params.id,
+                        entityId: entryId,
                         entityType: 'JournalEntry',
                         order,
                         type,
@@ -89,8 +95,8 @@ export const PATCH = withErrorHandler(async (request, { params }) => {
     }
 
     // Update parent preview
-    await updateEntityPreview(params.id, 'JournalEntry')
+    await updateEntityPreview(entryId.toString(), 'JournalEntry')
 
-    const blocks = await Block.find({ entityId: params.id, entityType: 'JournalEntry' }).sort({ order: 1 }).lean()
+    const blocks = await Block.find({ entityId: entryId, entityType: 'JournalEntry' }).sort({ order: 1 }).lean()
     return ok(blocks.map(b => ({ ...b, id: b._id.toString(), _id: undefined })))
 })

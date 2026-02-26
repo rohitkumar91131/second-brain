@@ -21,28 +21,31 @@ export const PATCH = withErrorHandler(async (request, { params }) => {
 
     await connectDB()
 
-    const block = await Block.findById(params.id)
-    if (!block) return err('Block not found', 404)
+    const blockId = new mongoose.Types.ObjectId(params.id)
+    const block = await Block.findById(blockId).lean()
+    if (!block) return err('Block not found for single update', 404)
 
     const { entityId, entityType } = block
+    const userId = new mongoose.Types.ObjectId(session.user.id)
+    const castedEntityId = new mongoose.Types.ObjectId(entityId)
 
     if (entityType === 'Note') {
-        const note = await Note.findOne({ _id: entityId, userId: session.user.id })
-        if (!note) return err('Unauthorized', 403)
+        const note = await Note.findOne({ _id: castedEntityId, userId }).lean()
+        if (!note) return err('Unauthorized Note block update', 403)
     } else if (entityType === 'JournalEntry') {
         const JournalEntry = mongoose.models.JournalEntry || mongoose.model('JournalEntry')
-        const entry = await JournalEntry.findOne({ _id: entityId, userId: session.user.id })
-        if (!entry) return err('Unauthorized', 403)
+        const entry = await JournalEntry.findOne({ _id: castedEntityId, userId }).lean()
+        if (!entry) return err('Unauthorized Journal entry block update', 403)
     }
 
     const updatedBlock = await Block.findByIdAndUpdate(
-        params.id,
+        blockId,
         { $set: validation.data },
         { returnDocument: 'after', runValidators: true }
     ).lean()
 
     // Update parent preview
-    await updateEntityPreview(entityId, entityType)
+    await updateEntityPreview(entityId.toString(), entityType)
 
     return ok({ ...updatedBlock, id: updatedBlock._id.toString(), _id: undefined })
 })
@@ -58,24 +61,27 @@ export const DELETE = withErrorHandler(async (request, { params }) => {
 
     await connectDB()
 
-    const block = await Block.findById(params.id)
-    if (!block) return err('Block not found', 404)
+    const blockId = new mongoose.Types.ObjectId(params.id)
+    const block = await Block.findById(blockId).lean()
+    if (!block) return err('Block not found for single deletion', 404)
 
     const { entityId, entityType } = block
+    const userId = new mongoose.Types.ObjectId(session.user.id)
+    const castedEntityId = new mongoose.Types.ObjectId(entityId)
 
     if (entityType === 'Note') {
-        const note = await Note.findOne({ _id: entityId, userId: session.user.id })
-        if (!note) return err('Unauthorized', 403)
+        const note = await Note.findOne({ _id: castedEntityId, userId }).lean()
+        if (!note) return err('Unauthorized Note block deletion', 403)
     } else if (entityType === 'JournalEntry') {
         const JournalEntry = mongoose.models.JournalEntry || mongoose.model('JournalEntry')
-        const entry = await JournalEntry.findOne({ _id: entityId, userId: session.user.id })
-        if (!entry) return err('Unauthorized', 403)
+        const entry = await JournalEntry.findOne({ _id: castedEntityId, userId }).lean()
+        if (!entry) return err('Unauthorized Journal entry block deletion', 403)
     }
 
-    await Block.findByIdAndDelete(params.id)
+    await Block.findByIdAndDelete(blockId)
 
     // Update parent preview
-    await updateEntityPreview(entityId, entityType)
+    await updateEntityPreview(entityId.toString(), entityType)
 
     return ok({ message: 'Block deleted' })
 })

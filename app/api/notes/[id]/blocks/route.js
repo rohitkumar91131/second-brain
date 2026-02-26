@@ -13,14 +13,17 @@ export const GET = withErrorHandler(async (request, { params }) => {
     await connectDB()
 
     if (!mongoose.Types.ObjectId.isValid(params.id)) {
-        return err('Invalid note ID', 400)
+        return err('Invalid note ID format', 400)
     }
 
-    // Verify note ownership
-    const note = await Note.findOne({ _id: params.id, userId: session.user.id })
-    if (!note) return err('Note not found', 404)
+    // Verify note ownership with explicit casting
+    const noteId = new mongoose.Types.ObjectId(params.id)
+    const userId = new mongoose.Types.ObjectId(session.user.id)
 
-    const blocks = await Block.find({ entityId: params.id, entityType: 'Note' }).sort({ order: 1 }).lean()
+    const note = await Note.findOne({ _id: noteId, userId }).lean()
+    if (!note) return err('Note not found or access denied for retrieval', 404)
+
+    const blocks = await Block.find({ entityId: noteId, entityType: 'Note' }).sort({ order: 1 }).lean()
 
     return ok(blocks.map(b => ({ ...b, id: b._id.toString(), _id: undefined })))
 })
@@ -36,12 +39,15 @@ export const PATCH = withErrorHandler(async (request, { params }) => {
     await connectDB()
 
     if (!mongoose.Types.ObjectId.isValid(params.id)) {
-        return err('Invalid note ID', 400)
+        return err('Invalid note ID format', 400)
     }
 
-    // Verify note ownership
-    const note = await Note.findOne({ _id: params.id, userId: session.user.id })
-    if (!note) return err('Note not found', 404)
+    // Verify note ownership with explicit casting
+    const noteId = new mongoose.Types.ObjectId(params.id)
+    const userId = new mongoose.Types.ObjectId(session.user.id)
+
+    const note = await Note.findOne({ _id: noteId, userId }).lean()
+    if (!note) return err('Note not found or access denied for update', 404)
 
     const operations = validation.data.map((item, index) => {
         const isExisting = mongoose.Types.ObjectId.isValid(item.id)
@@ -51,7 +57,7 @@ export const PATCH = withErrorHandler(async (request, { params }) => {
         if (isExisting) {
             return {
                 updateOne: {
-                    filter: { _id: item.id, entityId: params.id, entityType: 'Note' },
+                    filter: { _id: item.id, entityId: noteId, entityType: 'Note' },
                     update: {
                         $set: {
                             ...item,
@@ -72,7 +78,7 @@ export const PATCH = withErrorHandler(async (request, { params }) => {
                         ...item,
                         id: undefined,
                         _id: undefined,
-                        entityId: params.id,
+                        entityId: noteId,
                         entityType: 'Note',
                         order,
                         type,
@@ -88,8 +94,8 @@ export const PATCH = withErrorHandler(async (request, { params }) => {
     }
 
     // Update parent preview
-    await updateEntityPreview(params.id, 'Note')
+    await updateEntityPreview(noteId.toString(), 'Note')
 
-    const blocks = await Block.find({ entityId: params.id, entityType: 'Note' }).sort({ order: 1 }).lean()
+    const blocks = await Block.find({ entityId: noteId, entityType: 'Note' }).sort({ order: 1 }).lean()
     return ok(blocks.map(b => ({ ...b, id: b._id.toString(), _id: undefined })))
 })
