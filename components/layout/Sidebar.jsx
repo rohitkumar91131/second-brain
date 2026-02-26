@@ -8,7 +8,7 @@ import Image from 'next/image'
 import {
     LayoutDashboard, CheckSquare, FolderOpen, Target, Map,
     BookOpen, FileText, BookMarked, Archive, ChevronLeft,
-    ChevronRight, Brain, LogOut, User, Settings, Trash2,
+    ChevronRight, Brain, LogOut, User, Settings,
     Image as ImageIcon
 } from 'lucide-react'
 
@@ -23,7 +23,6 @@ const navItems = [
     { href: '/dashboard/notes', label: 'Notes', icon: FileText },
     { href: '/dashboard/journal', label: 'Journal', icon: BookMarked },
     { href: '/dashboard/archive', label: 'Archive', icon: Archive },
-    { href: '/dashboard/recycle-bin', label: 'Recycle Bin', icon: Trash2 },
     { href: '/dashboard/settings', label: 'Settings', icon: Settings },
 ]
 

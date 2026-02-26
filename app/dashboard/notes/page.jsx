@@ -10,7 +10,7 @@ import LoadingScreen from '@/components/ui/LoadingScreen'
 import ContextNoteCard from '@/components/ui/ContextNoteCard'
 
 export default function NotesPage() {
-    const { notes, archiveNote, recycleNote, loading, projects, fetchEndpoint } = useApp()
+    const { notes, updateNote, archiveNote, recycleNote, loading, projects, fetchEndpoint } = useApp()
     const [search, setSearch] = useState('')
     const [showAdd, setShowAdd] = useState(false)
 
