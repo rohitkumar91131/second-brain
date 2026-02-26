@@ -1,0 +1,242 @@
+import { useRef, useEffect, useState } from 'react'
+import { ChevronRight, ChevronDown } from 'lucide-react'
+import { BLOCK_TYPES } from './constants'
+import VideoBlock from './blocks/VideoBlock'
+import AudioBlock from './blocks/AudioBlock'
+import ImageBlock from './blocks/ImageBlock'
+import TableBlock from './blocks/TableBlock'
+import LinkBlock from './blocks/LinkBlock'
+
+// Categories ko direct type ke basis par set karte hain
+const CATEGORIZED_BLOCKS = BLOCK_TYPES.map(b => {
+    if (['image', 'video', 'audio'].includes(b.type)) return { ...b, category: 'Media' };
+    if (['table', 'divider', 'callout', 'link'].includes(b.type)) return { ...b, category: 'Advanced' };
+    return { ...b, category: 'Basics' };
+});
+
+export default function BlockRow({ block, index, listNumber, isDiary, showMenu, toggleOpen, onToggleOpen, onUpdate, onDelete, onShowMenu, onHideMenu, onChangeType, onEnter, onBackspace }) {
+    const inputRef = useRef(null)
+    const toggleChildRef = useRef(null)
+    const [selectedIndex, setSelectedIndex] = useState(0)
+
+    const isCommand = block.content.startsWith('/')
+    const searchQuery = isCommand ? block.content.substring(1).toLowerCase() : ''
+
+    const filteredBlocks = CATEGORIZED_BLOCKS.filter(b =>
+        b.label.toLowerCase().includes(searchQuery) ||
+        b.type.toLowerCase().includes(searchQuery)
+    )
+
+    useEffect(() => {
+        if (showMenu && !block.content.startsWith('/')) {
+            onHideMenu();
+        }
+        setSelectedIndex(0);
+    }, [block.content, showMenu, onHideMenu])
+
+    useEffect(() => {
+        const resize = (ref) => {
+            if (ref && ref.current) {
+                ref.current.style.height = 'auto'
+                ref.current.style.height = ref.current.scrollHeight + 'px'
+            }
+        }
+        resize(inputRef)
+        resize(toggleChildRef)
+    }, [block.content, block.children, toggleOpen])
+
+    const handleKeyDown = (e) => {
+        if (showMenu) {
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                setSelectedIndex(prev => Math.min(prev + 1, filteredBlocks.length - 1));
+                return;
+            }
+            if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                setSelectedIndex(prev => Math.max(prev - 1, 0));
+                return;
+            }
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                if (filteredBlocks.length > 0) {
+                    const selectedItem = filteredBlocks[selectedIndex];
+                    if (selectedItem) {
+                        // FIX: Ek sath type update aur content clear kar rahe hain
+                        onUpdate({ type: selectedItem.type, content: '' });
+                        onHideMenu();
+                    }
+                }
+                return;
+            }
+            if (e.key === 'Escape') {
+                onHideMenu();
+                return;
+            }
+        }
+
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault()
+            if (block.content === '/') {
+                onUpdate({ content: '' })
+                onHideMenu()
+            } else {
+                onEnter()
+            }
+        }
+        if (e.key === 'Backspace' && !e.target.value) {
+            onBackspace(true)
+        }
+        if (e.key === '/' && !e.target.value) {
+            setTimeout(() => onShowMenu(), 10)
+        }
+    }
+
+    if (block.type === 'link') return <LinkBlock block={block} onUpdate={onUpdate} onDelete={onDelete} />
+    if (block.type === 'video') return <VideoBlock block={block} onUpdate={onUpdate} onDelete={onDelete} />
+    if (block.type === 'audio') return <AudioBlock block={block} onUpdate={onUpdate} onDelete={onDelete} />
+    if (block.type === 'image') return <ImageBlock block={block} onUpdate={onUpdate} onDelete={onDelete} />
+    if (block.type === 'table') return <TableBlock block={block} onUpdate={onUpdate} onDelete={onDelete} />
+
+    if (block.type === 'divider') {
+        return (
+            <div className="group flex items-center gap-2 my-8">
+                <hr className="flex-1 border-[#e9e9e7]" />
+                <button onClick={onDelete} className="hover-reveal text-xs text-[#9b9a97] hover:text-red-400 transition-colors">×</button>
+            </div>
+        )
+    }
+
+    if (block.type === 'callout') {
+        return (
+            <div className={`callout-block my-6 group ${isDiary ? 'border-none bg-[#f1f1ef]/50' : ''}`}>
+                <span className="text-lg flex-shrink-0">💡</span>
+                <textarea
+                    id={`block-${block.id}`}
+                    ref={inputRef}
+                    value={block.content}
+                    onChange={e => onUpdate({ content: e.target.value })}
+                    onKeyDown={handleKeyDown}
+                    placeholder="Callout text..."
+                    rows={1}
+                    className={`block-editor-line flex-1 text-sm resize-none overflow-hidden leading-relaxed ${isDiary ? 'text-base' : ''}`}
+                    style={{ minHeight: '1.5em' }}
+                    onInput={e => { e.target.style.height = 'auto'; e.target.style.height = e.target.scrollHeight + 'px' }}
+                />
+            </div>
+        )
+    }
+
+    if (block.type === 'toggle') {
+        return (
+            <div className="my-2">
+                <div className="flex items-start gap-1">
+                    <button onClick={onToggleOpen} className="mt-1 p-0.5 text-[#9b9a97] hover:text-[#37352f] transition-colors">
+                        {toggleOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+                    </button>
+                    <textarea
+                        id={`block-${block.id}`}
+                        ref={inputRef}
+                        value={block.content}
+                        onChange={e => onUpdate({ content: e.target.value })}
+                        onKeyDown={handleKeyDown}
+                        placeholder="Toggle title..."
+                        rows={1}
+                        className={`block-editor-line text-sm font-medium flex-1 resize-none overflow-hidden leading-relaxed ${isDiary ? 'text-lg' : ''}`}
+                        onInput={e => { e.target.style.height = 'auto'; e.target.style.height = e.target.scrollHeight + 'px' }}
+                    />
+                </div>
+                {toggleOpen && (
+                    <div className="ml-6 pl-3 border-l border-[#e9e9e7] mt-1">
+                        <textarea
+                            ref={toggleChildRef}
+                            value={block.children || ''}
+                            onChange={e => onUpdate({ children: e.target.value })}
+                            placeholder="Toggle content..."
+                            rows={1}
+                            className={`block-editor-line text-sm w-full resize-none overflow-hidden text-[#787774] leading-relaxed ${isDiary ? 'text-base' : ''}`}
+                            onInput={e => { e.target.style.height = 'auto'; e.target.style.height = e.target.scrollHeight + 'px' }}
+                        />
+                    </div>
+                )}
+            </div>
+        )
+    }
+
+    const getStyles = () => {
+        const diaryBase = isDiary ? 'leading-relaxed' : ''
+        switch (block.type) {
+            case 'heading1': return `${isDiary ? 'text-4xl' : 'text-2xl'} font-bold text-[#37352f] mt-10 mb-4 ${diaryBase}`
+            case 'heading2': return `${isDiary ? 'text-3xl' : 'text-xl'} font-semibold text-[#37352f] mt-8 mb-3 ${diaryBase}`
+            case 'heading3': return `${isDiary ? 'text-2xl' : 'text-base'} font-semibold text-[#37352f] mt-6 mb-2 ${diaryBase}`
+            case 'bullet': return `${isDiary ? 'text-lg' : 'text-sm'} text-[#37352f] ${diaryBase}`
+            default: return `${isDiary ? 'text-lg' : 'text-sm'} text-[#37352f] ${diaryBase}`
+        }
+    }
+
+    return (
+        <div className="group flex items-start gap-1 my-0.5 relative">
+            {block.type === 'bullet' && (
+                <div className="w-6 flex-shrink-0 flex justify-center text-[#9b9a97] pt-[3px] select-none">
+                    <span className="text-[18px] leading-none">•</span>
+                </div>
+            )}
+
+            {block.type === 'numbered' && (
+                <div className="w-6 flex-shrink-0 text-[#9b9a97] text-sm text-right pr-1 pt-[3px] font-medium select-none">
+                    {listNumber}.
+                </div>
+            )}
+
+            <div className="flex-1 relative">
+                <textarea
+                    id={`block-${block.id}`}
+                    ref={inputRef}
+                    value={block.content}
+                    onChange={e => onUpdate({ content: e.target.value })}
+                    onKeyDown={handleKeyDown}
+                    placeholder={block.type === 'paragraph' ? "Type '/' for commands..." : `${BLOCK_TYPES.find(b => b.type === block.type)?.label}...`}
+                    rows={1}
+                    className={`block-editor-line w-full resize-none overflow-hidden ${getStyles()}`}
+                    style={{ minHeight: '1.5em' }}
+                    onInput={e => { e.target.style.height = 'auto'; e.target.style.height = e.target.scrollHeight + 'px' }}
+                />
+
+                {showMenu && (
+                    <div className="absolute top-full left-0 z-50 bg-white border border-[#e9e9e7] rounded-xl shadow-2xl py-2 w-52 animate-fade-in max-h-[300px] overflow-y-auto">
+                        {filteredBlocks.length > 0 ? (
+                            filteredBlocks.map((item, i) => {
+                                const showHeader = i === 0 || item.category !== filteredBlocks[i - 1].category;
+                                const Icon = item.icon;
+                                const isSelected = i === selectedIndex;
+
+                                return (
+                                    <div key={item.type} id={isSelected ? 'selected-menu-item' : ''}>
+                                        {showHeader && (
+                                            <p className="px-3 py-1 mt-1 text-[10px] font-bold text-[#9b9a97] uppercase tracking-widest">
+                                                {item.category}
+                                            </p>
+                                        )}
+                                        <button
+                                            onClick={() => {
+                                                // FIX: Click karne par bhi ek sath type update aur content clear kar rahe hain
+                                                onUpdate({ type: item.type, content: '' });
+                                                onHideMenu();
+                                            }}
+                                            className={`flex items-center gap-2 w-full px-3 py-1.5 text-xs text-[#37352f] transition-colors ${isSelected ? 'bg-[#f1f1ef] font-medium' : 'hover:bg-[#f7f7f5]'}`}
+                                        >
+                                            {Icon ? <Icon size={13} className={`text-[#9b9a97] ${isSelected ? 'text-[#2eaadc]' : ''}`} /> : <span className="w-3" />}
+                                            {item.label}
+                                        </button>
+                                    </div>
+                                )
+                            })
+                        ) : (
+                            <div className="px-3 py-3 text-xs text-[#9b9a97] text-center">No blocks found</div>
+                        )}
+                    </div>
+                )}
+            </div>
+        </div>
+    )
+}
