@@ -28,31 +28,55 @@ export default function ProjectDetailPage() {
     const [isSaving, setIsSaving] = useState(false)
     const [lastSaved, setLastSaved] = useState(null)
     const [notFoundDelay, setNotFoundDelay] = useState(false)
-
-    // Ensure projects, tasks and notes are loaded when opening a project detail
+    // Ensure projects, tasks and notes are loaded only once
     useEffect(() => {
-        if (!projects || projects.length === 0) {
-            fetchEndpoint('projects').then(() => setProjectsLoaded(true))
-        } else {
-            setProjectsLoaded(true)
-        }
-        if (!tasks || tasks.length === 0) fetchEndpoint('tasks')
-        if (!notes || notes.length === 0) fetchEndpoint('notes')
-    }, [projects, tasks, notes, fetchEndpoint])
+        let mounted = true
 
-    // Find the project
-    useEffect(() => {
-        if (projectsLoaded) {
-            const foundProject = projects.find(p => p.id === projectId)
-            setProject(foundProject)
-            if (foundProject) setNotFoundDelay(false)
-            else {
-                const timer = setTimeout(() => setNotFoundDelay(true), 400)
-                return () => clearTimeout(timer)
+        const loadData = async () => {
+            try {
+                if (!projects || projects.length === 0) {
+                    await fetchEndpoint('projects')
+                }
+
+                if (!tasks || tasks.length === 0) {
+                    await fetchEndpoint('tasks')
+                }
+
+                if (!notes || notes.length === 0) {
+                    await fetchEndpoint('notes')
+                }
+
+                if (mounted) {
+                    setProjectsLoaded(true)
+                }
+            } catch (err) {
+                console.error('Initial load failed', err)
             }
         }
-    }, [projects, projectId, projectsLoaded])
 
+        loadData()
+
+        return () => {
+            mounted = false
+        }
+    }, [])
+
+
+
+    // Find the project (runs when projects actually update)
+    useEffect(() => {
+        if (!projectsLoaded) return
+
+        const foundProject = projects.find(p => p.id === projectId)
+        setProject(foundProject)
+
+        if (foundProject) {
+            setNotFoundDelay(false)
+        } else {
+            const timer = setTimeout(() => setNotFoundDelay(true), 400)
+            return () => clearTimeout(timer)
+        }
+    }, [projects, projectId, projectsLoaded])
     // Filter tasks for this project
     const projectTasks = tasks.filter(t => t.projectId === projectId)
 
