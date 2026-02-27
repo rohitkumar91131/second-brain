@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState } from 'react'
-import { ChevronRight, ChevronDown } from 'lucide-react'
+import { ChevronRight, ChevronDown, GripVertical } from 'lucide-react'
 import { BLOCK_TYPES } from './constants'
 import VideoBlock from './blocks/VideoBlock'
 import AudioBlock from './blocks/AudioBlock'
@@ -7,14 +7,17 @@ import ImageBlock from './blocks/ImageBlock'
 import TableBlock from './blocks/TableBlock'
 import LinkBlock from './blocks/LinkBlock'
 
-// Categories ko direct type ke basis par set karte hain
 const CATEGORIZED_BLOCKS = BLOCK_TYPES.map(b => {
     if (['image', 'video', 'audio'].includes(b.type)) return { ...b, category: 'Media' };
     if (['table', 'divider', 'callout', 'link'].includes(b.type)) return { ...b, category: 'Advanced' };
     return { ...b, category: 'Basics' };
 });
 
-export default function BlockRow({ block, index, listNumber, isDiary, showMenu, toggleOpen, onToggleOpen, onUpdate, onDelete, onShowMenu, onHideMenu, onChangeType, onEnter, onBackspace }) {
+export default function BlockRow({
+    block, index, listNumber, isDiary, showMenu, toggleOpen,
+    onToggleOpen, onUpdate, onDelete, onShowMenu, onHideMenu,
+    onChangeType, onEnter, onBackspace, onDragHandleDown, onDragHandleUp
+}) {
     const inputRef = useRef(null)
     const toggleChildRef = useRef(null)
     const [selectedIndex, setSelectedIndex] = useState(0)
@@ -62,7 +65,6 @@ export default function BlockRow({ block, index, listNumber, isDiary, showMenu, 
                 if (filteredBlocks.length > 0) {
                     const selectedItem = filteredBlocks[selectedIndex];
                     if (selectedItem) {
-                        // FIX: Ek sath type update aur content clear kar rahe hain
                         onUpdate({ type: selectedItem.type, content: '' });
                         onHideMenu();
                     }
@@ -93,14 +95,24 @@ export default function BlockRow({ block, index, listNumber, isDiary, showMenu, 
     }
 
     if (block.type === 'link') return <LinkBlock block={block} onUpdate={onUpdate} onDelete={onDelete} />
-    if (block.type === 'video') return <VideoBlock block={block} onUpdate={onUpdate} onDelete={onDelete} />
-    if (block.type === 'audio') return <AudioBlock block={block} onUpdate={onUpdate} onDelete={onDelete} />
-    if (block.type === 'image') return <ImageBlock block={block} onUpdate={onUpdate} onDelete={onDelete} />
-    if (block.type === 'table') return <TableBlock block={block} onUpdate={onUpdate} onDelete={onDelete} />
+    if (block.type === 'video') return <VideoBlock block={block} onUpdate={onUpdate} onDelete={onDelete} onDragHandleDown={onDragHandleDown} onDragHandleUp={onDragHandleUp} />
+    if (block.type === 'audio') return <AudioBlock block={block} onUpdate={onUpdate} onDelete={onDelete} onDragHandleDown={onDragHandleDown} onDragHandleUp={onDragHandleUp} />
+    if (block.type === 'image') return <ImageBlock block={block} onUpdate={onUpdate} onDelete={onDelete} onDragHandleDown={onDragHandleDown} onDragHandleUp={onDragHandleUp} />
+    if (block.type === 'table') return <TableBlock block={block} onUpdate={onUpdate} onDelete={onDelete} onDragHandleDown={onDragHandleDown} onDragHandleUp={onDragHandleUp} />
 
     if (block.type === 'divider') {
         return (
-            <div className="group flex items-center gap-2 my-8">
+            <div className="group flex items-center gap-2 my-8 relative">
+                <div
+                    className="absolute -left-6 top-0 opacity-0 group-hover:opacity-100 cursor-grab text-[#9b9a97] hover:bg-[#e9e9e7] rounded w-5 h-6 flex items-center justify-center transition-all z-10"
+                    onMouseDown={onDragHandleDown}
+                    onMouseUp={onDragHandleUp}
+                    onMouseLeave={onDragHandleUp}
+                    onTouchStart={onDragHandleDown}
+                    onTouchEnd={onDragHandleUp}
+                >
+                    <GripVertical size={14} />
+                </div>
                 <hr className="flex-1 border-[#e9e9e7]" />
                 <button onClick={onDelete} className="hover-reveal text-xs text-[#9b9a97] hover:text-red-400 transition-colors">×</button>
             </div>
@@ -109,7 +121,17 @@ export default function BlockRow({ block, index, listNumber, isDiary, showMenu, 
 
     if (block.type === 'callout') {
         return (
-            <div className={`callout-block my-6 group ${isDiary ? 'border-none bg-[#f1f1ef]/50' : ''}`}>
+            <div className={`callout-block my-6 group relative ${isDiary ? 'border-none bg-[#f1f1ef]/50' : ''}`}>
+                <div
+                    className="absolute -left-6 top-1 opacity-0 group-hover:opacity-100 cursor-grab text-[#9b9a97] hover:bg-[#e9e9e7] rounded w-5 h-6 flex items-center justify-center transition-all z-10"
+                    onMouseDown={onDragHandleDown}
+                    onMouseUp={onDragHandleUp}
+                    onMouseLeave={onDragHandleUp}
+                    onTouchStart={onDragHandleDown}
+                    onTouchEnd={onDragHandleUp}
+                >
+                    <GripVertical size={14} />
+                </div>
                 <span className="text-lg flex-shrink-0">💡</span>
                 <textarea
                     id={`block-${block.id}`}
@@ -129,7 +151,17 @@ export default function BlockRow({ block, index, listNumber, isDiary, showMenu, 
 
     if (block.type === 'toggle') {
         return (
-            <div className="my-2">
+            <div className="my-2 group relative">
+                <div
+                    className="absolute -left-6 top-1 opacity-0 group-hover:opacity-100 cursor-grab text-[#9b9a97] hover:bg-[#e9e9e7] rounded w-5 h-6 flex items-center justify-center transition-all z-10"
+                    onMouseDown={onDragHandleDown}
+                    onMouseUp={onDragHandleUp}
+                    onMouseLeave={onDragHandleUp}
+                    onTouchStart={onDragHandleDown}
+                    onTouchEnd={onDragHandleUp}
+                >
+                    <GripVertical size={14} />
+                </div>
                 <div className="flex items-start gap-1">
                     <button onClick={onToggleOpen} className="mt-1 p-0.5 text-[#9b9a97] hover:text-[#37352f] transition-colors">
                         {toggleOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
@@ -176,6 +208,18 @@ export default function BlockRow({ block, index, listNumber, isDiary, showMenu, 
 
     return (
         <div className="group flex items-start gap-1 my-0.5 relative">
+
+            <div
+                className="absolute -left-6 top-1 opacity-0 group-hover:opacity-100 cursor-grab text-[#9b9a97] hover:bg-[#e9e9e7] rounded w-5 h-6 flex items-center justify-center transition-all z-10"
+                onMouseDown={onDragHandleDown}
+                onMouseUp={onDragHandleUp}
+                onMouseLeave={onDragHandleUp}
+                onTouchStart={onDragHandleDown}
+                onTouchEnd={onDragHandleUp}
+            >
+                <GripVertical size={14} />
+            </div>
+
             {block.type === 'bullet' && (
                 <div className="w-6 flex-shrink-0 flex justify-center text-[#9b9a97] pt-[3px] select-none">
                     <span className="text-[18px] leading-none">•</span>
@@ -219,7 +263,6 @@ export default function BlockRow({ block, index, listNumber, isDiary, showMenu, 
                                         )}
                                         <button
                                             onClick={() => {
-                                                // FIX: Click karne par bhi ek sath type update aur content clear kar rahe hain
                                                 onUpdate({ type: item.type, content: '' });
                                                 onHideMenu();
                                             }}

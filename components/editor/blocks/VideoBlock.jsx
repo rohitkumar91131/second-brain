@@ -1,9 +1,9 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Video, Minus, Maximize2, X } from 'lucide-react'
+import { Video, Minus, Maximize2, X, GripVertical } from 'lucide-react' // GripVertical import kiya
 
-export default function VideoBlock({ block, onUpdate, onDelete }) {
+export default function VideoBlock({ block, onUpdate, onDelete, onDragHandleDown, onDragHandleUp }) { // Naye props add kiye
     const [isFullScreen, setIsFullScreen] = useState(false)
     const videoRef = useRef(null)
 
@@ -46,7 +46,20 @@ export default function VideoBlock({ block, onUpdate, onDelete }) {
     }, [])
 
     return (
-        <div className="group flex flex-col gap-2 my-6 relative">
+        <div className="group flex flex-col gap-2 my-6 relative w-full">
+
+            {/* --- DRAG HANDLE ADD KIYA --- */}
+            <div
+                className="absolute -left-6 top-1 opacity-0 group-hover:opacity-100 cursor-grab text-[#9b9a97] hover:bg-[#e9e9e7] rounded w-5 h-6 flex items-center justify-center transition-all z-10"
+                onMouseDown={onDragHandleDown}
+                onMouseUp={onDragHandleUp}
+                onMouseLeave={onDragHandleUp}
+                onTouchStart={onDragHandleDown}
+                onTouchEnd={onDragHandleUp}
+            >
+                <GripVertical size={14} />
+            </div>
+
             {block.content ? (
                 <div className="relative w-full rounded-lg overflow-hidden bg-black/5 aspect-video border border-[#e9e9e7] group/vid">
                     {embedInfo.type === 'video' ? (

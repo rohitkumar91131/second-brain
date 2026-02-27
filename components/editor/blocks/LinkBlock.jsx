@@ -1,8 +1,21 @@
-import { Link as LinkIcon, Minus, ExternalLink } from 'lucide-react'
+import { Link as LinkIcon, Minus, ExternalLink, GripVertical } from 'lucide-react' // GripVertical import kiya
 
-export default function LinkBlock({ block, onUpdate, onDelete }) {
+export default function LinkBlock({ block, onUpdate, onDelete, onDragHandleDown, onDragHandleUp }) { // Naye props add kiye
     return (
         <div className="group flex flex-col gap-2 my-4 relative w-full">
+
+            {/* --- DRAG HANDLE ADD KIYA --- */}
+            <div
+                className="absolute -left-6 top-1 opacity-0 group-hover:opacity-100 cursor-grab text-[#9b9a97] hover:bg-[#e9e9e7] rounded w-5 h-6 flex items-center justify-center transition-all z-10"
+                onMouseDown={onDragHandleDown}
+                onMouseUp={onDragHandleUp}
+                onMouseLeave={onDragHandleUp}
+                onTouchStart={onDragHandleDown}
+                onTouchEnd={onDragHandleUp}
+            >
+                <GripVertical size={14} />
+            </div>
+
             {block.content ? (
                 <div className="relative flex items-center gap-3 p-3 rounded-lg border border-[#e9e9e7] bg-white hover:bg-[#f9f9f8] transition-colors shadow-sm">
                     <div className="w-8 h-8 rounded bg-blue-50 flex items-center justify-center text-blue-500 flex-shrink-0">
@@ -10,7 +23,6 @@ export default function LinkBlock({ block, onUpdate, onDelete }) {
                     </div>
                     <div className="flex-1 min-w-0">
                         <a
-                            // Check karega agar URL me http nahi hai toh laga dega
                             href={block.content.startsWith('http') ? block.content : `https://${block.content}`}
                             target="_blank"
                             rel="noopener noreferrer"

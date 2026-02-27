@@ -1,6 +1,6 @@
-import { Music, Minus } from 'lucide-react'
+import { Music, Minus, GripVertical } from 'lucide-react'
 
-export default function AudioBlock({ block, onUpdate, onDelete }) {
+export default function AudioBlock({ block, onUpdate, onDelete, onDragHandleDown, onDragHandleUp }) {
     const getAudioEmbed = (url) => {
         if (!url) return null;
         // YouTube detection
@@ -15,7 +15,20 @@ export default function AudioBlock({ block, onUpdate, onDelete }) {
     const embed = getAudioEmbed(block.content);
 
     return (
-        <div className="group flex flex-col gap-2 my-6 relative">
+        <div className="group flex flex-col gap-2 my-6 relative w-full">
+
+            {/* --- DRAG HANDLE ADD KIYA --- */}
+            <div
+                className="absolute -left-6 top-2 opacity-0 group-hover:opacity-100 cursor-grab text-[#9b9a97] hover:bg-[#e9e9e7] rounded w-5 h-6 flex items-center justify-center transition-all z-10"
+                onMouseDown={onDragHandleDown}
+                onMouseUp={onDragHandleUp}
+                onMouseLeave={onDragHandleUp}
+                onTouchStart={onDragHandleDown}
+                onTouchEnd={onDragHandleUp}
+            >
+                <GripVertical size={14} />
+            </div>
+
             {block.content ? (
                 <div className="relative w-full p-4 rounded-xl bg-white border border-[#e9e9e7] shadow-sm hover:shadow-md transition-all flex flex-col gap-3">
                     <div className="flex items-center gap-3">
@@ -73,7 +86,7 @@ export default function AudioBlock({ block, onUpdate, onDelete }) {
                     ) : (
                         <div className="w-full mt-1">
                             <audio
-                                key={embed.url} // Key is important in React to force reload the audio player when URL changes
+                                key={embed.url}
                                 controls
                                 src={embed.url}
                                 className="w-full h-11 outline-none rounded-md"
