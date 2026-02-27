@@ -3,7 +3,7 @@
 import { useApp } from '@/context/AppContext'
 import { Map, Plus, Trash2 } from 'lucide-react'
 
-const AREA_COLORS = ['#2eaadc', '#0f7b6c', '#6940a5', '#d9730d', '#e03e3e', '#0b6e99', '#37352f']
+const AREA_COLORS = ['#2eaadc', '#0f7b6c', '#6940a5', '#d9730d', '#e03e3e', '#0b6e99', 'var(--notion-text)']
 
 export default function AreasPage() {
     const { areas, updateAreas } = useApp()
@@ -29,8 +29,8 @@ export default function AreasPage() {
 
     return (
         <div className="flex flex-col h-full">
-            <div className="flex items-center justify-between px-6 py-3 border-b border-[#e9e9e7]">
-                <p className="text-xs text-[#9b9a97]">Areas of life to organize your projects and goals</p>
+            <div className="flex items-center justify-between px-6 py-3 border-b border-notion-border">
+                <p className="text-xs text-notion-muted">Areas of life to organize your projects and goals</p>
                 <button
                     onClick={addArea}
                     className="flex items-center gap-1.5 px-3 py-1.5 bg-[#37352f] text-white text-xs font-medium rounded-md hover:bg-[#2f2d28] transition-colors"
@@ -42,7 +42,7 @@ export default function AreasPage() {
 
             <div className="flex-1 overflow-auto p-6">
                 {areas.length === 0 ? (
-                    <div className="text-center py-16 text-[#9b9a97]">
+                    <div className="text-center py-16 text-notion-muted">
                         <Map size={40} className="mx-auto mb-3 opacity-30" />
                         <p className="text-sm">No areas yet. Add your first area of life!</p>
                     </div>
@@ -51,7 +51,7 @@ export default function AreasPage() {
                         {areas.map(area => (
                             <div
                                 key={area.id}
-                                className="group border border-[#e9e9e7] rounded-xl p-4 bg-white hover:shadow-sm transition-shadow"
+                                className="group border border-notion-border rounded-xl p-4 bg-notion-bg hover:shadow-sm transition-shadow"
                                 style={{ borderLeftColor: area.color, borderLeftWidth: 3 }}
                             >
                                 <div className="flex items-start justify-between">
@@ -60,7 +60,7 @@ export default function AreasPage() {
                                         <input
                                             value={area.title}
                                             onChange={e => updateArea(area.id, { title: e.target.value })}
-                                            className="text-sm font-semibold text-[#37352f] bg-transparent focus:outline-none border-b border-transparent focus:border-[#e9e9e7]"
+                                            className="text-sm font-semibold text-notion-text bg-transparent focus:outline-none border-b border-transparent focus:border-notion-border"
                                         />
                                     </div>
                                     <button
@@ -74,7 +74,7 @@ export default function AreasPage() {
                                     value={area.description}
                                     onChange={e => updateArea(area.id, { description: e.target.value })}
                                     placeholder="Description..."
-                                    className="text-xs text-[#9b9a97] bg-transparent focus:outline-none w-full"
+                                    className="text-xs text-notion-muted bg-transparent focus:outline-none w-full"
                                 />
                             </div>
                         ))}

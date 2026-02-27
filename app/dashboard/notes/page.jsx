@@ -55,15 +55,15 @@ export default function NotesPage() {
     return (
         <div className="flex flex-col h-full">
 
-            <div className="flex items-center gap-3 px-6 py-3 border-b border-[#e9e9e7]">
-                <div className="flex-1 flex items-center gap-2 px-3 py-1.5 border border-[#e9e9e7] rounded-md bg-[#f7f7f5]">
-                    <Search size={13} className="text-[#9b9a97]" />
+            <div className="flex items-center gap-3 px-6 py-3 border-b border-notion-border">
+                <div className="flex-1 flex items-center gap-2 px-3 py-1.5 border border-notion-border rounded-md bg-notion-sidebar">
+                    <Search size={13} className="text-notion-muted" />
                     <input
                         type="text"
                         placeholder="Search notes..."
                         value={search}
                         onChange={e => setSearch(e.target.value)}
-                        className="flex-1 text-sm bg-transparent focus:outline-none text-[#37352f]"
+                        className="flex-1 text-sm bg-transparent focus:outline-none text-notion-text"
                     />
                 </div>
 
@@ -78,7 +78,7 @@ export default function NotesPage() {
 
             <div className="flex-1 overflow-auto p-6">
                 {filtered.length === 0 ? (
-                    <div className="text-center py-16 text-[#9b9a97]">
+                    <div className="text-center py-16 text-notion-muted">
                         <FileText size={40} className="mx-auto mb-3 opacity-30" />
                         <p className="text-sm">No notes yet.</p>
                     </div>

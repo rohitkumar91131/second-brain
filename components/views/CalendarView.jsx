@@ -27,16 +27,16 @@ export default function CalendarView({ items, onUpdate }) {
             <div className="flex items-center justify-between mb-4">
                 <button
                     onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
-                    className="p-1.5 rounded hover:bg-[#efefef] text-[#9b9a97] hover:text-[#37352f] transition-colors"
+                    className="p-1.5 rounded hover:bg-notion-hover text-notion-muted hover:text-notion-text transition-colors"
                 >
                     <ChevronLeft size={16} />
                 </button>
-                <h3 className="text-sm font-semibold text-[#37352f]">
+                <h3 className="text-sm font-semibold text-notion-text">
                     {format(currentMonth, 'MMMM yyyy')}
                 </h3>
                 <button
                     onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
-                    className="p-1.5 rounded hover:bg-[#efefef] text-[#9b9a97] hover:text-[#37352f] transition-colors"
+                    className="p-1.5 rounded hover:bg-notion-hover text-notion-muted hover:text-notion-text transition-colors"
                 >
                     <ChevronRight size={16} />
                 </button>
@@ -45,25 +45,25 @@ export default function CalendarView({ items, onUpdate }) {
             {/* Day headers */}
             <div className="grid grid-cols-7 mb-1">
                 {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
-                    <div key={d} className="text-center text-xs font-medium text-[#9b9a97] py-1">
+                    <div key={d} className="text-center text-xs font-medium text-notion-muted py-1">
                         {d}
                     </div>
                 ))}
             </div>
 
             {/* Calendar grid */}
-            <div className="grid grid-cols-7 gap-px bg-[#e9e9e7] border border-[#e9e9e7] rounded-lg overflow-hidden">
+            <div className="grid grid-cols-7 gap-px bg-notion-border border border-notion-border rounded-lg overflow-hidden">
                 {paddedDays.map((day, idx) => {
                     const dayItems = getItemsForDay(day)
                     const isCurrentDay = day && isToday(day)
                     return (
                         <div
                             key={idx}
-                            className={`calendar-day bg-white p-1.5 ${!day ? 'bg-[#f7f7f5]' : ''}`}
+                            className={`calendar-day bg-notion-bg p-1.5 ${!day ? 'bg-notion-sidebar' : ''}`}
                         >
                             {day && (
                                 <>
-                                    <div className={`text-xs font-medium mb-1 w-6 h-6 flex items-center justify-center rounded-full ${isCurrentDay ? 'bg-[#37352f] text-white' : 'text-[#37352f]'
+                                    <div className={`text-xs font-medium mb-1 w-6 h-6 flex items-center justify-center rounded-full ${isCurrentDay ? 'bg-[#37352f] text-white' : 'text-notion-text'
                                         }`}>
                                         {format(day, 'd')}
                                     </div>
@@ -74,14 +74,14 @@ export default function CalendarView({ items, onUpdate }) {
                                                 className="text-[10px] px-1 py-0.5 rounded truncate"
                                                 style={{
                                                     backgroundColor: item.status === 'Done' ? '#dcfce7' : item.status === 'In Progress' ? '#dbeafe' : '#f1f1ef',
-                                                    color: item.status === 'Done' ? '#166534' : item.status === 'In Progress' ? '#1d4ed8' : '#787774',
+                                                    color: item.status === 'Done' ? '#166534' : item.status === 'In Progress' ? '#1d4ed8' : 'var(--notion-muted)',
                                                 }}
                                             >
                                                 {item.title}
                                             </div>
                                         ))}
                                         {dayItems.length > 3 && (
-                                            <div className="text-[10px] text-[#9b9a97] px-1">+{dayItems.length - 3} more</div>
+                                            <div className="text-[10px] text-notion-muted px-1">+{dayItems.length - 3} more</div>
                                         )}
                                     </div>
                                 </>

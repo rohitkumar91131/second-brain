@@ -41,7 +41,7 @@ export default function GoalsPage() {
 
     if (isLoading) {
         return (
-            <div className="flex items-center justify-center h-full w-full relative overflow-hidden bg-white/50 backdrop-blur-sm z-50">
+            <div className="flex items-center justify-center h-full w-full relative overflow-hidden bg-notion-bg/50 backdrop-blur-sm z-50">
                 <Loader />
             </div>
         )
@@ -49,7 +49,7 @@ export default function GoalsPage() {
 
     return (
         <div className="flex flex-col h-full">
-            <div className="flex items-center gap-3 px-6 py-3 border-b border-[#e9e9e7] flex-wrap">
+            <div className="flex items-center gap-3 px-6 py-3 border-b border-notion-border flex-wrap">
                 <ViewSwitcher activeView={view} onViewChange={setView} tabName="Goals" />
                 <div className="ml-auto">
                     <button
@@ -63,12 +63,12 @@ export default function GoalsPage() {
             </div>
 
             {/* Overall progress */}
-            <div className="flex items-center gap-4 px-6 py-2 border-b border-[#e9e9e7]">
-                <span className="text-xs text-[#9b9a97]">Overall progress</span>
+            <div className="flex items-center gap-4 px-6 py-2 border-b border-notion-border">
+                <span className="text-xs text-notion-muted">Overall progress</span>
                 <div className="flex-1 max-w-xs">
                     <ProgressBar value={avgProgress} color="#f97316" />
                 </div>
-                <span className="text-xs text-[#9b9a97]">{goals.filter(g => g.status === 'Active').length} active goals</span>
+                <span className="text-xs text-notion-muted">{goals.filter(g => g.status === 'Active').length} active goals</span>
             </div>
 
             <div className="flex-1 overflow-auto">

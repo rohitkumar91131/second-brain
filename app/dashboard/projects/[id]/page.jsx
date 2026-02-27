@@ -183,7 +183,7 @@ export default function ProjectDetailPage() {
 
     if (loading || !projectsLoaded) {
         return (
-            <div className="flex items-center justify-center h-full w-full relative overflow-hidden bg-white/50 backdrop-blur-sm z-50">
+            <div className="flex items-center justify-center h-full w-full relative overflow-hidden bg-notion-bg/50 backdrop-blur-sm z-50">
                 <Loader />
             </div>
         )
@@ -192,7 +192,7 @@ export default function ProjectDetailPage() {
     if (!project && notFoundDelay) {
         return (
             <div className="flex flex-col items-center justify-center h-full">
-                <div className="text-[#9b9a97] mb-4">Project not found</div>
+                <div className="text-notion-muted mb-4">Project not found</div>
                 <Link href="/dashboard/projects" className="text-blue-600 hover:text-blue-700 text-sm">
                     Back to Projects
                 </Link>
@@ -211,29 +211,29 @@ export default function ProjectDetailPage() {
     // If a note is selected, show the note editor
     if (selectedNote) {
         return (
-            <div className="flex flex-col h-full bg-white">
-                <div className="flex items-center gap-3 px-6 py-3 border-b border-[#e9e9e7] bg-white/80 backdrop-blur-md z-10">
+            <div className="flex flex-col h-full bg-notion-bg">
+                <div className="flex items-center gap-3 px-6 py-3 border-b border-notion-border bg-notion-bg/80 backdrop-blur-md z-10">
                     <button
                         onClick={handleCloseNote}
-                        className="p-1.5 rounded-lg hover:bg-[#efefef] text-[#9b9a97] hover:text-[#37352f] transition-all"
+                        className="p-1.5 rounded-lg hover:bg-notion-hover text-notion-muted hover:text-notion-text transition-all"
                     >
                         <ChevronLeft size={16} />
                     </button>
 
                     <div className="flex-1 flex items-center gap-2">
-                        <span className="text-xs font-semibold text-[#9b9a97] uppercase tracking-wider">Notes</span>
+                        <span className="text-xs font-semibold text-notion-muted uppercase tracking-wider">Notes</span>
                         <span className="text-xs text-[#d3d1cb]">/</span>
                         <input
                             value={noteTitle}
                             onChange={(e) => setNoteTitle(e.target.value)}
-                            className="text-sm font-bold text-[#37352f] bg-transparent focus:outline-none flex-1 truncate"
+                            className="text-sm font-bold text-notion-text bg-transparent focus:outline-none flex-1 truncate"
                         />
                     </div>
 
                     <div className="flex items-center gap-4">
                         <div className="flex items-center gap-1.5">
                             <div className={`w-1.5 h-1.5 rounded-full ${isSaving ? 'bg-yellow-500 animate-pulse' : 'bg-[#2eaadc]'}`} />
-                            <span className="text-[10px] font-bold text-[#9b9a97] uppercase tracking-tighter">
+                            <span className="text-[10px] font-bold text-notion-muted uppercase tracking-tighter">
                                 {isSaving
                                     ? 'Saving...'
                                     : lastSaved
@@ -245,32 +245,32 @@ export default function ProjectDetailPage() {
                         <button
                             onClick={handleSaveNote}
                             disabled={isSaving}
-                            className="p-1.5 rounded-lg hover:bg-[#efefef] text-[#9b9a97] hover:text-[#37352f] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="p-1.5 rounded-lg hover:bg-notion-hover text-notion-muted hover:text-notion-text transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             <Save size={15} />
                         </button>
 
                         <button
                             onClick={handleDeleteNote}
-                            className="p-1.5 rounded-lg hover:bg-red-50 text-[#9b9a97] hover:text-red-500 transition-all"
+                            className="p-1.5 rounded-lg hover:bg-red-50 text-notion-muted hover:text-red-500 transition-all"
                         >
                             <Trash2 size={15} />
                         </button>
                     </div>
                 </div>
 
-                <div className="flex-1 overflow-auto py-12 px-6 bg-[#fcfcfc]">
+                <div className="flex-1 overflow-auto py-12 px-6 bg-notion-card">
                     <div className="max-w-3xl mx-auto">
                         <div className="mb-10">
                             <input
                                 value={noteTitle}
                                 onChange={(e) => setNoteTitle(e.target.value)}
                                 placeholder="Untitled Note"
-                                className="w-full text-5xl font-extrabold text-[#37352f] bg-transparent focus:outline-none placeholder-[#d3d1cb] tracking-tight leading-tight"
+                                className="w-full text-5xl font-extrabold text-notion-text bg-transparent focus:outline-none placeholder-[#d3d1cb] tracking-tight leading-tight"
                             />
 
                             <div className="flex flex-wrap items-center gap-2 mt-6">
-                                <div className="flex items-center gap-1.5 px-2.5 py-1 bg-[#f1f1ef] text-[#787774] text-xs font-bold rounded-lg border border-[#e9e9e7]/50 uppercase tracking-wider">
+                                <div className="flex items-center gap-1.5 px-2.5 py-1 bg-[#f1f1ef] text-notion-muted text-xs font-bold rounded-lg border border-notion-border/50 uppercase tracking-wider">
                                     <FileText size={12} />
                                     Note
                                 </div>
@@ -285,45 +285,45 @@ export default function ProjectDetailPage() {
     }
 
     return (
-        <div className="flex flex-col h-full bg-white">
+        <div className="flex flex-col h-full bg-notion-bg">
             {/* Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-[#e9e9e7]">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-notion-border">
                 <div className="flex items-center gap-3">
                     <Link
                         href="/dashboard/projects"
                         className="p-1.5 hover:bg-[#f0f0ee] rounded-md transition-colors"
                     >
-                        <ChevronLeft size={20} className="text-[#37352f]" />
+                        <ChevronLeft size={20} className="text-notion-text" />
                     </Link>
                     <div>
-                        <h1 className="text-2xl font-bold text-[#37352f]">{project.title}</h1>
-                        <p className="text-xs text-[#9b9a97] mt-1">{project.description}</p>
+                        <h1 className="text-2xl font-bold text-notion-text">{project.title}</h1>
+                        <p className="text-xs text-notion-muted mt-1">{project.description}</p>
                     </div>
                 </div>
 
                 {/* Date Selector - Top Right */}
-                <div className="flex items-center gap-2 bg-[#f7f7f5] p-2 rounded-lg">
+                <div className="flex items-center gap-2 bg-notion-sidebar p-2 rounded-lg">
                     <button
                         onClick={handlePrevDay}
-                        className="p-1.5 hover:bg-[#e9e9e7] rounded transition-colors"
+                        className="p-1.5 hover:bg-notion-border rounded transition-colors"
                         title="Previous day"
                     >
-                        <ChevronLeft size={16} className="text-[#37352f]" />
+                        <ChevronLeft size={16} className="text-notion-text" />
                     </button>
 
                     <div className="flex items-center gap-2 px-2 min-w-[180px] justify-center">
-                        <Calendar size={14} className="text-[#9b9a97]" />
-                        <span className="text-sm font-medium text-[#37352f] min-w-fit">
+                        <Calendar size={14} className="text-notion-muted" />
+                        <span className="text-sm font-medium text-notion-text min-w-fit">
                             {format(selectedDate, 'MMM d, yyyy')}
                         </span>
                     </div>
 
                     <button
                         onClick={handleNextDay}
-                        className="p-1.5 hover:bg-[#e9e9e7] rounded transition-colors"
+                        className="p-1.5 hover:bg-notion-border rounded transition-colors"
                         title="Next day"
                     >
-                        <ChevronRight size={16} className="text-[#37352f]" />
+                        <ChevronRight size={16} className="text-notion-text" />
                     </button>
                 </div>
             </div>
@@ -332,11 +332,11 @@ export default function ProjectDetailPage() {
             <div className="flex-1 overflow-auto">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6">
                     {/* Notes Section */}
-                    <div className="bg-[#f7f7f5] rounded-xl p-6 flex flex-col">
+                    <div className="bg-notion-sidebar rounded-xl p-6 flex flex-col">
                         <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center gap-2">
                                 <FileText size={18} className="text-green-600" />
-                                <h2 className="text-lg font-bold text-[#37352f]">
+                                <h2 className="text-lg font-bold text-notion-text">
                                     All Notes ({projectNotes.length})
                                 </h2>
                             </div>
@@ -351,7 +351,7 @@ export default function ProjectDetailPage() {
 
                         {projectNotes.length === 0 ? (
                             <div className="py-8 text-center flex-1 flex items-center justify-center">
-                                <p className="text-sm text-[#9b9a97] italic">
+                                <p className="text-sm text-notion-muted italic">
                                     No notes for this project
                                 </p>
                             </div>
@@ -363,12 +363,12 @@ export default function ProjectDetailPage() {
                                         href={`/dashboard/notes/${note.id}`}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="block p-4 bg-white rounded-lg hover:bg-[#efefef] transition-colors border border-[#e9e9e7] hover:border-[#d0ccc7] group"
+                                        className="block p-4 bg-notion-bg rounded-lg hover:bg-notion-hover transition-colors border border-notion-border hover:border-[#d0ccc7] group"
                                     >
-                                        <h3 className="font-semibold text-[#37352f] text-sm group-hover:text-blue-600 transition-colors">
+                                        <h3 className="font-semibold text-notion-text text-sm group-hover:text-blue-600 transition-colors">
                                             {note.title}
                                         </h3>
-                                        <p className="text-xs text-[#9b9a97] mt-1">
+                                        <p className="text-xs text-notion-muted mt-1">
                                             {note.createdAt ? format(parseISO(note.createdAt), 'MMM d, yyyy') : 'No date'}
                                         </p>
                                         {note.tags && note.tags.length > 0 && (
@@ -376,13 +376,13 @@ export default function ProjectDetailPage() {
                                                 {note.tags.slice(0, 3).map(tag => (
                                                     <span
                                                         key={tag}
-                                                        className="text-xs px-2 py-1 bg-[#f0f0ee] text-[#9b9a97] rounded"
+                                                        className="text-xs px-2 py-1 bg-[#f0f0ee] text-notion-muted rounded"
                                                     >
                                                         {tag}
                                                     </span>
                                                 ))}
                                                 {note.tags.length > 3 && (
-                                                    <span className="text-xs px-2 py-1 text-[#9b9a97]">
+                                                    <span className="text-xs px-2 py-1 text-notion-muted">
                                                         +{note.tags.length - 3}
                                                     </span>
                                                 )}
@@ -395,11 +395,11 @@ export default function ProjectDetailPage() {
                     </div>
 
                     {/* Tasks Section */}
-                    <div className="bg-[#f7f7f5] rounded-xl p-6 flex flex-col">
+                    <div className="bg-notion-sidebar rounded-xl p-6 flex flex-col">
                         <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center gap-2">
                                 <CheckSquare size={18} className="text-blue-600" />
-                                <h2 className="text-lg font-bold text-[#37352f]">
+                                <h2 className="text-lg font-bold text-notion-text">
                                     Tasks ({completedTasks}/{totalTasks})
                                 </h2>
                             </div>
@@ -417,7 +417,7 @@ export default function ProjectDetailPage() {
                             <select
                                 value={filter}
                                 onChange={(e) => setFilter(e.target.value)}
-                                className="px-3 py-1 text-sm border border-[#e9e9e7] rounded-md bg-white text-[#37352f]"
+                                className="px-3 py-1 text-sm border border-notion-border rounded-md bg-notion-bg text-notion-text"
                             >
                                 <option value="all">All</option>
                                 <option value="active">Active</option>
@@ -432,13 +432,13 @@ export default function ProjectDetailPage() {
 
                         {tasksForDate.length === 0 ? (
                             <div className="py-8 text-center flex-1 flex items-center justify-center">
-                                <p className="text-sm text-[#9b9a97] italic">
+                                <p className="text-sm text-notion-muted italic">
                                     No tasks scheduled for this date
                                 </p>
                             </div>
                         ) : filteredTasks.length === 0 ? (
                             <div className="py-8 text-center flex-1 flex items-center justify-center">
-                                <p className="text-sm text-[#9b9a97] italic">
+                                <p className="text-sm text-notion-muted italic">
                                     No {filterLabel}
                                 </p>
                             </div>
@@ -447,13 +447,13 @@ export default function ProjectDetailPage() {
                                 {filteredTasks.map(task => (
                                     <div
                                         key={task.id}
-                                        className="flex items-center gap-3 p-3 bg-white rounded-lg border border-[#e9e9e7] hover:bg-[#efefef] transition-colors group"
+                                        className="flex items-center gap-3 p-3 bg-notion-bg rounded-lg border border-notion-border hover:bg-notion-hover transition-colors group"
                                     >
                                         <button
                                             onClick={() => handleTaskToggle(task.id, task.completed)}
                                             className={`w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-all ${task.completed
                                                 ? 'bg-green-500 border-green-500'
-                                                : 'border-[#d3d1cb] group-hover:border-[#37352f]'
+                                                : 'border-notion-border group-hover:border-[#37352f]'
                                                 }`}
                                         >
                                             {task.completed && (
@@ -475,8 +475,8 @@ export default function ProjectDetailPage() {
                                         <div className="flex-1 min-w-0">
                                             <p
                                                 className={`text-sm font-medium truncate ${task.completed
-                                                    ? 'line-through text-[#9b9a97]'
-                                                    : 'text-[#37352f]'
+                                                    ? 'line-through text-notion-muted'
+                                                    : 'text-notion-text'
                                                     }`}
                                             >
                                                 {task.title}
@@ -503,46 +503,46 @@ export default function ProjectDetailPage() {
 
                 {/* Project Stats */}
                 <div className="px-6 pb-6">
-                    <div className="bg-gradient-to-br from-[#f7f7f5] to-[#f0f0ee] rounded-xl p-6 border border-[#e9e9e7]">
-                        <h3 className="font-bold text-[#37352f] mb-4">Project Overview</h3>
+                    <div className="bg-gradient-to-br from-[#f7f7f5] to-[#f0f0ee] rounded-xl p-6 border border-notion-border">
+                        <h3 className="font-bold text-notion-text mb-4">Project Overview</h3>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <div className="bg-white rounded-lg p-4">
-                                <p className="text-[#9b9a97] text-xs font-medium uppercase tracking-wide mb-2">
+                            <div className="bg-notion-bg rounded-lg p-4">
+                                <p className="text-notion-muted text-xs font-medium uppercase tracking-wide mb-2">
                                     Status
                                 </p>
-                                <p className="text-lg font-bold text-[#37352f]">{project.status}</p>
+                                <p className="text-lg font-bold text-notion-text">{project.status}</p>
                             </div>
-                            <div className="bg-white rounded-lg p-4">
-                                <p className="text-[#9b9a97] text-xs font-medium uppercase tracking-wide mb-2">
+                            <div className="bg-notion-bg rounded-lg p-4">
+                                <p className="text-notion-muted text-xs font-medium uppercase tracking-wide mb-2">
                                     Progress
                                 </p>
-                                <p className="text-lg font-bold text-[#37352f]">{project.progress}%</p>
+                                <p className="text-lg font-bold text-notion-text">{project.progress}%</p>
                             </div>
-                            <div className="bg-white rounded-lg p-4">
-                                <p className="text-[#9b9a97] text-xs font-medium uppercase tracking-wide mb-2">
+                            <div className="bg-notion-bg rounded-lg p-4">
+                                <p className="text-notion-muted text-xs font-medium uppercase tracking-wide mb-2">
                                     Due Date
                                 </p>
-                                <p className="text-lg font-bold text-[#37352f]">
+                                <p className="text-lg font-bold text-notion-text">
                                     {project.dueDate
                                         ? format(parseISO(project.dueDate), 'MMM d')
                                         : 'No date'}
                                 </p>
                             </div>
-                            <div className="bg-white rounded-lg p-4">
-                                <p className="text-[#9b9a97] text-xs font-medium uppercase tracking-wide mb-2">
+                            <div className="bg-notion-bg rounded-lg p-4">
+                                <p className="text-notion-muted text-xs font-medium uppercase tracking-wide mb-2">
                                     Tags
                                 </p>
-                                <p className="text-lg font-bold text-[#37352f]">{project.tags?.length || 0}</p>
+                                <p className="text-lg font-bold text-notion-text">{project.tags?.length || 0}</p>
                             </div>
                         </div>
 
                         {/* Progress Bar */}
                         <div className="mt-6">
                             <div className="flex items-center justify-between mb-2">
-                                <span className="text-sm font-medium text-[#37352f]">Progress</span>
-                                <span className="text-sm font-bold text-[#9b9a97]">{project.progress}%</span>
+                                <span className="text-sm font-medium text-notion-text">Progress</span>
+                                <span className="text-sm font-bold text-notion-muted">{project.progress}%</span>
                             </div>
-                            <div className="w-full bg-[#e9e9e7] rounded-full h-2 overflow-hidden">
+                            <div className="w-full bg-notion-border rounded-full h-2 overflow-hidden">
                                 <div
                                     className="bg-gradient-to-r from-blue-500 to-purple-500 h-full rounded-full transition-all"
                                     style={{ width: `${project.progress}%` }}
@@ -553,12 +553,12 @@ export default function ProjectDetailPage() {
                         {/* Tags */}
                         {project.tags && project.tags.length > 0 && (
                             <div className="mt-6">
-                                <p className="text-sm font-medium text-[#37352f] mb-2">Tags</p>
+                                <p className="text-sm font-medium text-notion-text mb-2">Tags</p>
                                 <div className="flex flex-wrap gap-2">
                                     {project.tags.map(tag => (
                                         <span
                                             key={tag}
-                                            className="text-xs px-3 py-1.5 bg-[#e9e9e7] text-[#37352f] rounded-full font-medium"
+                                            className="text-xs px-3 py-1.5 bg-notion-border text-notion-text rounded-full font-medium"
                                         >
                                             {tag}
                                         </span>

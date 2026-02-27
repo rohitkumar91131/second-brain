@@ -100,7 +100,7 @@ export default function TaskDetailPage() {
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center h-full w-full relative overflow-hidden bg-white/50 backdrop-blur-sm z-50">
+            <div className="flex items-center justify-center h-full w-full relative overflow-hidden bg-notion-bg/50 backdrop-blur-sm z-50">
                 <Loader />
             </div>
         )
@@ -108,7 +108,7 @@ export default function TaskDetailPage() {
 
     if (!task && notFoundDelay) {
         return (
-            <div className="flex items-center justify-center h-full text-[#9b9a97]">
+            <div className="flex items-center justify-center h-full text-notion-muted">
                 Task not found
             </div>
         )
@@ -132,7 +132,7 @@ export default function TaskDetailPage() {
     const lastCompleted = history.length ? history.slice().sort().pop() : null
 
     return (
-        <div className="flex flex-col h-full bg-white">
+        <div className="flex flex-col h-full bg-notion-bg">
             <div className="flex items-center justify-between px-6 py-4 border-b">
                 <div className="flex items-center gap-4">
                     <button
@@ -143,19 +143,19 @@ export default function TaskDetailPage() {
                     </button>
                     <div>
                         <h1 className="text-2xl font-bold">{task.title}</h1>
-                        <p className="text-sm text-[#9b9a97] mt-1">{task.notes}</p>
+                        <p className="text-sm text-notion-muted mt-1">{task.notes}</p>
                     </div>
                 </div>
                 <div className="flex items-center gap-4">
-                    <div className="text-sm text-[#9b9a97] text-right">
+                    <div className="text-sm text-notion-muted text-right">
                         <div>Current</div>
                         <div className="text-xl font-bold">{currentStreak}</div>
                     </div>
-                    <div className="text-sm text-[#9b9a97] text-right">
+                    <div className="text-sm text-notion-muted text-right">
                         <div>Longest</div>
                         <div className="text-xl font-bold">{longestStreak}</div>
                     </div>
-                    <div className="text-sm text-[#9b9a97] text-right">
+                    <div className="text-sm text-notion-muted text-right">
                         <div>Total</div>
                         <div className="text-xl font-bold">{totalCompletions}</div>
                     </div>
@@ -170,11 +170,11 @@ export default function TaskDetailPage() {
 
             <div className="p-6">
                 {lastCompleted ? (
-                    <div className="text-sm text-[#9b9a97]">
+                    <div className="text-sm text-notion-muted">
                         Last completed: {lastCompleted}
                     </div>
                 ) : (
-                    <div className="text-sm text-[#9b9a97]">
+                    <div className="text-sm text-notion-muted">
                         No completions yet
                     </div>
                 )}

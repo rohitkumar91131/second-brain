@@ -142,7 +142,7 @@ export default function PlatformDownloadPage() {
             <div className="min-h-screen flex flex-col items-center justify-center gap-6 px-6 text-center">
                 <AlertCircle size={48} className="text-red-400" />
                 <h1 className="text-2xl font-bold">Platform not found</h1>
-                <p className="text-[#787774]">The platform &quot;{platformId}&quot; is not supported yet.</p>
+                <p className="text-notion-muted">The platform &quot;{platformId}&quot; is not supported yet.</p>
                 <Link href="/downloads" className="px-6 py-3 bg-[#37352f] text-white rounded-xl font-semibold hover:bg-[#2f2d28] transition-all">
                     View all downloads
                 </Link>
@@ -151,9 +151,9 @@ export default function PlatformDownloadPage() {
     }
 
     return (
-        <div className="min-h-screen bg-[#ffffff] text-[#37352f]">
+        <div className="min-h-screen bg-notion-bg text-notion-text">
             {/* Navigation */}
-            <nav className="fixed top-0 w-full z-50 bg-white/70 backdrop-blur-md border-b border-[#e9e9e7]">
+            <nav className="fixed top-0 w-full z-50 bg-notion-bg/70 backdrop-blur-md border-b border-notion-border">
                 <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
                     <Link href="/" className="flex items-center gap-2">
                         <div className="w-8 h-8 bg-[#37352f] rounded-lg flex items-center justify-center">
@@ -162,9 +162,9 @@ export default function PlatformDownloadPage() {
                         <span className="font-bold text-lg tracking-tight">Second Brain</span>
                     </Link>
                     <div className="hidden md:flex items-center gap-8 text-sm font-medium">
-                        <Link href="/#features" className="hover:text-[#2eaadc] transition-colors">Features</Link>
-                        <Link href="/downloads" className="text-[#2eaadc] font-semibold">Downloads</Link>
-                        <Link href="/login" className="hover:text-[#2eaadc] transition-colors">Login</Link>
+                        <Link href="/#features" className="hover:text-notion-accent transition-colors">Features</Link>
+                        <Link href="/downloads" className="text-notion-accent font-semibold">Downloads</Link>
+                        <Link href="/login" className="hover:text-notion-accent transition-colors">Login</Link>
                         <Link
                             href="/register"
                             className="px-4 py-2 bg-[#37352f] text-white rounded-full hover:bg-[#2f2d28] transition-all shadow-lg shadow-[#37352f]/10"
@@ -180,7 +180,7 @@ export default function PlatformDownloadPage() {
                     {/* Back */}
                     <Link
                         href="/downloads"
-                        className="inline-flex items-center gap-2 text-sm text-[#787774] hover:text-[#37352f] transition-colors mb-8"
+                        className="inline-flex items-center gap-2 text-sm text-notion-muted hover:text-notion-text transition-colors mb-8"
                     >
                         <ArrowLeft size={16} /> Back to Downloads
                     </Link>
@@ -194,7 +194,7 @@ export default function PlatformDownloadPage() {
                             <h1 className="text-4xl font-extrabold mb-2">
                                 Second Brain for {platform.name}
                             </h1>
-                            <p className="text-[#787774] text-sm">
+                            <p className="text-notion-muted text-sm">
                                 Version {platform.version} &nbsp;·&nbsp; Released {platform.releaseDate} &nbsp;·&nbsp; {platform.size}
                             </p>
                         </div>
@@ -209,7 +209,7 @@ export default function PlatformDownloadPage() {
                         <button
                             disabled
                             aria-disabled="true"
-                            className="flex items-center gap-3 px-8 py-4 bg-white/50 text-[#37352f]/50 rounded-2xl font-bold text-lg cursor-not-allowed shadow-xl shadow-black/10 shrink-0"
+                            className="flex items-center gap-3 px-8 py-4 bg-notion-bg/50 text-notion-text/50 rounded-2xl font-bold text-lg cursor-not-allowed shadow-xl shadow-black/10 shrink-0"
                             title="Coming Soon"
                         >
                             <Download size={22} />
@@ -219,11 +219,11 @@ export default function PlatformDownloadPage() {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
                         {/* System Requirements */}
-                        <div className="bg-[#fcfcfc] border border-[#e9e9e7] rounded-3xl p-8">
+                        <div className="bg-notion-card border border-notion-border rounded-3xl p-8">
                             <h3 className="text-lg font-bold mb-5">System Requirements</h3>
                             <ul className="flex flex-col gap-3">
                                 {platform.requirements.map((req, i) => (
-                                    <li key={i} className="flex items-start gap-2 text-sm text-[#787774]">
+                                    <li key={i} className="flex items-start gap-2 text-sm text-notion-muted">
                                         <CheckCircle2 size={16} className="text-green-500 mt-0.5 shrink-0" />
                                         {req}
                                     </li>
@@ -232,11 +232,11 @@ export default function PlatformDownloadPage() {
                         </div>
 
                         {/* Installation Instructions */}
-                        <div className="bg-[#fcfcfc] border border-[#e9e9e7] rounded-3xl p-8">
+                        <div className="bg-notion-card border border-notion-border rounded-3xl p-8">
                             <h3 className="text-lg font-bold mb-5">How to Install</h3>
                             <ol className="flex flex-col gap-4">
                                 {platform.instructions.map((step, i) => (
-                                    <li key={i} className="flex items-start gap-3 text-sm text-[#787774]">
+                                    <li key={i} className="flex items-start gap-3 text-sm text-notion-muted">
                                         <span className="w-5 h-5 bg-[#37352f] text-white rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
                                             {i + 1}
                                         </span>
@@ -248,7 +248,7 @@ export default function PlatformDownloadPage() {
                     </div>
 
                     {/* Other platforms */}
-                    <div className="border border-[#e9e9e7] rounded-3xl p-8">
+                    <div className="border border-notion-border rounded-3xl p-8">
                         <h3 className="text-lg font-bold mb-5">Other Platforms</h3>
                         <div className="flex flex-wrap gap-3">
                             {allPlatforms
@@ -257,7 +257,7 @@ export default function PlatformDownloadPage() {
                                     <Link
                                         key={p.id}
                                         href={`/downloads/${p.id}`}
-                                        className="flex items-center gap-2 px-4 py-2.5 border border-[#e9e9e7] rounded-xl text-sm font-medium hover:bg-[#f7f7f5] hover:border-[#d3d1cb] transition-all"
+                                        className="flex items-center gap-2 px-4 py-2.5 border border-notion-border rounded-xl text-sm font-medium hover:bg-notion-sidebar hover:border-notion-border transition-all"
                                     >
                                         {p.icon}
                                         {p.label}
@@ -269,17 +269,17 @@ export default function PlatformDownloadPage() {
             </div>
 
             {/* Footer */}
-            <footer className="py-12 border-t border-[#e9e9e7]">
+            <footer className="py-12 border-t border-notion-border">
                 <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6">
                     <div className="flex items-center gap-2 opacity-60">
                         <Brain size={18} />
                         <span className="font-bold text-sm">Second Brain Tracker</span>
                     </div>
-                    <p className="text-xs text-[#9b9a97]">© 2026 Second Brain. Built for high performance.</p>
-                    <div className="flex gap-6 text-xs text-[#9b9a97]">
-                        <a href="#" className="hover:text-[#37352f]">Privacy</a>
-                        <a href="#" className="hover:text-[#37352f]">Terms</a>
-                        <Link href="/" className="hover:text-[#37352f]">Home</Link>
+                    <p className="text-xs text-notion-muted">© 2026 Second Brain. Built for high performance.</p>
+                    <div className="flex gap-6 text-xs text-notion-muted">
+                        <a href="#" className="hover:text-notion-text">Privacy</a>
+                        <a href="#" className="hover:text-notion-text">Terms</a>
+                        <Link href="/" className="hover:text-notion-text">Home</Link>
                     </div>
                 </div>
             </footer>

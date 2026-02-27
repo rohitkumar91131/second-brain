@@ -34,7 +34,7 @@ export default function ListView({ items, columns, onUpdate, onDelete, onAdd, en
             ))}
             <button
                 onClick={onAdd}
-                className="flex items-center gap-2 w-full px-4 py-3 text-xs text-[#9b9a97] hover:text-[#37352f] hover:bg-[#f7f7f5] transition-colors"
+                className="flex items-center gap-2 w-full px-4 py-3 text-xs text-notion-muted hover:text-notion-text hover:bg-notion-sidebar transition-colors"
             >
                 <Plus size={13} />
                 New {entityType}
@@ -59,7 +59,7 @@ function ListRow({ item, columns, onUpdate, onDelete, entityType, onRowClick }) 
                             status: !item.completed ? 'Done' : 'Not Started',
                         })
                     }}
-                    className={`w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 transition-colors ${item.completed ? 'bg-[#37352f] border-[#37352f]' : 'border-[#d3d1cb] hover:border-[#37352f]'
+                    className={`w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 transition-colors ${item.completed ? 'bg-[#37352f] border-[#37352f]' : 'border-notion-border hover:border-[#37352f]'
                         }`}
                 >
                     {item.completed && <Check size={10} className="text-white" />}
@@ -67,7 +67,7 @@ function ListRow({ item, columns, onUpdate, onDelete, entityType, onRowClick }) 
             )}
 
             {/* Title */}
-            <span className={`flex-1 text-sm font-medium ${item.completed ? 'line-through text-[#9b9a97]' : 'text-[#37352f]'}`}>
+            <span className={`flex-1 text-sm font-medium ${item.completed ? 'line-through text-notion-muted' : 'text-notion-text'}`}>
                 {item.title}
             </span>
 
@@ -75,7 +75,7 @@ function ListRow({ item, columns, onUpdate, onDelete, entityType, onRowClick }) 
             <div className="flex items-center gap-3 flex-shrink-0">
                 {item.status && <StatusTag status={item.status} />}
                 {item.dueDate && (
-                    <span className="text-xs text-[#9b9a97]">{format(new Date(item.dueDate), 'MMM d')}</span>
+                    <span className="text-xs text-notion-muted">{format(new Date(item.dueDate), 'MMM d')}</span>
                 )}
                 {item.progress !== undefined && (
                     <div className="w-24">
@@ -83,7 +83,7 @@ function ListRow({ item, columns, onUpdate, onDelete, entityType, onRowClick }) 
                     </div>
                 )}
                 {item.tags?.slice(0, 2).map(tag => (
-                    <span key={tag} className="px-1.5 py-0.5 bg-[#f1f1ef] text-[#787774] text-xs rounded hidden sm:inline">
+                    <span key={tag} className="px-1.5 py-0.5 bg-[#f1f1ef] text-notion-muted text-xs rounded hidden sm:inline">
                         {tag}
                     </span>
                 ))}

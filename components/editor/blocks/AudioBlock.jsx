@@ -19,7 +19,7 @@ export default function AudioBlock({ block, onUpdate, onDelete, onDragHandleDown
 
             {/* --- DRAG HANDLE ADD KIYA --- */}
             <div
-                className="absolute -left-6 top-2 opacity-0 group-hover:opacity-100 cursor-grab text-[#9b9a97] hover:bg-[#e9e9e7] rounded w-5 h-6 flex items-center justify-center transition-all z-10"
+                className="absolute -left-6 top-2 opacity-0 group-hover:opacity-100 cursor-grab text-notion-muted hover:bg-notion-border rounded w-5 h-6 flex items-center justify-center transition-all z-10"
                 onMouseDown={onDragHandleDown}
                 onMouseUp={onDragHandleUp}
                 onMouseLeave={onDragHandleUp}
@@ -30,18 +30,18 @@ export default function AudioBlock({ block, onUpdate, onDelete, onDragHandleDown
             </div>
 
             {block.content ? (
-                <div className="relative w-full p-4 rounded-xl bg-white border border-[#e9e9e7] shadow-sm hover:shadow-md transition-all flex flex-col gap-3">
+                <div className="relative w-full p-4 rounded-xl bg-notion-bg border border-notion-border shadow-sm hover:shadow-md transition-all flex flex-col gap-3">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-[#f1f1ef] flex items-center justify-center text-[#9b9a97]">
+                        <div className="w-10 h-10 rounded-full bg-[#f1f1ef] flex items-center justify-center text-notion-muted">
                             <Music size={18} />
                         </div>
                         <div className="flex-1 min-w-0">
-                            <p className="text-[10px] font-bold text-[#9b9a97] uppercase tracking-widest leading-none mb-1">Audio Source</p>
-                            <p className="text-xs text-[#37352f] truncate font-medium">{block.content}</p>
+                            <p className="text-[10px] font-bold text-notion-muted uppercase tracking-widest leading-none mb-1">Audio Source</p>
+                            <p className="text-xs text-notion-text truncate font-medium">{block.content}</p>
                         </div>
                         <button
                             onClick={onDelete}
-                            className="p-1.5 rounded-md text-[#9b9a97] hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                            className="p-1.5 rounded-md text-notion-muted hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
                         >
                             <Minus size={14} />
                         </button>
@@ -49,7 +49,7 @@ export default function AudioBlock({ block, onUpdate, onDelete, onDragHandleDown
 
                     {embed.type === 'youtube' ? (
                         <div className="w-full">
-                            <div className="flex items-center gap-4 p-4 rounded-lg bg-gradient-to-r from-[#f1f1ef] to-white border border-[#e9e9e7]">
+                            <div className="flex items-center gap-4 p-4 rounded-lg bg-gradient-to-r from-[#f1f1ef] to-white border border-notion-border">
                                 <button
                                     onClick={() => {
                                         const iframe = document.getElementById(`yt-audio-${block.id}`);
@@ -65,14 +65,14 @@ export default function AudioBlock({ block, onUpdate, onDelete, onDragHandleDown
                                     className="w-12 h-12 rounded-full bg-[#37352f] text-white flex items-center justify-center hover:scale-105 transition-transform shadow-md"
                                 >
                                     <div className="flex gap-1 items-end h-4">
-                                        <div className="w-1 bg-white/40 h-2 animate-pulse"></div>
-                                        <div className="w-1 bg-white h-4 animate-pulse"></div>
-                                        <div className="w-1 bg-white/60 h-3 animate-pulse"></div>
+                                        <div className="w-1 bg-notion-bg/40 h-2 animate-pulse"></div>
+                                        <div className="w-1 bg-notion-bg h-4 animate-pulse"></div>
+                                        <div className="w-1 bg-notion-bg/60 h-3 animate-pulse"></div>
                                     </div>
                                 </button>
                                 <div className="flex-1">
-                                    <p className="text-sm font-semibold text-[#37352f]">YouTube Audio Player</p>
-                                    <p className="text-[10px] text-[#9b9a97] uppercase font-bold tracking-tighter">Click to Play/Pause • Video is hidden</p>
+                                    <p className="text-sm font-semibold text-notion-text">YouTube Audio Player</p>
+                                    <p className="text-[10px] text-notion-muted uppercase font-bold tracking-tighter">Click to Play/Pause • Video is hidden</p>
                                 </div>
                                 <div className="h-0 w-0 overflow-hidden pointer-events-none absolute">
                                     <iframe
@@ -97,9 +97,9 @@ export default function AudioBlock({ block, onUpdate, onDelete, onDragHandleDown
                     )}
                 </div>
             ) : (
-                <div className="relative w-full flex flex-col items-center gap-3 bg-[#f7f7f5]/50 border border-dashed border-[#e9e9e7] rounded-xl p-8 transition-colors hover:bg-[#f7f7f5]">
-                    <Music size={24} className="text-[#9b9a97] opacity-40" />
-                    <div className="w-full max-w-md flex items-center gap-2 bg-white border border-[#e9e9e7] rounded-lg p-1 shadow-sm">
+                <div className="relative w-full flex flex-col items-center gap-3 bg-notion-sidebar/50 border border-dashed border-notion-border rounded-xl p-8 transition-colors hover:bg-notion-sidebar">
+                    <Music size={24} className="text-notion-muted opacity-40" />
+                    <div className="w-full max-w-md flex items-center gap-2 bg-notion-bg border border-notion-border rounded-lg p-1 shadow-sm">
                         <input
                             autoFocus
                             placeholder="Paste Audio URL or YouTube link..."
@@ -120,7 +120,7 @@ export default function AudioBlock({ block, onUpdate, onDelete, onDragHandleDown
                             Add
                         </button>
                     </div>
-                    <p className="text-[10px] text-[#9b9a97] font-medium uppercase tracking-widest">YouTube links will play in compact player</p>
+                    <p className="text-[10px] text-notion-muted font-medium uppercase tracking-widest">YouTube links will play in compact player</p>
                 </div>
             )}
         </div>

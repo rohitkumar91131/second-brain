@@ -56,7 +56,7 @@ export default function TableBlock({ block, onUpdate, onDelete, onDragHandleDown
 
             {/* --- DRAG HANDLE ADD KIYA --- */}
             <div
-                className="absolute -left-6 top-1 opacity-0 group-hover:opacity-100 cursor-grab text-[#9b9a97] hover:bg-[#e9e9e7] rounded w-5 h-6 flex items-center justify-center transition-all z-10"
+                className="absolute -left-6 top-1 opacity-0 group-hover:opacity-100 cursor-grab text-notion-muted hover:bg-notion-border rounded w-5 h-6 flex items-center justify-center transition-all z-10"
                 onMouseDown={onDragHandleDown}
                 onMouseUp={onDragHandleUp}
                 onMouseLeave={onDragHandleUp}
@@ -67,18 +67,18 @@ export default function TableBlock({ block, onUpdate, onDelete, onDragHandleDown
             </div>
 
             {/* Table Container - overflow iske andar rakha hai taaki drag handle na kate */}
-            <div className="flex-1 w-full overflow-x-auto rounded-lg border border-[#e9e9e7] shadow-sm">
-                <table className="w-full border-collapse text-sm text-[#37352f] min-w-[300px]">
-                    <thead className="bg-[#f7f7f5] border-b border-[#e9e9e7]">
+            <div className="flex-1 w-full overflow-x-auto rounded-lg border border-notion-border shadow-sm">
+                <table className="w-full border-collapse text-sm text-notion-text min-w-[300px]">
+                    <thead className="bg-notion-sidebar border-b border-notion-border">
                         <tr>
                             {rows[0]?.map((cell, cIdx) => {
                                 const isLastCol = cIdx === rows[0].length - 1;
                                 return (
-                                    <th key={`head-${cIdx}`} className="group/cell p-2 text-left font-semibold border-r border-[#e9e9e7] last:border-r-0 relative min-w-[120px]">
+                                    <th key={`head-${cIdx}`} className="group/cell p-2 text-left font-semibold border-r border-notion-border last:border-r-0 relative min-w-[120px]">
                                         <input
                                             value={cell}
                                             onChange={e => updateCell(0, cIdx, e.target.value)}
-                                            className="w-full bg-transparent focus:outline-none font-semibold placeholder:font-normal placeholder:text-[#9b9a97] pr-12"
+                                            className="w-full bg-transparent focus:outline-none font-semibold placeholder:font-normal placeholder:text-notion-muted pr-12"
                                             placeholder="Header..."
                                         />
                                         <div className="absolute top-1.5 right-1.5 flex gap-1 opacity-0 group-hover/cell:opacity-100 z-10">
@@ -111,11 +111,11 @@ export default function TableBlock({ block, onUpdate, onDelete, onDragHandleDown
                         {rows.slice(1).map((row, rIdx) => {
                             const actualRowIndex = rIdx + 1;
                             return (
-                                <tr key={`row-${actualRowIndex}`} className="border-b border-[#e9e9e7] last:border-b-0 hover:bg-[#f9f9f8]/50 transition-colors">
+                                <tr key={`row-${actualRowIndex}`} className="border-b border-notion-border last:border-b-0 hover:bg-[#f9f9f8]/50 transition-colors">
                                     {row.map((cell, cIdx) => {
                                         const isLastCol = cIdx === row.length - 1;
                                         return (
-                                            <td key={`cell-${actualRowIndex}-${cIdx}`} className="group/cell p-2 border-r border-[#e9e9e7] last:border-r-0 relative min-w-[120px]">
+                                            <td key={`cell-${actualRowIndex}-${cIdx}`} className="group/cell p-2 border-r border-notion-border last:border-r-0 relative min-w-[120px]">
                                                 <input
                                                     value={cell}
                                                     onChange={e => updateCell(actualRowIndex, cIdx, e.target.value)}
@@ -143,11 +143,11 @@ export default function TableBlock({ block, onUpdate, onDelete, onDragHandleDown
                 </table>
 
                 {/* Bottom Controls */}
-                <div className="flex gap-2 p-2 bg-white border-t border-[#e9e9e7]">
-                    <button onClick={addRow} className="text-[10px] font-medium text-[#9b9a97] hover:bg-[#efefef] hover:text-[#37352f] px-2 py-1 rounded border border-[#e9e9e7] transition-colors">
+                <div className="flex gap-2 p-2 bg-notion-bg border-t border-notion-border">
+                    <button onClick={addRow} className="text-[10px] font-medium text-notion-muted hover:bg-notion-hover hover:text-notion-text px-2 py-1 rounded border border-notion-border transition-colors">
                         + Add Row
                     </button>
-                    <button onClick={addCol} className="text-[10px] font-medium text-[#9b9a97] hover:bg-[#efefef] hover:text-[#37352f] px-2 py-1 rounded border border-[#e9e9e7] transition-colors">
+                    <button onClick={addCol} className="text-[10px] font-medium text-notion-muted hover:bg-notion-hover hover:text-notion-text px-2 py-1 rounded border border-notion-border transition-colors">
                         + Add Column
                     </button>
                     <button onClick={onDelete} className="text-[10px] font-medium text-red-400 hover:bg-red-50 hover:text-red-500 px-2 py-1 rounded border border-red-100 ml-auto transition-colors">

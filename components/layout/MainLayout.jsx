@@ -10,7 +10,7 @@ export default function MainLayout({ children }) {
     const [mobileOpen, setMobileOpen] = useState(false)
 
     return (
-        <div className="flex h-screen overflow-hidden bg-white">
+        <div className="flex h-screen overflow-hidden bg-notion-bg">
             {/* Mobile overlay */}
             {mobileOpen && (
                 <div
@@ -28,7 +28,7 @@ export default function MainLayout({ children }) {
             {/* Main content */}
             <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
                 <Header onMobileMenuClick={() => setMobileOpen(true)} />
-                <main className="flex-1 overflow-y-auto bg-white">
+                <main className="flex-1 overflow-y-auto bg-notion-bg">
                     {children}
                 </main>
             </div>

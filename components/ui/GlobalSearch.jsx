@@ -21,7 +21,7 @@ function highlight(text, query) {
     return (
         <>
             {text.slice(0, idx)}
-            <mark className="bg-yellow-100 text-[#37352f] rounded-sm px-0.5">{text.slice(idx, idx + query.length)}</mark>
+            <mark className="bg-yellow-100 text-notion-text rounded-sm px-0.5">{text.slice(idx, idx + query.length)}</mark>
             {text.slice(idx + query.length)}
         </>
     )
@@ -103,12 +103,12 @@ export default function GlobalSearch({ onClose }) {
 
             {/* Search panel */}
             <div
-                className="relative w-full max-w-xl bg-white rounded-2xl shadow-2xl border border-[#e9e9e7] overflow-hidden"
+                className="relative w-full max-w-xl bg-notion-bg rounded-2xl shadow-2xl border border-notion-border overflow-hidden"
                 onClick={e => e.stopPropagation()}
             >
                 {/* Input row */}
-                <div className="flex items-center gap-3 px-4 py-3 border-b border-[#e9e9e7]">
-                    <Search size={16} className="text-[#9b9a97] flex-shrink-0" />
+                <div className="flex items-center gap-3 px-4 py-3 border-b border-notion-border">
+                    <Search size={16} className="text-notion-muted flex-shrink-0" />
                     <input
                         ref={inputRef}
                         type="text"
@@ -116,14 +116,14 @@ export default function GlobalSearch({ onClose }) {
                         onChange={e => setQuery(e.target.value)}
                         onKeyDown={handleKey}
                         placeholder="Search tasks, notes, projects, goals…"
-                        className="flex-1 text-sm text-[#37352f] bg-transparent focus:outline-none placeholder-[#9b9a97]"
+                        className="flex-1 text-sm text-notion-text bg-transparent focus:outline-none placeholder-[#9b9a97]"
                     />
                     {query && (
-                        <button onClick={() => setQuery('')} className="text-[#9b9a97] hover:text-[#37352f]">
+                        <button onClick={() => setQuery('')} className="text-notion-muted hover:text-notion-text">
                             <X size={14} />
                         </button>
                     )}
-                    <kbd className="hidden sm:inline-flex items-center px-1.5 py-0.5 text-[10px] text-[#9b9a97] border border-[#e9e9e7] rounded">
+                    <kbd className="hidden sm:inline-flex items-center px-1.5 py-0.5 text-[10px] text-notion-muted border border-notion-border rounded">
                         ESC
                     </kbd>
                 </div>
@@ -131,12 +131,12 @@ export default function GlobalSearch({ onClose }) {
                 {/* Results */}
                 <div className="max-h-[60vh] overflow-y-auto">
                     {query.trim() === '' ? (
-                        <div className="px-4 py-8 text-center text-xs text-[#9b9a97]">
+                        <div className="px-4 py-8 text-center text-xs text-notion-muted">
                             Start typing to search across all your data
                         </div>
                     ) : results.length === 0 ? (
-                        <div className="px-4 py-8 text-center text-xs text-[#9b9a97]">
-                            No results for <span className="font-medium text-[#37352f]">&ldquo;{query}&rdquo;</span>
+                        <div className="px-4 py-8 text-center text-xs text-notion-muted">
+                            No results for <span className="font-medium text-notion-text">&ldquo;{query}&rdquo;</span>
                         </div>
                     ) : (
                         <div className="py-2">
@@ -148,7 +148,7 @@ export default function GlobalSearch({ onClose }) {
                                         {/* Section header */}
                                         <div className="flex items-center gap-2 px-4 py-1.5">
                                             <Icon size={11} style={{ color: meta.color }} />
-                                            <span className="text-[10px] font-semibold uppercase tracking-wider text-[#9b9a97]">
+                                            <span className="text-[10px] font-semibold uppercase tracking-wider text-notion-muted">
                                                 {meta.label}
                                             </span>
                                         </div>
@@ -168,11 +168,11 @@ export default function GlobalSearch({ onClose }) {
                                                         style={{ backgroundColor: meta.color }}
                                                     />
                                                     <div className="flex-1 min-w-0">
-                                                        <p className="text-sm text-[#37352f] truncate">
+                                                        <p className="text-sm text-notion-text truncate">
                                                             {highlight(item.title, query)}
                                                         </p>
                                                         {item.sub && (
-                                                            <p className="text-xs text-[#9b9a97] truncate">
+                                                            <p className="text-xs text-notion-muted truncate">
                                                                 {highlight(item.sub, query)}
                                                             </p>
                                                         )}

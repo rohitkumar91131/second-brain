@@ -93,14 +93,14 @@ function KanbanColumn({ status, items, color, onUpdate, onDelete, onAdd, entityT
                 <div className="flex items-center gap-2">
                     <span
                         className="w-2 h-2 rounded-full"
-                        style={{ backgroundColor: color === '#f1f1ef' ? '#9b9a97' : undefined, background: color !== '#f1f1ef' ? undefined : undefined }}
+                        style={{ backgroundColor: color === '#f1f1ef' ? 'var(--notion-muted)' : undefined, background: color !== '#f1f1ef' ? undefined : undefined }}
                     />
                     <StatusTag status={status} />
-                    <span className="text-xs text-[#9b9a97]">{items.length}</span>
+                    <span className="text-xs text-notion-muted">{items.length}</span>
                 </div>
                 <button
                     onClick={onAdd}
-                    className="p-1 rounded hover:bg-[#efefef] text-[#9b9a97] hover:text-[#37352f] transition-colors"
+                    className="p-1 rounded hover:bg-notion-hover text-notion-muted hover:text-notion-text transition-colors"
                 >
                     <Plus size={13} />
                 </button>
@@ -121,7 +121,7 @@ function KanbanColumn({ status, items, color, onUpdate, onDelete, onAdd, entityT
                         />
                     ))}
                     {items.length === 0 && (
-                        <div className="text-center py-6 text-xs text-[#9b9a97]">
+                        <div className="text-center py-6 text-xs text-notion-muted">
                             No {entityType}s
                         </div>
                     )}
@@ -144,27 +144,27 @@ function KanbanCard({ item, onUpdate, onDelete, isDragging }) {
         <div
             ref={setNodeRef}
             style={style}
-            className={`bg-white rounded-md p-3 shadow-sm border border-[#e9e9e7] group cursor-default ${isDragging ? 'shadow-lg rotate-1' : ''}`}
+            className={`bg-notion-bg rounded-md p-3 shadow-sm border border-notion-border group cursor-default ${isDragging ? 'shadow-lg rotate-1' : ''}`}
         >
             <div className="flex items-start gap-2">
                 <button
                     {...attributes}
                     {...listeners}
-                    className="mt-0.5 p-0.5 rounded hover:bg-[#efefef] text-[#d3d1cb] hover:text-[#9b9a97] cursor-grab active:cursor-grabbing flex-shrink-0"
+                    className="mt-0.5 p-0.5 rounded hover:bg-notion-hover text-[#d3d1cb] hover:text-notion-muted cursor-grab active:cursor-grabbing flex-shrink-0"
                 >
                     <GripVertical size={12} />
                 </button>
                 <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-[#37352f] leading-snug">{item.title}</p>
+                    <p className="text-sm font-medium text-notion-text leading-snug">{item.title}</p>
                     {item.dueDate && (
-                        <p className="text-xs text-[#9b9a97] mt-1">
+                        <p className="text-xs text-notion-muted mt-1">
                             {format(new Date(item.dueDate), 'MMM d')}
                         </p>
                     )}
                     {item.tags?.length > 0 && (
                         <div className="flex flex-wrap gap-1 mt-1.5">
                             {item.tags.slice(0, 2).map(tag => (
-                                <span key={tag} className="px-1.5 py-0.5 bg-[#f1f1ef] text-[#787774] text-[10px] rounded">
+                                <span key={tag} className="px-1.5 py-0.5 bg-[#f1f1ef] text-notion-muted text-[10px] rounded">
                                     {tag}
                                 </span>
                             ))}

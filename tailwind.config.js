@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+    darkMode: 'class',
     content: [
         './pages/**/*.{js,jsx}',
         './components/**/*.{js,jsx}',
@@ -12,13 +13,15 @@ module.exports = {
             },
             colors: {
                 notion: {
-                    bg: '#ffffff',
-                    sidebar: '#f7f7f5',
-                    hover: '#efefef',
-                    border: '#e9e9e7',
-                    text: '#37352f',
-                    muted: '#9b9a97',
-                    accent: '#2eaadc',
+                    bg: 'var(--notion-bg)',
+                    sidebar: 'var(--notion-sidebar)',
+                    hover: 'var(--notion-hover)',
+                    border: 'var(--notion-border)',
+                    text: 'var(--notion-text)',
+                    muted: 'var(--notion-muted)',
+                    accent: 'var(--notion-accent)',
+                    card: 'var(--notion-card)',
+                    'text-inverse': 'var(--notion-text-inverse)',
                 },
             },
             animation: {

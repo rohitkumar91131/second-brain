@@ -104,7 +104,7 @@ export default function BlockRow({
         return (
             <div className="group flex items-center gap-2 my-8 relative">
                 <div
-                    className="absolute -left-6 top-0 opacity-0 group-hover:opacity-100 cursor-grab text-[#9b9a97] hover:bg-[#e9e9e7] rounded w-5 h-6 flex items-center justify-center transition-all z-10"
+                    className="absolute -left-6 top-0 opacity-0 group-hover:opacity-100 cursor-grab text-notion-muted hover:bg-notion-border rounded w-5 h-6 flex items-center justify-center transition-all z-10"
                     onMouseDown={onDragHandleDown}
                     onMouseUp={onDragHandleUp}
                     onMouseLeave={onDragHandleUp}
@@ -113,8 +113,8 @@ export default function BlockRow({
                 >
                     <GripVertical size={14} />
                 </div>
-                <hr className="flex-1 border-[#e9e9e7]" />
-                <button onClick={onDelete} className="hover-reveal text-xs text-[#9b9a97] hover:text-red-400 transition-colors">×</button>
+                <hr className="flex-1 border-notion-border" />
+                <button onClick={onDelete} className="hover-reveal text-xs text-notion-muted hover:text-red-400 transition-colors">×</button>
             </div>
         )
     }
@@ -123,7 +123,7 @@ export default function BlockRow({
         return (
             <div className={`callout-block my-6 group relative ${isDiary ? 'border-none bg-[#f1f1ef]/50' : ''}`}>
                 <div
-                    className="absolute -left-6 top-1 opacity-0 group-hover:opacity-100 cursor-grab text-[#9b9a97] hover:bg-[#e9e9e7] rounded w-5 h-6 flex items-center justify-center transition-all z-10"
+                    className="absolute -left-6 top-1 opacity-0 group-hover:opacity-100 cursor-grab text-notion-muted hover:bg-notion-border rounded w-5 h-6 flex items-center justify-center transition-all z-10"
                     onMouseDown={onDragHandleDown}
                     onMouseUp={onDragHandleUp}
                     onMouseLeave={onDragHandleUp}
@@ -153,7 +153,7 @@ export default function BlockRow({
         return (
             <div className="my-2 group relative">
                 <div
-                    className="absolute -left-6 top-1 opacity-0 group-hover:opacity-100 cursor-grab text-[#9b9a97] hover:bg-[#e9e9e7] rounded w-5 h-6 flex items-center justify-center transition-all z-10"
+                    className="absolute -left-6 top-1 opacity-0 group-hover:opacity-100 cursor-grab text-notion-muted hover:bg-notion-border rounded w-5 h-6 flex items-center justify-center transition-all z-10"
                     onMouseDown={onDragHandleDown}
                     onMouseUp={onDragHandleUp}
                     onMouseLeave={onDragHandleUp}
@@ -163,7 +163,7 @@ export default function BlockRow({
                     <GripVertical size={14} />
                 </div>
                 <div className="flex items-start gap-1">
-                    <button onClick={onToggleOpen} className="mt-1 p-0.5 text-[#9b9a97] hover:text-[#37352f] transition-colors">
+                    <button onClick={onToggleOpen} className="mt-1 p-0.5 text-notion-muted hover:text-notion-text transition-colors">
                         {toggleOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
                     </button>
                     <textarea
@@ -179,14 +179,14 @@ export default function BlockRow({
                     />
                 </div>
                 {toggleOpen && (
-                    <div className="ml-6 pl-3 border-l border-[#e9e9e7] mt-1">
+                    <div className="ml-6 pl-3 border-l border-notion-border mt-1">
                         <textarea
                             ref={toggleChildRef}
                             value={block.children || ''}
                             onChange={e => onUpdate({ children: e.target.value })}
                             placeholder="Toggle content..."
                             rows={1}
-                            className={`block-editor-line text-sm w-full resize-none overflow-hidden text-[#787774] leading-relaxed ${isDiary ? 'text-base' : ''}`}
+                            className={`block-editor-line text-sm w-full resize-none overflow-hidden text-notion-muted leading-relaxed ${isDiary ? 'text-base' : ''}`}
                             onInput={e => { e.target.style.height = 'auto'; e.target.style.height = e.target.scrollHeight + 'px' }}
                         />
                     </div>
@@ -198,11 +198,11 @@ export default function BlockRow({
     const getStyles = () => {
         const diaryBase = isDiary ? 'leading-relaxed' : ''
         switch (block.type) {
-            case 'heading1': return `${isDiary ? 'text-4xl' : 'text-2xl'} font-bold text-[#37352f] mt-10 mb-4 ${diaryBase}`
-            case 'heading2': return `${isDiary ? 'text-3xl' : 'text-xl'} font-semibold text-[#37352f] mt-8 mb-3 ${diaryBase}`
-            case 'heading3': return `${isDiary ? 'text-2xl' : 'text-base'} font-semibold text-[#37352f] mt-6 mb-2 ${diaryBase}`
-            case 'bullet': return `${isDiary ? 'text-lg' : 'text-sm'} text-[#37352f] ${diaryBase}`
-            default: return `${isDiary ? 'text-lg' : 'text-sm'} text-[#37352f] ${diaryBase}`
+            case 'heading1': return `${isDiary ? 'text-4xl' : 'text-2xl'} font-bold text-notion-text mt-10 mb-4 ${diaryBase}`
+            case 'heading2': return `${isDiary ? 'text-3xl' : 'text-xl'} font-semibold text-notion-text mt-8 mb-3 ${diaryBase}`
+            case 'heading3': return `${isDiary ? 'text-2xl' : 'text-base'} font-semibold text-notion-text mt-6 mb-2 ${diaryBase}`
+            case 'bullet': return `${isDiary ? 'text-lg' : 'text-sm'} text-notion-text ${diaryBase}`
+            default: return `${isDiary ? 'text-lg' : 'text-sm'} text-notion-text ${diaryBase}`
         }
     }
 
@@ -210,7 +210,7 @@ export default function BlockRow({
         <div className="group flex items-start gap-1 my-0.5 relative">
 
             <div
-                className="absolute -left-6 top-1 opacity-0 group-hover:opacity-100 cursor-grab text-[#9b9a97] hover:bg-[#e9e9e7] rounded w-5 h-6 flex items-center justify-center transition-all z-10"
+                className="absolute -left-6 top-1 opacity-0 group-hover:opacity-100 cursor-grab text-notion-muted hover:bg-notion-border rounded w-5 h-6 flex items-center justify-center transition-all z-10"
                 onMouseDown={onDragHandleDown}
                 onMouseUp={onDragHandleUp}
                 onMouseLeave={onDragHandleUp}
@@ -221,13 +221,13 @@ export default function BlockRow({
             </div>
 
             {block.type === 'bullet' && (
-                <div className="w-6 flex-shrink-0 flex justify-center text-[#9b9a97] pt-[3px] select-none">
+                <div className="w-6 flex-shrink-0 flex justify-center text-notion-muted pt-[3px] select-none">
                     <span className="text-[18px] leading-none">•</span>
                 </div>
             )}
 
             {block.type === 'numbered' && (
-                <div className="w-6 flex-shrink-0 text-[#9b9a97] text-sm text-right pr-1 pt-[3px] font-medium select-none">
+                <div className="w-6 flex-shrink-0 text-notion-muted text-sm text-right pr-1 pt-[3px] font-medium select-none">
                     {listNumber}.
                 </div>
             )}
@@ -247,7 +247,7 @@ export default function BlockRow({
                 />
 
                 {showMenu && (
-                    <div className="absolute top-full left-0 z-50 bg-white border border-[#e9e9e7] rounded-xl shadow-2xl py-2 w-52 animate-fade-in max-h-[300px] overflow-y-auto">
+                    <div className="absolute top-full left-0 z-50 bg-notion-bg border border-notion-border rounded-xl shadow-2xl py-2 w-52 animate-fade-in max-h-[300px] overflow-y-auto">
                         {filteredBlocks.length > 0 ? (
                             filteredBlocks.map((item, i) => {
                                 const showHeader = i === 0 || item.category !== filteredBlocks[i - 1].category;
@@ -257,7 +257,7 @@ export default function BlockRow({
                                 return (
                                     <div key={item.type} id={isSelected ? 'selected-menu-item' : ''}>
                                         {showHeader && (
-                                            <p className="px-3 py-1 mt-1 text-[10px] font-bold text-[#9b9a97] uppercase tracking-widest">
+                                            <p className="px-3 py-1 mt-1 text-[10px] font-bold text-notion-muted uppercase tracking-widest">
                                                 {item.category}
                                             </p>
                                         )}
@@ -266,16 +266,16 @@ export default function BlockRow({
                                                 onUpdate({ type: item.type, content: '' });
                                                 onHideMenu();
                                             }}
-                                            className={`flex items-center gap-2 w-full px-3 py-1.5 text-xs text-[#37352f] transition-colors ${isSelected ? 'bg-[#f1f1ef] font-medium' : 'hover:bg-[#f7f7f5]'}`}
+                                            className={`flex items-center gap-2 w-full px-3 py-1.5 text-xs text-notion-text transition-colors ${isSelected ? 'bg-[#f1f1ef] font-medium' : 'hover:bg-notion-sidebar'}`}
                                         >
-                                            {Icon ? <Icon size={13} className={`text-[#9b9a97] ${isSelected ? 'text-[#2eaadc]' : ''}`} /> : <span className="w-3" />}
+                                            {Icon ? <Icon size={13} className={`text-notion-muted ${isSelected ? 'text-notion-accent' : ''}`} /> : <span className="w-3" />}
                                             {item.label}
                                         </button>
                                     </div>
                                 )
                             })
                         ) : (
-                            <div className="px-3 py-3 text-xs text-[#9b9a97] text-center">No blocks found</div>
+                            <div className="px-3 py-3 text-xs text-notion-muted text-center">No blocks found</div>
                         )}
                     </div>
                 )}

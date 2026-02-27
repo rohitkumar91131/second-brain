@@ -59,7 +59,7 @@ export default function TasksPage() {
 
     if (isLoading) {
         return (
-            <div className="flex items-center justify-center h-full w-full relative overflow-hidden bg-white/50 backdrop-blur-sm z-50">
+            <div className="flex items-center justify-center h-full w-full relative overflow-hidden bg-notion-bg/50 backdrop-blur-sm z-50">
                 <Loader />
             </div>
         )
@@ -68,7 +68,7 @@ export default function TasksPage() {
     return (
         <div className="flex flex-col h-full">
             {/* Toolbar */}
-            <div className="flex items-center gap-3 px-6 py-3 border-b border-[#e9e9e7] flex-wrap">
+            <div className="flex items-center gap-3 px-6 py-3 border-b border-notion-border flex-wrap">
                 <ViewSwitcher activeView={view} onViewChange={setView} tabName="Tasks" />
 
                 {/* Combined filter dropdown (All / Active / Completed / Status) */}
@@ -76,7 +76,7 @@ export default function TasksPage() {
                     <select
                         value={filter}
                         onChange={(e) => setFilter(e.target.value)}
-                        className="px-3 py-1 text-sm border border-[#e9e9e7] rounded-md bg-white text-[#37352f]"
+                        className="px-3 py-1 text-sm border border-notion-border rounded-md bg-notion-bg text-notion-text"
                     >
                         <option value="all">All</option>
                         <option value="active">Active</option>
@@ -101,7 +101,7 @@ export default function TasksPage() {
             </div>
 
             {/* Stats */}
-            <div className="flex gap-4 px-6 py-2 border-b border-[#e9e9e7] text-xs text-[#9b9a97]">
+            <div className="flex gap-4 px-6 py-2 border-b border-notion-border text-xs text-notion-muted">
                 <span>{tasks.filter(t => !t.completed).length} active</span>
                 <span>{tasks.filter(t => t.completed).length} completed</span>
                 <span>{tasks.length} total</span>

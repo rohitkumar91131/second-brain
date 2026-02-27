@@ -2,6 +2,7 @@ import './globals.css';
 import { AppProvider } from '@/context/AppContext';
 import { ToastProvider } from '@/components/ui/Toast';
 import { Analytics } from '@vercel/analytics/react';
+import { ThemeProvider } from '@/components/ThemeProvider';
 
 export const metadata = {
     title: 'Second Brain Tracker',
@@ -10,13 +11,15 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
     return (
-        <html lang="en">
+        <html lang="en" suppressHydrationWarning>
             <body>
-                <ToastProvider>
-                    <AppProvider>
-                        {children}
-                    </AppProvider>
-                </ToastProvider>
+                <ThemeProvider>
+                    <ToastProvider>
+                        <AppProvider>
+                            {children}
+                        </AppProvider>
+                    </ToastProvider>
+                </ThemeProvider>
                 <Analytics />
             </body>
         </html>

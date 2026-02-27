@@ -40,10 +40,10 @@ export default function DashboardPage() {
             <div className="animate-fade-in-up">
                 {/* Welcome Section */}
                 <div className="mb-10">
-                    <h1 className="text-4xl font-extrabold text-[#37352f] mb-2 tracking-tight">
+                    <h1 className="text-4xl font-extrabold text-notion-text mb-2 tracking-tight">
                         {isDataLoading ? <div className="h-10 w-64 bg-[#f1f1ef] animate-pulse rounded-lg" /> : `${greeting}${userName ? `, ${userName}` : ''} 👋`}
                     </h1>
-                    <p className="text-[#9b9a97] text-sm font-medium">{format(now, 'EEEE, MMMM d, yyyy')}</p>
+                    <p className="text-notion-muted text-sm font-medium">{format(now, 'EEEE, MMMM d, yyyy')}</p>
                 </div>
 
                 {/* Quick Add Buttons */}
@@ -84,12 +84,12 @@ export default function DashboardPage() {
                         {todayTasks.length === 0 ? <EmptyWidget text="No tasks due today 🎉" /> : (
                             <div className="space-y-2">
                                 {todayTasks.map(task => (
-                                    <div key={task.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-[#f7f7f5] transition-colors group">
+                                    <div key={task.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-notion-sidebar transition-colors group">
                                         <button onClick={() => updateTask(task.id, { completed: true, status: 'Done' })}
-                                            className="w-5 h-5 rounded-md border border-[#d3d1cb] hover:border-[#37352f] flex items-center justify-center flex-shrink-0 transition-all hover:bg-white shadow-sm">
-                                            {task.completed && <Check size={12} className="text-[#37352f]" />}
+                                            className="w-5 h-5 rounded-md border border-notion-border hover:border-[#37352f] flex items-center justify-center flex-shrink-0 transition-all hover:bg-notion-bg shadow-sm">
+                                            {task.completed && <Check size={12} className="text-notion-text" />}
                                         </button>
-                                        <span className="text-sm text-[#37352f] flex-1 truncate font-medium">{task.title}</span>
+                                        <span className="text-sm text-notion-text flex-1 truncate font-medium">{task.title}</span>
                                         <StatusTag status={task.status} />
                                     </div>
                                 ))}
@@ -102,9 +102,9 @@ export default function DashboardPage() {
                         {upcomingTasks.length === 0 ? <EmptyWidget text="No upcoming tasks" /> : (
                             <div className="space-y-2">
                                 {upcomingTasks.map(task => (
-                                    <div key={task.id} className="flex items-center gap-2 p-2 rounded-lg hover:bg-[#f7f7f5] transition-colors">
-                                        <span className="text-sm text-[#37352f] flex-1 truncate font-medium">{task.title}</span>
-                                        <span className="text-xs font-semibold px-2 py-1 bg-[#f1f1ef] text-[#9b9a97] rounded-md flex-shrink-0">
+                                    <div key={task.id} className="flex items-center gap-2 p-2 rounded-lg hover:bg-notion-sidebar transition-colors">
+                                        <span className="text-sm text-notion-text flex-1 truncate font-medium">{task.title}</span>
+                                        <span className="text-xs font-semibold px-2 py-1 bg-[#f1f1ef] text-notion-muted rounded-md flex-shrink-0">
                                             {isTomorrow(parseISO(task.dueDate)) ? 'Tomorrow' : format(parseISO(task.dueDate), 'MMM d')}
                                         </span>
                                     </div>
@@ -120,8 +120,8 @@ export default function DashboardPage() {
                                 {activeProjects.map(project => (
                                     <div key={project.id} className="p-1">
                                         <div className="flex items-center justify-between mb-2">
-                                            <span className="text-sm font-bold text-[#37352f] truncate">{project.title}</span>
-                                            <span className="text-xs font-bold text-[#37352f] bg-[#f1f1ef] px-1.5 py-0.5 rounded">{project.progress}%</span>
+                                            <span className="text-sm font-bold text-notion-text truncate">{project.title}</span>
+                                            <span className="text-xs font-bold text-notion-text bg-[#f1f1ef] px-1.5 py-0.5 rounded">{project.progress}%</span>
                                         </div>
                                         <ProgressBar value={project.progress} showLabel={false} />
                                     </div>
@@ -137,11 +137,11 @@ export default function DashboardPage() {
                                 {activeGoals.map(goal => (
                                     <div key={goal.id} className="p-1">
                                         <div className="flex items-center justify-between mb-2">
-                                            <span className="text-sm font-bold text-[#37352f] truncate">{goal.title}</span>
+                                            <span className="text-sm font-bold text-notion-text truncate">{goal.title}</span>
                                             <span className="text-xs font-bold text-orange-600 bg-orange-50 px-1.5 py-0.5 rounded">{goal.progress}%</span>
                                         </div>
                                         <ProgressBar value={goal.progress} showLabel={false} color="#f97316" />
-                                        {goal.metric && <p className="text-[11px] font-medium text-[#9b9a97] mt-1.5 uppercase tracking-wider">{goal.metric}</p>}
+                                        {goal.metric && <p className="text-[11px] font-medium text-notion-muted mt-1.5 uppercase tracking-wider">{goal.metric}</p>}
                                     </div>
                                 ))}
                             </div>
@@ -154,12 +154,12 @@ export default function DashboardPage() {
                             <div className="space-y-1">
                                 {recentNotes.map(note => (
                                     <Link key={note.id} href={`/dashboard/notes/${note.id}`}
-                                        className="flex items-center gap-3 py-2 px-3 rounded-xl hover:bg-[#f7f7f5] transition-all hover:translate-x-1 group">
-                                        <div className="p-1.5 rounded-lg bg-[#f1f1ef] group-hover:bg-white transition-colors">
-                                            <FileText size={14} className="text-[#9b9a97] flex-shrink-0" />
+                                        className="flex items-center gap-3 py-2 px-3 rounded-xl hover:bg-notion-sidebar transition-all hover:translate-x-1 group">
+                                        <div className="p-1.5 rounded-lg bg-[#f1f1ef] group-hover:bg-notion-bg transition-colors">
+                                            <FileText size={14} className="text-notion-muted flex-shrink-0" />
                                         </div>
-                                        <span className="text-sm text-[#37352f] flex-1 truncate font-medium">{note.title}</span>
-                                        <span className="text-xs text-[#9b9a97] font-medium flex-shrink-0">{format(new Date(note.updatedAt), 'MMM d')}</span>
+                                        <span className="text-sm text-notion-text flex-1 truncate font-medium">{note.title}</span>
+                                        <span className="text-xs text-notion-muted font-medium flex-shrink-0">{format(new Date(note.updatedAt), 'MMM d')}</span>
                                     </Link>
                                 ))}
                             </div>
@@ -179,18 +179,18 @@ export default function DashboardPage() {
 function Widget({ title, icon, href, count, children, delay = "0", loading = false }) {
     return (
         <div
-            className="border border-[#e9e9e7] rounded-2xl p-5 bg-white hover-lift sexy-shadow animate-fade-in-up"
+            className="border border-notion-border rounded-2xl p-5 bg-notion-bg hover-lift sexy-shadow animate-fade-in-up"
             style={{ animationDelay: delay }}
         >
             <div className="flex items-center justify-between mb-5">
                 <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-xl bg-[#f7f7f5] flex items-center justify-center">
+                    <div className="p-2 rounded-xl bg-notion-sidebar flex items-center justify-center">
                         {icon}
                     </div>
-                    <h2 className="text-sm font-bold text-[#37352f] tracking-tight">{title}</h2>
-                    {!loading && count > 0 && <span className="px-2 py-0.5 bg-[#f1f1ef] text-[#787774] text-[10px] font-bold rounded-full">{count}</span>}
+                    <h2 className="text-sm font-bold text-notion-text tracking-tight">{title}</h2>
+                    {!loading && count > 0 && <span className="px-2 py-0.5 bg-[#f1f1ef] text-notion-muted text-[10px] font-bold rounded-full">{count}</span>}
                 </div>
-                <Link href={href} className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-[#f7f7f5] text-[#9b9a97] hover:text-[#37352f] transition-all">
+                <Link href={href} className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-notion-sidebar text-notion-muted hover:text-notion-text transition-all">
                     <ChevronRight size={18} />
                 </Link>
             </div>
@@ -207,7 +207,7 @@ function Widget({ title, icon, href, count, children, delay = "0", loading = fal
 }
 
 function EmptyWidget({ text }) {
-    return <p className="text-[13px] font-medium text-[#9b9a97] py-6 text-center italic">{text}</p>
+    return <p className="text-[13px] font-medium text-notion-muted py-6 text-center italic">{text}</p>
 }
 
 function MiniCalendar({ tasks, delay = "0", loading = false }) {
@@ -215,14 +215,14 @@ function MiniCalendar({ tasks, delay = "0", loading = false }) {
     const days = Array.from({ length: 7 }, (_, i) => addDays(now, i))
     return (
         <div
-            className="border border-[#e9e9e7] rounded-2xl p-5 bg-white hover-lift sexy-shadow animate-fade-in-up"
+            className="border border-notion-border rounded-2xl p-5 bg-notion-bg hover-lift sexy-shadow animate-fade-in-up"
             style={{ animationDelay: delay }}
         >
             <div className="flex items-center gap-3 mb-5">
                 <div className="p-2 rounded-xl bg-blue-50 flex items-center justify-center">
-                    <BookMarked size={16} className="text-[#2eaadc]" />
+                    <BookMarked size={16} className="text-notion-accent" />
                 </div>
-                <h2 className="text-sm font-bold text-[#37352f] tracking-tight">Next 7 Days</h2>
+                <h2 className="text-sm font-bold text-notion-text tracking-tight">Next 7 Days</h2>
             </div>
 
             {loading ? (
@@ -240,7 +240,7 @@ function MiniCalendar({ tasks, delay = "0", loading = false }) {
                         const dayTasks = tasks.filter(t => t.dueDate && format(parseISO(t.dueDate || '2000-01-01'), 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd'))
                         return (
                             <div key={day.toISOString()} className="flex items-center gap-4 group">
-                                <div className={`text-[11px] w-8 font-bold uppercase tracking-widest flex-shrink-0 ${isToday(day) ? 'text-blue-600' : 'text-[#9b9a97]'}`}>
+                                <div className={`text-[11px] w-8 font-bold uppercase tracking-widest flex-shrink-0 ${isToday(day) ? 'text-blue-600' : 'text-notion-muted'}`}>
                                     {isToday(day) ? 'Now' : format(day, 'EEE')}
                                 </div>
                                 <div className="flex-1 flex gap-2 flex-wrap">

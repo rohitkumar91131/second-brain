@@ -15,7 +15,7 @@ function OAuthButton({ provider, icon, label, color }) {
                 await signIn(provider, { callbackUrl: '/' })
             }}
             disabled={loading}
-            className="w-full flex items-center justify-center gap-3 px-4 py-2.5 border border-[#e9e9e7] rounded-lg text-sm font-medium text-[#37352f] bg-white hover:bg-[#f7f7f5] transition-colors disabled:opacity-60"
+            className="w-full flex items-center justify-center gap-3 px-4 py-2.5 border border-notion-border rounded-lg text-sm font-medium text-notion-text bg-notion-bg hover:bg-notion-sidebar transition-colors disabled:opacity-60"
         >
             {loading ? <Loader2 size={16} className="animate-spin" /> : icon}
             {label}
@@ -63,18 +63,18 @@ function LoginContent() {
     }
 
     return (
-        <div className="min-h-screen bg-[#f7f7f5] flex items-center justify-center p-4">
+        <div className="min-h-screen bg-notion-sidebar flex items-center justify-center p-4">
             <div className="w-full max-w-sm">
                 {/* Logo */}
                 <div className="text-center mb-8">
                     <div className="inline-flex items-center justify-center w-12 h-12 bg-[#37352f] rounded-xl mb-4">
                         <Brain size={24} className="text-white" />
                     </div>
-                    <h1 className="text-2xl font-bold text-[#37352f]">Second Brain</h1>
-                    <p className="text-sm text-[#9b9a97] mt-1">Sign in to your workspace</p>
+                    <h1 className="text-2xl font-bold text-notion-text">Second Brain</h1>
+                    <p className="text-sm text-notion-muted mt-1">Sign in to your workspace</p>
                 </div>
 
-                <div className="bg-white rounded-2xl border border-[#e9e9e7] p-6 shadow-sm">
+                <div className="bg-notion-bg rounded-2xl border border-notion-border p-6 shadow-sm">
                     {/* OAuth Buttons */}
                     <div className="space-y-2.5 mb-5">
                         <OAuthButton
@@ -111,9 +111,9 @@ function LoginContent() {
 
                     {/* Divider */}
                     <div className="flex items-center gap-3 mb-5">
-                        <div className="flex-1 h-px bg-[#e9e9e7]" />
-                        <span className="text-xs text-[#9b9a97]">or</span>
-                        <div className="flex-1 h-px bg-[#e9e9e7]" />
+                        <div className="flex-1 h-px bg-notion-border" />
+                        <span className="text-xs text-notion-muted">or</span>
+                        <div className="flex-1 h-px bg-notion-border" />
                     </div>
 
                     {/* Email/Password Form */}
@@ -132,7 +132,7 @@ function LoginContent() {
                         )}
 
                         <div>
-                            <label className="block text-xs font-medium text-[#37352f] mb-1">Email</label>
+                            <label className="block text-xs font-medium text-notion-text mb-1">Email</label>
                             <input
                                 type="email"
                                 required
@@ -140,12 +140,12 @@ function LoginContent() {
                                 value={form.email}
                                 onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
                                 placeholder="you@example.com"
-                                className="w-full px-3 py-2 text-sm border border-[#e9e9e7] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#37352f]/20 focus:border-[#37352f] transition-all"
+                                className="w-full px-3 py-2 text-sm border border-notion-border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#37352f]/20 focus:border-[#37352f] transition-all"
                             />
                         </div>
 
                         <div>
-                            <label className="block text-xs font-medium text-[#37352f] mb-1">Password</label>
+                            <label className="block text-xs font-medium text-notion-text mb-1">Password</label>
                             <div className="relative">
                                 <input
                                     type={showPass ? 'text' : 'password'}
@@ -154,12 +154,12 @@ function LoginContent() {
                                     value={form.password}
                                     onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
                                     placeholder="••••••••"
-                                    className="w-full px-3 py-2 pr-9 text-sm border border-[#e9e9e7] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#37352f]/20 focus:border-[#37352f] transition-all"
+                                    className="w-full px-3 py-2 pr-9 text-sm border border-notion-border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#37352f]/20 focus:border-[#37352f] transition-all"
                                 />
                                 <button
                                     type="button"
                                     onClick={() => setShowPass(s => !s)}
-                                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#9b9a97] hover:text-[#37352f]"
+                                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-notion-muted hover:text-notion-text"
                                 >
                                     {showPass ? <EyeOff size={14} /> : <Eye size={14} />}
                                 </button>
@@ -176,9 +176,9 @@ function LoginContent() {
                         </button>
                     </form>
 
-                    <p className="text-center text-xs text-[#9b9a97] mt-4">
+                    <p className="text-center text-xs text-notion-muted mt-4">
                         Don&apos;t have an account?{' '}
-                        <Link href="/register" className="text-[#37352f] font-medium hover:underline">
+                        <Link href="/register" className="text-notion-text font-medium hover:underline">
                             Create one
                         </Link>
                     </p>
@@ -191,8 +191,8 @@ function LoginContent() {
 export default function LoginPage() {
     return (
         <Suspense fallback={
-            <div className="min-h-screen bg-[#f7f7f5] flex items-center justify-center">
-                <Loader2 size={24} className="animate-spin text-[#37352f]" />
+            <div className="min-h-screen bg-notion-sidebar flex items-center justify-center">
+                <Loader2 size={24} className="animate-spin text-notion-text" />
             </div>
         }>
             <LoginContent />

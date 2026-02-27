@@ -47,7 +47,7 @@ export default function ResourcesPage() {
 
     if (isLoading) {
         return (
-            <div className="flex items-center justify-center h-full w-full relative overflow-hidden bg-white/50 backdrop-blur-sm z-50">
+            <div className="flex items-center justify-center h-full w-full relative overflow-hidden bg-notion-bg/50 backdrop-blur-sm z-50">
                 <Loader />
             </div>
         )
@@ -55,7 +55,7 @@ export default function ResourcesPage() {
 
     return (
         <div className="flex flex-col h-full">
-            <div className="flex items-center gap-3 px-6 py-3 border-b border-[#e9e9e7] flex-wrap">
+            <div className="flex items-center gap-3 px-6 py-3 border-b border-notion-border flex-wrap">
                 <ViewSwitcher activeView={view} onViewChange={setView} tabName="Resources" />
                 <div className="ml-auto">
                     <button
@@ -68,7 +68,7 @@ export default function ResourcesPage() {
                 </div>
             </div>
 
-            <div className="flex gap-4 px-6 py-2 border-b border-[#e9e9e7] text-xs text-[#9b9a97]">
+            <div className="flex gap-4 px-6 py-2 border-b border-notion-border text-xs text-notion-muted">
                 {['Book', 'Article', 'Website', 'Video', 'Course'].map(type => (
                     <span key={type}>{resources.filter(r => r.type === type).length} {type}s</span>
                 ))}
@@ -82,7 +82,7 @@ export default function ResourcesPage() {
                     <ListView items={resources} columns={COLUMNS} onUpdate={updateResource} onDelete={deleteResource} onAdd={() => setShowAdd(true)} entityType="resource" />
                 )}
                 {(view === 'board' || view === 'calendar') && (
-                    <div className="p-6 text-center text-[#9b9a97] text-sm">Switch to Table or List view for Resources</div>
+                    <div className="p-6 text-center text-notion-muted text-sm">Switch to Table or List view for Resources</div>
                 )}
             </div>
 
@@ -95,20 +95,20 @@ export default function ResourcesPage() {
                             placeholder="Title"
                             value={form.title}
                             onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
-                            className="w-full px-3 py-2 text-sm border border-[#e9e9e7] rounded-md focus:outline-none focus:ring-2 focus:ring-[#2eaadc]/30"
+                            className="w-full px-3 py-2 text-sm border border-notion-border rounded-md focus:outline-none focus:ring-2 focus:ring-[#2eaadc]/30"
                         />
                         <div className="grid grid-cols-2 gap-2">
-                            <select value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value }))} className="px-2 py-1.5 text-xs border border-[#e9e9e7] rounded-md focus:outline-none">
+                            <select value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value }))} className="px-2 py-1.5 text-xs border border-notion-border rounded-md focus:outline-none">
                                 {RESOURCE_TYPES.map(t => <option key={t}>{t}</option>)}
                             </select>
-                            <select value={form.status} onChange={e => setForm(f => ({ ...f, status: e.target.value }))} className="px-2 py-1.5 text-xs border border-[#e9e9e7] rounded-md focus:outline-none">
+                            <select value={form.status} onChange={e => setForm(f => ({ ...f, status: e.target.value }))} className="px-2 py-1.5 text-xs border border-notion-border rounded-md focus:outline-none">
                                 {['To Read', 'Reading', 'Completed', 'Active'].map(s => <option key={s}>{s}</option>)}
                             </select>
                         </div>
-                        <input type="url" placeholder="URL (optional)" value={form.url} onChange={e => setForm(f => ({ ...f, url: e.target.value }))} className="w-full px-3 py-1.5 text-xs border border-[#e9e9e7] rounded-md focus:outline-none" />
-                        <input type="text" placeholder="Tags (comma separated)" value={form.tags} onChange={e => setForm(f => ({ ...f, tags: e.target.value }))} className="w-full px-3 py-1.5 text-xs border border-[#e9e9e7] rounded-md focus:outline-none" />
+                        <input type="url" placeholder="URL (optional)" value={form.url} onChange={e => setForm(f => ({ ...f, url: e.target.value }))} className="w-full px-3 py-1.5 text-xs border border-notion-border rounded-md focus:outline-none" />
+                        <input type="text" placeholder="Tags (comma separated)" value={form.tags} onChange={e => setForm(f => ({ ...f, tags: e.target.value }))} className="w-full px-3 py-1.5 text-xs border border-notion-border rounded-md focus:outline-none" />
                         <div className="flex gap-2">
-                            <button type="button" onClick={() => setShowAdd(false)} className="flex-1 px-3 py-2 text-xs border border-[#e9e9e7] rounded-md hover:bg-[#f7f7f5]">Cancel</button>
+                            <button type="button" onClick={() => setShowAdd(false)} className="flex-1 px-3 py-2 text-xs border border-notion-border rounded-md hover:bg-notion-sidebar">Cancel</button>
                             <button type="submit" className="flex-1 px-3 py-2 text-xs text-white bg-[#37352f] rounded-md hover:bg-[#2f2d28]">Add</button>
                         </div>
                     </form>

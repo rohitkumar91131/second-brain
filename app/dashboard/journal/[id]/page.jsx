@@ -107,10 +107,10 @@ export default function JournalEntryPage() {
             >
                 <div className="flex flex-col h-full bg-[#fcfaf7] animate-pulse">
 
-                    <div className="h-14 border-b border-[#e9e9e7] bg-white" />
+                    <div className="h-14 border-b border-notion-border bg-notion-bg" />
 
                     <div className="flex-1 overflow-hidden py-12 px-6">
-                        <div className="max-w-3xl mx-auto bg-white rounded-sm min-h-[80vh] border border-[#e9e9e7]/50 relative">
+                        <div className="max-w-3xl mx-auto bg-notion-bg rounded-sm min-h-[80vh] border border-notion-border/50 relative">
 
                             <div className="absolute left-0 top-0 bottom-0 w-8 border-r border-[#f1f1ef] bg-[#fdfdfd]" />
 
@@ -143,12 +143,12 @@ export default function JournalEntryPage() {
             {!loading && !entry && (
                 <div className="flex items-center justify-center h-full">
                     <div className="text-center">
-                        <p className="text-[#9b9a97] text-sm mb-3 font-medium">
+                        <p className="text-notion-muted text-sm mb-3 font-medium">
                             Entry not found
                         </p>
                         <Link
                             href="/dashboard/journal"
-                            className="text-sm text-[#2eaadc] hover:underline font-semibold"
+                            className="text-sm text-notion-accent hover:underline font-semibold"
                         >
                             ← Back to Journal
                         </Link>
@@ -164,20 +164,20 @@ export default function JournalEntryPage() {
                 >
 
                     {/* HEADER */}
-                    <div className="flex items-center gap-3 px-6 py-3 border-b border-[#e9e9e7] bg-white/60 backdrop-blur-md z-10">
+                    <div className="flex items-center gap-3 px-6 py-3 border-b border-notion-border bg-notion-bg/60 backdrop-blur-md z-10">
                         <Link
                             href="/dashboard/journal"
-                            className="p-1.5 rounded-lg hover:bg-[#efefef] text-[#9b9a97] hover:text-[#37352f] transition"
+                            className="p-1.5 rounded-lg hover:bg-notion-hover text-notion-muted hover:text-notion-text transition"
                         >
                             <ArrowLeft size={16} />
                         </Link>
 
                         <div className="flex-1 flex items-center gap-2">
-                            <span className="text-xs font-semibold text-[#9b9a97] uppercase tracking-wider">
+                            <span className="text-xs font-semibold text-notion-muted uppercase tracking-wider">
                                 Diary
                             </span>
                             <span className="text-xs text-[#d3d1cb]">/</span>
-                            <span className="text-sm font-bold text-[#37352f] truncate">
+                            <span className="text-sm font-bold text-notion-text truncate">
                                 {entry.title}
                             </span>
                         </div>
@@ -190,7 +190,7 @@ export default function JournalEntryPage() {
                                         : 'bg-green-400'
                                         }`}
                                 />
-                                <span className="text-[10px] font-bold text-[#9b9a97] uppercase tracking-tighter">
+                                <span className="text-[10px] font-bold text-notion-muted uppercase tracking-tighter">
                                     {isSaving
                                         ? 'Saving...'
                                         : lastSaved
@@ -202,14 +202,14 @@ export default function JournalEntryPage() {
                             <button
                                 onClick={handleSave}
                                 disabled={isSaving}
-                                className="p-1.5 rounded-lg hover:bg-[#efefef] text-[#9b9a97] hover:text-[#37352f] transition disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="p-1.5 rounded-lg hover:bg-notion-hover text-notion-muted hover:text-notion-text transition disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 <Save size={15} />
                             </button>
 
                             <button
                                 onClick={handleDelete}
-                                className="p-1.5 rounded-lg hover:bg-red-50 text-[#9b9a97] hover:text-red-500 transition"
+                                className="p-1.5 rounded-lg hover:bg-red-50 text-notion-muted hover:text-red-500 transition"
                             >
                                 <Trash2 size={15} />
                             </button>
@@ -218,7 +218,7 @@ export default function JournalEntryPage() {
 
                     {/* PAPER CONTENT */}
                     <div className="flex-1 overflow-auto paper-texture py-12 px-6">
-                        <div className="max-w-3xl mx-auto bg-white paper-shadow rounded-sm min-h-[80vh] relative page-fold border border-[#e9e9e7]/50">
+                        <div className="max-w-3xl mx-auto bg-notion-bg paper-shadow rounded-sm min-h-[80vh] relative page-fold border border-notion-border/50">
 
                             <div className="absolute left-0 top-0 bottom-0 w-8 border-r border-[#f1f1ef] bg-[#fdfdfd] opacity-50" />
 
@@ -230,12 +230,12 @@ export default function JournalEntryPage() {
                                     </span>
 
                                     <div className="pt-2">
-                                        <h1 className="text-5xl font-extrabold text-[#37352f] tracking-tight leading-tight mb-2">
+                                        <h1 className="text-5xl font-extrabold text-notion-text tracking-tight leading-tight mb-2">
                                             {entry.title}
                                         </h1>
 
                                         <div className="flex items-center gap-3">
-                                            <p className="text-base font-medium text-[#9b9a97] italic">
+                                            <p className="text-base font-medium text-notion-muted italic">
                                                 {format(
                                                     parseISO(entry.date),
                                                     'EEEE, MMMM d, yyyy'

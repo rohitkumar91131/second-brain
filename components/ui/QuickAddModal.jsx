@@ -87,12 +87,12 @@ export default function QuickAddModal({ onClose, defaultType = 'task', prefilled
     return (
         <Modal title="Quick Add" onClose={onClose} size="sm">
             {/* Type selector */}
-            <div className="flex gap-1 mb-4 p-1 bg-[#f7f7f5] rounded-lg">
+            <div className="flex gap-1 mb-4 p-1 bg-notion-sidebar rounded-lg">
                 {TYPES.map(({ key, label, icon: Icon, color }) => (
                     <button
                         key={key}
                         onClick={() => setType(key)}
-                        className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md text-xs font-medium transition-colors ${type === key ? 'bg-white shadow-sm text-[#37352f]' : 'text-[#9b9a97] hover:text-[#37352f]'
+                        className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md text-xs font-medium transition-colors ${type === key ? 'bg-notion-bg shadow-sm text-notion-text' : 'text-notion-muted hover:text-notion-text'
                             }`}
                     >
                         <Icon size={13} className={type === key ? color : ''} />
@@ -127,11 +127,11 @@ export default function QuickAddModal({ onClose, defaultType = 'task', prefilled
                             <button
                                 type="button"
                                 onClick={() => open()}
-                                className="w-full py-8 border-2 border-dashed border-[#e9e9e7] rounded-xl flex flex-col items-center justify-center gap-2 hover:bg-[#f7f7f5] transition-colors group"
+                                className="w-full py-8 border-2 border-dashed border-notion-border rounded-xl flex flex-col items-center justify-center gap-2 hover:bg-notion-sidebar transition-colors group"
                             >
-                                <ImageIcon size={24} className="text-[#9b9a97] group-hover:text-pink-500 transition-colors" />
-                                <span className="text-xs font-medium text-[#37352f]">Click to Upload Image</span>
-                                <span className="text-[10px] text-[#9b9a97]">Supports JPG, PNG, WEBP</span>
+                                <ImageIcon size={24} className="text-notion-muted group-hover:text-pink-500 transition-colors" />
+                                <span className="text-xs font-medium text-notion-text">Click to Upload Image</span>
+                                <span className="text-[10px] text-notion-muted">Supports JPG, PNG, WEBP</span>
                             </button>
                         )}
                     </CldUploadWidget>
@@ -144,16 +144,16 @@ export default function QuickAddModal({ onClose, defaultType = 'task', prefilled
                         placeholder={`${TYPES.find(t => t.key === type)?.label} title...`}
                         value={title}
                         onChange={e => setTitle(e.target.value)}
-                        className="w-full px-3 py-2 text-sm border border-[#e9e9e7] rounded-md focus:outline-none focus:ring-2 focus:ring-[#2eaadc]/30 focus:border-[#2eaadc]"
+                        className="w-full px-3 py-2 text-sm border border-notion-border rounded-md focus:outline-none focus:ring-2 focus:ring-[#2eaadc]/30 focus:border-[#2eaadc]"
                     />
 
                     <div className="grid grid-cols-2 gap-2">
                         <div>
-                            <label className="block text-xs text-[#9b9a97] mb-1">Status</label>
+                            <label className="block text-xs text-notion-muted mb-1">Status</label>
                             <select
                                 value={status}
                                 onChange={e => setStatus(e.target.value)}
-                                className="w-full px-2 py-1.5 text-xs border border-[#e9e9e7] rounded-md focus:outline-none focus:ring-2 focus:ring-[#2eaadc]/30"
+                                className="w-full px-2 py-1.5 text-xs border border-notion-border rounded-md focus:outline-none focus:ring-2 focus:ring-[#2eaadc]/30"
                             >
                                 <option>Not Started</option>
                                 <option>In Progress</option>
@@ -163,24 +163,24 @@ export default function QuickAddModal({ onClose, defaultType = 'task', prefilled
                             </select>
                         </div>
                         <div>
-                            <label className="block text-xs text-[#9b9a97] mb-1">Due Date</label>
+                            <label className="block text-xs text-notion-muted mb-1">Due Date</label>
                             <input
                                 type="date"
                                 value={dueDate}
                                 onChange={e => setDueDate(e.target.value)}
-                                className="w-full px-2 py-1.5 text-xs border border-[#e9e9e7] rounded-md focus:outline-none focus:ring-2 focus:ring-[#2eaadc]/30"
+                                className="w-full px-2 py-1.5 text-xs border border-notion-border rounded-md focus:outline-none focus:ring-2 focus:ring-[#2eaadc]/30"
                             />
                         </div>
                     </div>
 
                     <div>
-                        <label className="block text-xs text-[#9b9a97] mb-1">Tags (comma separated)</label>
+                        <label className="block text-xs text-notion-muted mb-1">Tags (comma separated)</label>
                         <input
                             type="text"
                             placeholder="productivity, work, personal"
                             value={tags}
                             onChange={e => setTags(e.target.value)}
-                            className="w-full px-3 py-1.5 text-xs border border-[#e9e9e7] rounded-md focus:outline-none focus:ring-2 focus:ring-[#2eaadc]/30"
+                            className="w-full px-3 py-1.5 text-xs border border-notion-border rounded-md focus:outline-none focus:ring-2 focus:ring-[#2eaadc]/30"
                         />
                     </div>
 
@@ -189,7 +189,7 @@ export default function QuickAddModal({ onClose, defaultType = 'task', prefilled
                             type="button"
                             onClick={onClose}
                             disabled={isLoading}
-                            className="flex-1 px-3 py-2 text-xs font-medium text-[#37352f] border border-[#e9e9e7] rounded-md hover:bg-[#f7f7f5] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="flex-1 px-3 py-2 text-xs font-medium text-notion-text border border-notion-border rounded-md hover:bg-notion-sidebar transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             Cancel
                         </button>

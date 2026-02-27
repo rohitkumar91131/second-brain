@@ -8,7 +8,7 @@ import { Brain, Eye, EyeOff, Loader2, Check, X } from 'lucide-react'
 
 function PasswordRule({ met, label }) {
     return (
-        <div className={`flex items-center gap-1.5 text-xs ${met ? 'text-green-600' : 'text-[#9b9a97]'}`}>
+        <div className={`flex items-center gap-1.5 text-xs ${met ? 'text-green-600' : 'text-notion-muted'}`}>
             {met ? <Check size={11} /> : <X size={11} />}
             {label}
         </div>
@@ -80,17 +80,17 @@ export default function RegisterPage() {
     }
 
     return (
-        <div className="min-h-screen bg-[#f7f7f5] flex items-center justify-center p-4">
+        <div className="min-h-screen bg-notion-sidebar flex items-center justify-center p-4">
             <div className="w-full max-w-sm">
                 <div className="text-center mb-8">
                     <div className="inline-flex items-center justify-center w-12 h-12 bg-[#37352f] rounded-xl mb-4">
                         <Brain size={24} className="text-white" />
                     </div>
-                    <h1 className="text-2xl font-bold text-[#37352f]">Create account</h1>
-                    <p className="text-sm text-[#9b9a97] mt-1">Start building your second brain</p>
+                    <h1 className="text-2xl font-bold text-notion-text">Create account</h1>
+                    <p className="text-sm text-notion-muted mt-1">Start building your second brain</p>
                 </div>
 
-                <div className="bg-white rounded-2xl border border-[#e9e9e7] p-6 shadow-sm">
+                <div className="bg-notion-bg rounded-2xl border border-notion-border p-6 shadow-sm">
                     <form onSubmit={handleSubmit} className="space-y-3">
                         {error && (
                             <div className="px-3 py-2 bg-red-50 border border-red-200 rounded-lg text-xs text-red-600">
@@ -99,31 +99,31 @@ export default function RegisterPage() {
                         )}
 
                         <div>
-                            <label className="block text-xs font-medium text-[#37352f] mb-1">Full Name</label>
+                            <label className="block text-xs font-medium text-notion-text mb-1">Full Name</label>
                             <input
                                 type="text"
                                 required
                                 value={form.name}
                                 onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
                                 placeholder="Your name"
-                                className="w-full px-3 py-2 text-sm border border-[#e9e9e7] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#37352f]/20 focus:border-[#37352f] transition-all"
+                                className="w-full px-3 py-2 text-sm border border-notion-border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#37352f]/20 focus:border-[#37352f] transition-all"
                             />
                         </div>
 
                         <div>
-                            <label className="block text-xs font-medium text-[#37352f] mb-1">Email</label>
+                            <label className="block text-xs font-medium text-notion-text mb-1">Email</label>
                             <input
                                 type="email"
                                 required
                                 value={form.email}
                                 onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
                                 placeholder="you@example.com"
-                                className="w-full px-3 py-2 text-sm border border-[#e9e9e7] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#37352f]/20 focus:border-[#37352f] transition-all"
+                                className="w-full px-3 py-2 text-sm border border-notion-border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#37352f]/20 focus:border-[#37352f] transition-all"
                             />
                         </div>
 
                         <div>
-                            <label className="block text-xs font-medium text-[#37352f] mb-1">Password</label>
+                            <label className="block text-xs font-medium text-notion-text mb-1">Password</label>
                             <div className="relative">
                                 <input
                                     type={showPass ? 'text' : 'password'}
@@ -131,9 +131,9 @@ export default function RegisterPage() {
                                     value={form.password}
                                     onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
                                     placeholder="••••••••"
-                                    className="w-full px-3 py-2 pr-9 text-sm border border-[#e9e9e7] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#37352f]/20 focus:border-[#37352f] transition-all"
+                                    className="w-full px-3 py-2 pr-9 text-sm border border-notion-border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#37352f]/20 focus:border-[#37352f] transition-all"
                                 />
-                                <button type="button" onClick={() => setShowPass(s => !s)} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#9b9a97]">
+                                <button type="button" onClick={() => setShowPass(s => !s)} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-notion-muted">
                                     {showPass ? <EyeOff size={14} /> : <Eye size={14} />}
                                 </button>
                             </div>
@@ -147,14 +147,14 @@ export default function RegisterPage() {
                         </div>
 
                         <div>
-                            <label className="block text-xs font-medium text-[#37352f] mb-1">Confirm Password</label>
+                            <label className="block text-xs font-medium text-notion-text mb-1">Confirm Password</label>
                             <input
                                 type="password"
                                 required
                                 value={form.confirm}
                                 onChange={e => setForm(f => ({ ...f, confirm: e.target.value }))}
                                 placeholder="••••••••"
-                                className="w-full px-3 py-2 text-sm border border-[#e9e9e7] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#37352f]/20 focus:border-[#37352f] transition-all"
+                                className="w-full px-3 py-2 text-sm border border-notion-border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#37352f]/20 focus:border-[#37352f] transition-all"
                             />
                         </div>
 
@@ -168,9 +168,9 @@ export default function RegisterPage() {
                         </button>
                     </form>
 
-                    <p className="text-center text-xs text-[#9b9a97] mt-4">
+                    <p className="text-center text-xs text-notion-muted mt-4">
                         Already have an account?{' '}
-                        <Link href="/login" className="text-[#37352f] font-medium hover:underline">
+                        <Link href="/login" className="text-notion-text font-medium hover:underline">
                             Sign in
                         </Link>
                     </p>

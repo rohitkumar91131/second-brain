@@ -117,10 +117,10 @@ export default function NoteEditorPage() {
     }
 
     return (
-        <div className="flex flex-col h-full bg-white relative">
+        <div className="flex flex-col h-full bg-notion-bg relative">
 
             {loading && (
-                <div className="absolute inset-0 flex items-center justify-center bg-white/50 backdrop-blur-sm z-50">
+                <div className="absolute inset-0 flex items-center justify-center bg-notion-bg/50 backdrop-blur-sm z-50">
                     <Loader />
                 </div>
             )}
@@ -128,8 +128,8 @@ export default function NoteEditorPage() {
             {!loading && !note && notFoundDelay && (
                 <div className="flex items-center justify-center h-full">
                     <div className="text-center">
-                        <p className="text-[#9b9a97] text-sm mb-3 font-medium">Note not found</p>
-                        <Link href="/dashboard/notes" className="text-sm text-[#2eaadc] hover:underline font-semibold">
+                        <p className="text-notion-muted text-sm mb-3 font-medium">Note not found</p>
+                        <Link href="/dashboard/notes" className="text-sm text-notion-accent hover:underline font-semibold">
                             ← Back to Notes
                         </Link>
                     </div>
@@ -140,63 +140,63 @@ export default function NoteEditorPage() {
                 <div className={`flex flex-col h-full transition-all duration-300 ease-out ${ready ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}>
 
                     {/* Header: Responsive Gap and Padding */}
-                    <div className="flex items-center gap-2 md:gap-3 px-4 md:px-6 py-3 border-b border-[#e9e9e7] bg-white/80 backdrop-blur-md z-10 sticky top-0">
-                        <Link href="/dashboard/notes" className="p-1.5 rounded-lg hover:bg-[#efefef] text-[#9b9a97] hover:text-[#37352f] transition-all flex-shrink-0">
+                    <div className="flex items-center gap-2 md:gap-3 px-4 md:px-6 py-3 border-b border-notion-border bg-notion-bg/80 backdrop-blur-md z-10 sticky top-0">
+                        <Link href="/dashboard/notes" className="p-1.5 rounded-lg hover:bg-notion-hover text-notion-muted hover:text-notion-text transition-all flex-shrink-0">
                             <ArrowLeft size={16} />
                         </Link>
 
                         <div className="flex-1 flex items-center gap-2 min-w-0">
-                            <span className="hidden sm:inline text-xs font-semibold text-[#9b9a97] uppercase tracking-wider">Notes</span>
+                            <span className="hidden sm:inline text-xs font-semibold text-notion-muted uppercase tracking-wider">Notes</span>
                             <span className="hidden sm:inline text-xs text-[#d3d1cb]">/</span>
                             <input
                                 value={title}
                                 onChange={(e) => setTitle(e.target.value)}
-                                className="text-sm font-bold text-[#37352f] bg-transparent focus:outline-none flex-1 truncate"
+                                className="text-sm font-bold text-notion-text bg-transparent focus:outline-none flex-1 truncate"
                             />
                         </div>
 
                         <div className="flex items-center gap-2 md:gap-4 flex-shrink-0">
                             {project && (
                                 <div className="group relative hidden md:block">
-                                    <span className="text-sm font-bold text-[#37352f] cursor-help">{project.title}</span>
+                                    <span className="text-sm font-bold text-notion-text cursor-help">{project.title}</span>
                                     <span className="absolute -top-8 right-0 bg-[#37352f] text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap">Project</span>
                                 </div>
                             )}
 
                             <div className="flex items-center gap-1.5">
                                 <div className={`w-1.5 h-1.5 rounded-full ${isSaving ? 'bg-yellow-500 animate-pulse' : 'bg-[#2eaadc]'}`} />
-                                <span className="text-[9px] sm:text-[10px] font-bold text-[#9b9a97] uppercase tracking-tighter max-w-[60px] sm:max-w-none truncate">
+                                <span className="text-[9px] sm:text-[10px] font-bold text-notion-muted uppercase tracking-tighter max-w-[60px] sm:max-w-none truncate">
                                     {isSaving ? 'Saving...' : lastSaved === 'Draft (Unsaved)' ? 'Draft' : lastSaved ? `Saved ${format(new Date(lastSaved), 'h:mm')}` : 'New'}
                                 </span>
                             </div>
 
-                            <button onClick={handleSave} disabled={isSaving} className="p-1.5 rounded-lg hover:bg-[#efefef] text-[#9b9a97] transition-all">
+                            <button onClick={handleSave} disabled={isSaving} className="p-1.5 rounded-lg hover:bg-notion-hover text-notion-muted transition-all">
                                 <Save size={15} />
                             </button>
 
-                            <button onClick={handleDelete} className="p-1.5 rounded-lg hover:bg-red-50 text-[#9b9a97] hover:text-red-500">
+                            <button onClick={handleDelete} className="p-1.5 rounded-lg hover:bg-red-50 text-notion-muted hover:text-red-500">
                                 <Trash2 size={15} />
                             </button>
                         </div>
                     </div>
 
-                    <div className="flex-1 overflow-auto py-8 md:py-12 px-4 md:px-6 bg-[#fcfcfc]">
+                    <div className="flex-1 overflow-auto py-8 md:py-12 px-4 md:px-6 bg-notion-card">
                         <div className="max-w-3xl mx-auto">
                             <div className="mb-6 md:mb-10">
                                 <input
                                     value={title}
                                     onChange={(e) => setTitle(e.target.value)}
                                     placeholder="Untitled Note"
-                                    className="w-full text-3xl md:text-5xl font-extrabold text-[#37352f] bg-transparent focus:outline-none placeholder-[#d3d1cb] tracking-tight leading-tight"
+                                    className="w-full text-3xl md:text-5xl font-extrabold text-notion-text bg-transparent focus:outline-none placeholder-[#d3d1cb] tracking-tight leading-tight"
                                 />
 
                                 <div className="flex flex-wrap items-center gap-2 mt-4 md:mt-6">
-                                    <div className="flex items-center gap-1.5 px-2.5 py-1 bg-[#f1f1ef] text-[#787774] text-[10px] md:text-xs font-bold rounded-lg border border-[#e9e9e7]/50 uppercase tracking-wider">
+                                    <div className="flex items-center gap-1.5 px-2.5 py-1 bg-[#f1f1ef] text-notion-muted text-[10px] md:text-xs font-bold rounded-lg border border-notion-border/50 uppercase tracking-wider">
                                         <FileText size={12} /> Note
                                     </div>
 
                                     {note.tags?.map(tag => (
-                                        <span key={tag} className="px-2 py-0.5 md:px-2.5 md:py-1 bg-white text-[#9b9a97] text-[10px] md:text-xs font-semibold rounded-lg border border-[#e9e9e7]">
+                                        <span key={tag} className="px-2 py-0.5 md:px-2.5 md:py-1 bg-notion-bg text-notion-muted text-[10px] md:text-xs font-semibold rounded-lg border border-notion-border">
                                             #{tag}
                                         </span>
                                     ))}

@@ -169,7 +169,7 @@ export default function BlockEditor({ blocks, onChange, isDiary = false }) {
                 <button
                     onClick={handleSave}
                     disabled={isSaving}
-                    className="flex items-center gap-2 px-3 py-1.5 bg-[#f1f1ef] hover:bg-[#e9e9e7] text-[#37352f] text-sm rounded transition-colors"
+                    className="flex items-center gap-2 px-3 py-1.5 bg-[#f1f1ef] hover:bg-notion-border text-notion-text text-sm rounded transition-colors"
                 >
                     <Save size={14} />
                     {isSaving ? 'Saving...' : 'Save Order'}
@@ -238,29 +238,29 @@ export default function BlockEditor({ blocks, onChange, isDiary = false }) {
                     const last = blocks[blocks.length - 1]
                     if (last) addBlock(last.id)
                 }}
-                className="flex items-center gap-2 mt-10 mb-20 text-xs text-[#9b9a97] hover:text-[#37352f] transition-colors opacity-40 hover:opacity-100"
+                className="flex items-center gap-2 mt-10 mb-20 text-xs text-notion-muted hover:text-notion-text transition-colors opacity-40 hover:opacity-100"
             >
                 <Plus size={13} />
                 Add block
             </button>
 
-            <div className="flex items-center gap-4 py-4 px-2 border-t border-[#e9e9e7] mt-4 opacity-60 hover:opacity-100 transition-opacity">
-                <span className="text-[10px] font-bold text-[#9b9a97] uppercase tracking-widest">Quick Media:</span>
+            <div className="flex items-center gap-4 py-4 px-2 border-t border-notion-border mt-4 opacity-60 hover:opacity-100 transition-opacity">
+                <span className="text-[10px] font-bold text-notion-muted uppercase tracking-widest">Quick Media:</span>
                 <button
                     onClick={() => addBlock(blocks[blocks.length - 1]?.id, 'image')}
-                    className="flex items-center gap-1.5 text-xs text-[#37352f] hover:text-pink-600 transition-all font-medium"
+                    className="flex items-center gap-1.5 text-xs text-notion-text hover:text-pink-600 transition-all font-medium"
                 >
                     <ImageIcon size={14} /> Image
                 </button>
                 <button
                     onClick={() => addBlock(blocks[blocks.length - 1]?.id, 'video')}
-                    className="flex items-center gap-1.5 text-xs text-[#37352f] hover:text-blue-600 transition-all font-medium"
+                    className="flex items-center gap-1.5 text-xs text-notion-text hover:text-blue-600 transition-all font-medium"
                 >
                     <Video size={14} /> Video
                 </button>
                 <button
                     onClick={() => addBlock(blocks[blocks.length - 1]?.id, 'audio')}
-                    className="flex items-center gap-1.5 text-xs text-[#37352f] hover:text-purple-600 transition-all font-medium"
+                    className="flex items-center gap-1.5 text-xs text-notion-text hover:text-purple-600 transition-all font-medium"
                 >
                     <Music size={14} /> Audio
                 </button>

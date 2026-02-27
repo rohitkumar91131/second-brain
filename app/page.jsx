@@ -56,9 +56,9 @@ export default function LandingPage() {
     const closeMenu = () => setMobileMenuOpen(false)
 
     return (
-        <div className="min-h-screen bg-[#ffffff] text-[#37352f] overflow-x-hidden">
+        <div className="min-h-screen bg-notion-bg text-notion-text overflow-x-hidden">
             {/* Navigation */}
-            <nav className="fixed top-0 w-full z-[100] bg-white/80 backdrop-blur-md border-b border-[#e9e9e7]">
+            <nav className="fixed top-0 w-full z-[100] bg-notion-bg/80 backdrop-blur-md border-b border-notion-border">
                 <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between relative z-[110] bg-transparent">
                     <div className="flex items-center gap-2">
                         <div className="w-8 h-8 bg-[#37352f] rounded-lg flex items-center justify-center">
@@ -69,26 +69,26 @@ export default function LandingPage() {
 
                     {/* Desktop Menu */}
                     <div className="hidden md:flex items-center gap-8 text-sm font-medium">
-                        <a href="#features" className="hover:text-[#2eaadc] transition-colors">Features</a>
-                        <Link href="/versions" className="hover:text-[#2eaadc] transition-colors">Versions</Link>
-                        <Link href="/downloads" className="hover:text-[#2eaadc] transition-colors">Downloads</Link>
+                        <a href="#features" className="hover:text-notion-accent transition-colors">Features</a>
+                        <Link href="/versions" className="hover:text-notion-accent transition-colors">Versions</Link>
+                        <Link href="/downloads" className="hover:text-notion-accent transition-colors">Downloads</Link>
 
                         {status === 'loading' ? (
                             <div className="w-20 flex justify-center">
-                                <Loader2 size={18} className="animate-spin text-[#9b9a97]" />
+                                <Loader2 size={18} className="animate-spin text-notion-muted" />
                             </div>
                         ) : status === 'authenticated' ? (
                             <Link href="/dashboard" className="px-5 py-2.5 bg-[#37352f] text-white rounded-full hover:bg-black transition-all shadow-md">Dashboard</Link>
                         ) : (
                             <div className="flex items-center gap-6">
-                                <Link href="/login" className="hover:text-[#2eaadc] transition-colors">Login</Link>
+                                <Link href="/login" className="hover:text-notion-accent transition-colors">Login</Link>
                                 <Link href="/register" className="px-5 py-2.5 bg-[#37352f] text-white rounded-full hover:bg-black transition-all shadow-md">Get Started</Link>
                             </div>
                         )}
                     </div>
 
                     {/* Mobile Toggle */}
-                    <button className="md:hidden p-2 text-[#37352f]" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+                    <button className="md:hidden p-2 text-notion-text" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
                         {mobileMenuOpen ? <X size={26} /> : <Menu size={26} />}
                     </button>
                 </div>
@@ -97,23 +97,23 @@ export default function LandingPage() {
                 <div
                     ref={menuRef}
                     style={{ transform: "translateY(-100%)", display: "none", opacity: 0 }}
-                    className="md:hidden fixed top-16 left-0 w-full bg-white border-b border-[#e9e9e7] shadow-2xl py-10 px-8 flex flex-col gap-6 text-xl font-bold z-[90]"
+                    className="md:hidden fixed top-16 left-0 w-full bg-notion-bg border-b border-notion-border shadow-2xl py-10 px-8 flex flex-col gap-6 text-xl font-bold z-[90]"
                 >
-                    <a href="#features" ref={el => menuLinksRef.current[0] = el} onClick={closeMenu} className="hover:text-[#2eaadc]">Features</a>
-                    <Link href="/versions" ref={el => menuLinksRef.current[1] = el} onClick={closeMenu} className="hover:text-[#2eaadc]">Versions</Link>
-                    <Link href="/downloads" ref={el => menuLinksRef.current[2] = el} onClick={closeMenu} className="hover:text-[#2eaadc]">Downloads</Link>
+                    <a href="#features" ref={el => menuLinksRef.current[0] = el} onClick={closeMenu} className="hover:text-notion-accent">Features</a>
+                    <Link href="/versions" ref={el => menuLinksRef.current[1] = el} onClick={closeMenu} className="hover:text-notion-accent">Versions</Link>
+                    <Link href="/downloads" ref={el => menuLinksRef.current[2] = el} onClick={closeMenu} className="hover:text-notion-accent">Downloads</Link>
 
-                    <div className="h-px bg-[#e9e9e7] my-2" ref={el => menuLinksRef.current[3] = el} />
+                    <div className="h-px bg-notion-border my-2" ref={el => menuLinksRef.current[3] = el} />
 
                     {status === 'loading' ? (
                         <div className="flex justify-center" ref={el => menuLinksRef.current[4] = el}>
-                            <Loader2 size={24} className="animate-spin text-[#37352f]" />
+                            <Loader2 size={24} className="animate-spin text-notion-text" />
                         </div>
                     ) : status === 'authenticated' ? (
                         <Link href="/dashboard" ref={el => menuLinksRef.current[4] = el} className="text-center py-4 bg-[#37352f] text-white rounded-2xl shadow-lg">Dashboard</Link>
                     ) : (
                         <div className="flex flex-col gap-4" ref={el => menuLinksRef.current[5] = el}>
-                            <Link href="/login" onClick={closeMenu} className="text-center py-4 border border-[#e9e9e7] rounded-2xl">Login</Link>
+                            <Link href="/login" onClick={closeMenu} className="text-center py-4 border border-notion-border rounded-2xl">Login</Link>
                             <Link href="/register" onClick={closeMenu} className="text-center py-4 bg-[#37352f] text-white rounded-2xl shadow-lg">Get Started</Link>
                         </div>
                     )}
@@ -127,7 +127,7 @@ export default function LandingPage() {
                         Build your <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">Digital Second Brain</span>
                     </h1>
 
-                    <p className="text-lg md:text-xl text-[#787774] max-w-2xl mx-auto mb-10 leading-relaxed">
+                    <p className="text-lg md:text-xl text-notion-muted max-w-2xl mx-auto mb-10 leading-relaxed">
                         The all-in-one workspace to capture notes, track habits, manage projects, and achieve your goals. Simple, powerful, and beautiful.
                     </p>
 
@@ -148,16 +148,16 @@ export default function LandingPage() {
                     <div className="mt-24 relative max-w-4xl mx-auto">
                         <div className="absolute -top-10 -left-10 w-40 h-40 bg-blue-100 rounded-full blur-3xl opacity-30" />
                         <div className="relative grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="bg-white border border-[#e9e9e7] rounded-[2.5rem] p-8 shadow-xl text-left transform hover:-translate-y-2 transition-all duration-300">
+                            <div className="bg-notion-bg border border-notion-border rounded-[2.5rem] p-8 shadow-xl text-left transform hover:-translate-y-2 transition-all duration-300">
                                 <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-6">
                                     <Layout size={24} />
                                 </div>
                                 <h3 className="text-2xl font-bold mb-3">Modular Workspace</h3>
-                                <p className="text-[#9b9a97] text-sm leading-relaxed">Organize everything exactly how you think. No rigid structures, just pure creative flow.</p>
+                                <p className="text-notion-muted text-sm leading-relaxed">Organize everything exactly how you think. No rigid structures, just pure creative flow.</p>
                             </div>
 
                             <div className="bg-[#37352f] rounded-[2.5rem] p-8 shadow-2xl text-left text-white transform md:translate-y-8 hover:-translate-y-0 transition-all duration-300">
-                                <div className="w-12 h-12 bg-white/10 text-blue-400 rounded-2xl flex items-center justify-center mb-6">
+                                <div className="w-12 h-12 bg-notion-bg/10 text-blue-400 rounded-2xl flex items-center justify-center mb-6">
                                     <Sparkles size={24} />
                                 </div>
                                 <h3 className="text-2xl font-bold mb-3">Focus on Action</h3>
@@ -169,11 +169,11 @@ export default function LandingPage() {
             </section>
 
             {/* Features Group */}
-            <section id="features" className="py-24 bg-[#fcfcfc] border-y border-[#e9e9e7]">
+            <section id="features" className="py-24 bg-notion-card border-y border-notion-border">
                 <div className="max-w-7xl mx-auto px-6">
                     <div className="text-center mb-16">
                         <h2 className="text-3xl font-bold mb-4">Core Components</h2>
-                        <p className="text-[#9b9a97]">Everything you need to stay organized in one place.</p>
+                        <p className="text-notion-muted">Everything you need to stay organized in one place.</p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -204,8 +204,8 @@ export default function LandingPage() {
                             <Download size={12} />
                             <span>Available everywhere</span>
                         </div>
-                        <h2 className="text-3xl font-bold mb-4 text-[#37352f]">Download the App</h2>
-                        <p className="text-[#9b9a97] max-w-xl mx-auto">Seamlessly sync your brain across all your devices.</p>
+                        <h2 className="text-3xl font-bold mb-4 text-notion-text">Download the App</h2>
+                        <p className="text-notion-muted max-w-xl mx-auto">Seamlessly sync your brain across all your devices.</p>
                     </div>
 
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-5">
@@ -219,7 +219,7 @@ export default function LandingPage() {
                             <Link
                                 key={platform.id}
                                 href={`/downloads/${platform.id}`}
-                                className="flex flex-col items-center gap-3 p-6 bg-white border border-[#e9e9e7] rounded-2xl hover:shadow-lg transition-all group"
+                                className="flex flex-col items-center gap-3 p-6 bg-notion-bg border border-notion-border rounded-2xl hover:shadow-lg transition-all group"
                             >
                                 <div className={`w-14 h-14 ${platform.bg} ${platform.color} rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform`}>
                                     {platform.icon}
@@ -232,7 +232,7 @@ export default function LandingPage() {
             </section>
 
             {/* Footer */}
-            <footer className="py-20 border-t border-[#e9e9e7] bg-[#fcfcfc]">
+            <footer className="py-20 border-t border-notion-border bg-notion-card">
                 <div className="max-w-7xl mx-auto px-6">
                     <div className="flex flex-col md:flex-row items-start justify-between gap-12 mb-16">
                         <div className="max-w-xs text-left">
@@ -242,26 +242,26 @@ export default function LandingPage() {
                                 </div>
                                 <span className="font-bold text-lg tracking-tight">Second Brain</span>
                             </div>
-                            <p className="text-sm text-[#9b9a97] leading-relaxed">
+                            <p className="text-sm text-notion-muted leading-relaxed">
                                 The ultimate tool for high-performers to organize their knowledge and master their habits.
                             </p>
                         </div>
 
                         <div className="grid grid-cols-2 sm:grid-cols-2 gap-16 md:gap-24">
                             <div className="flex flex-col gap-4">
-                                <h4 className="font-bold text-sm uppercase tracking-widest text-[#37352f]">Product</h4>
-                                <Link href="/versions" className="text-sm text-[#9b9a97] hover:text-[#37352f] transition-colors">Versions</Link>
-                                <Link href="/downloads" className="text-sm text-[#9b9a97] hover:text-[#37352f] transition-colors">Downloads</Link>
+                                <h4 className="font-bold text-sm uppercase tracking-widest text-notion-text">Product</h4>
+                                <Link href="/versions" className="text-sm text-notion-muted hover:text-notion-text transition-colors">Versions</Link>
+                                <Link href="/downloads" className="text-sm text-notion-muted hover:text-notion-text transition-colors">Downloads</Link>
                             </div>
                             <div className="flex flex-col gap-4">
-                                <h4 className="font-bold text-sm uppercase tracking-widest text-[#37352f]">Legal</h4>
-                                <Link href="/privacy" className="text-sm text-[#9b9a97] hover:text-[#37352f] transition-colors">Privacy Policy</Link>
-                                <Link href="/terms" className="text-sm text-[#9b9a97] hover:text-[#37352f] transition-colors">Terms of Service</Link>
+                                <h4 className="font-bold text-sm uppercase tracking-widest text-notion-text">Legal</h4>
+                                <Link href="/privacy" className="text-sm text-notion-muted hover:text-notion-text transition-colors">Privacy Policy</Link>
+                                <Link href="/terms" className="text-sm text-notion-muted hover:text-notion-text transition-colors">Terms of Service</Link>
                             </div>
                         </div>
                     </div>
 
-                    <div className="flex flex-col md:flex-row items-center justify-between gap-6 pt-8 border-t border-[#e9e9e7]">
+                    <div className="flex flex-col md:flex-row items-center justify-between gap-6 pt-8 border-t border-notion-border">
                         <p className="text-xs text-[#d3d1cb] font-medium">© 2026 Second Brain. Built for clarity and speed.</p>
                         <p className="text-xs text-[#d3d1cb] font-bold tracking-widest uppercase">MASTER YOUR MIND</p>
                     </div>
@@ -273,12 +273,12 @@ export default function LandingPage() {
 
 function FeatureCard({ icon, title, description }) {
     return (
-        <div className="p-8 bg-white border border-[#e9e9e7] rounded-3xl hover:shadow-xl transition-all duration-300 group">
-            <div className="w-12 h-12 bg-[#f7f7f5] rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+        <div className="p-8 bg-notion-bg border border-notion-border rounded-3xl hover:shadow-xl transition-all duration-300 group">
+            <div className="w-12 h-12 bg-notion-sidebar rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                 {icon}
             </div>
             <h3 className="text-xl font-bold mb-3">{title}</h3>
-            <p className="text-[#787774] leading-relaxed text-sm">
+            <p className="text-notion-muted leading-relaxed text-sm">
                 {description}
             </p>
         </div>

@@ -44,7 +44,7 @@ export default function ImageBlock({ block, onUpdate, onDelete, onDragHandleDown
 
             {/* --- DRAG HANDLE ADD KIYA --- */}
             <div
-                className="absolute -left-6 top-1 opacity-0 group-hover:opacity-100 cursor-grab text-[#9b9a97] hover:bg-[#e9e9e7] rounded w-5 h-6 flex items-center justify-center transition-all z-10"
+                className="absolute -left-6 top-1 opacity-0 group-hover:opacity-100 cursor-grab text-notion-muted hover:bg-notion-border rounded w-5 h-6 flex items-center justify-center transition-all z-10"
                 onMouseDown={onDragHandleDown}
                 onMouseUp={onDragHandleUp}
                 onMouseLeave={onDragHandleUp}
@@ -61,20 +61,20 @@ export default function ImageBlock({ block, onUpdate, onDelete, onDragHandleDown
                             src={block.content}
                             alt="Block"
                             onClick={() => setIsFullScreen(true)}
-                            className="max-w-full h-auto object-contain rounded-lg border border-[#e9e9e7] cursor-zoom-in hover:brightness-95 transition-all"
+                            className="max-w-full h-auto object-contain rounded-lg border border-notion-border cursor-zoom-in hover:brightness-95 transition-all"
                         />
 
                         <div className="absolute top-2 right-2 flex gap-1.5 opacity-0 group-hover/img:opacity-100 transition-opacity">
                             <button
                                 onClick={() => setIsFullScreen(true)}
-                                className="bg-white/90 p-1.5 rounded-md text-[#9b9a97] hover:text-[#2eaadc] shadow-sm transition-colors"
+                                className="bg-notion-bg/90 p-1.5 rounded-md text-notion-muted hover:text-notion-accent shadow-sm transition-colors"
                                 title="Full Screen"
                             >
                                 <Maximize2 size={14} />
                             </button>
                             <button
                                 onClick={onDelete}
-                                className="bg-white/90 p-1.5 rounded-md text-[#9b9a97] hover:text-red-500 shadow-sm transition-colors"
+                                className="bg-notion-bg/90 p-1.5 rounded-md text-notion-muted hover:text-red-500 shadow-sm transition-colors"
                                 title="Delete Image"
                             >
                                 <Minus size={14} />
@@ -86,7 +86,7 @@ export default function ImageBlock({ block, onUpdate, onDelete, onDragHandleDown
                             <div className="fixed inset-0 z-[9999] bg-[#37352f]/95 backdrop-blur-sm flex items-center justify-center p-4 md:p-10 animate-fade-in">
                                 <button
                                     onClick={() => setIsFullScreen(false)}
-                                    className="absolute top-6 left-6 flex items-center gap-2 px-3 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-all text-sm font-medium border border-white/10"
+                                    className="absolute top-6 left-6 flex items-center gap-2 px-3 py-2 bg-notion-bg/10 hover:bg-notion-bg/20 text-white rounded-lg transition-all text-sm font-medium border border-white/10"
                                 >
                                     <X size={18} />
                                     <span>Back</span>
@@ -95,7 +95,7 @@ export default function ImageBlock({ block, onUpdate, onDelete, onDragHandleDown
                                 <button
                                     onClick={() => handleDownload(block.content)}
                                     disabled={isDownloading}
-                                    className="absolute top-6 right-6 p-2.5 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-all border border-white/10 disabled:opacity-50"
+                                    className="absolute top-6 right-6 p-2.5 bg-notion-bg/10 hover:bg-notion-bg/20 text-white rounded-lg transition-all border border-white/10 disabled:opacity-50"
                                 >
                                     <Download size={18} className={isDownloading ? 'animate-bounce' : ''} />
                                 </button>
@@ -134,10 +134,10 @@ export default function ImageBlock({ block, onUpdate, onDelete, onDragHandleDown
                                         e.preventDefault();
                                         open();
                                     }}
-                                    className="border border-dashed border-[#e9e9e7] bg-[#f7f7f5]/50 hover:bg-[#f7f7f5] transition-colors rounded-lg p-8 flex flex-col items-center justify-center text-sm text-[#9b9a97] w-full cursor-pointer"
+                                    className="border border-dashed border-notion-border bg-notion-sidebar/50 hover:bg-notion-sidebar transition-colors rounded-lg p-8 flex flex-col items-center justify-center text-sm text-notion-muted w-full cursor-pointer"
                                 >
                                     <ImageIcon size={24} className="mb-2 opacity-40" />
-                                    <span className="font-medium hover:text-[#37352f] transition-colors">
+                                    <span className="font-medium hover:text-notion-text transition-colors">
                                         Click to add image via link, device, or camera
                                     </span>
                                 </div>

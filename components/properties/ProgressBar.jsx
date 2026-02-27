@@ -12,7 +12,7 @@ export default function ProgressBar({ value = 0, showLabel = true, color = '#2ea
                 />
             </div>
             {showLabel && (
-                <span className="text-xs text-[#9b9a97] w-8 text-right flex-shrink-0">{pct}%</span>
+                <span className="text-xs text-notion-muted w-8 text-right flex-shrink-0">{pct}%</span>
             )}
         </div>
     )

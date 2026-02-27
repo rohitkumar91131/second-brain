@@ -18,7 +18,7 @@ export default function JournalPage() {
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center h-full w-full relative overflow-hidden bg-white/50 backdrop-blur-sm z-50">
+            <div className="flex items-center justify-center h-full w-full relative overflow-hidden bg-notion-bg/50 backdrop-blur-sm z-50">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
             </div>
         )
@@ -69,19 +69,19 @@ export default function JournalPage() {
     return (
         <div className="flex flex-col h-full bg-[#fcfaf7]">
             {/* Toolbar */}
-            <div className="flex items-center gap-3 px-6 py-4 bg-white/50 backdrop-blur-md border-b border-[#e9e9e7] z-10">
+            <div className="flex items-center gap-3 px-6 py-4 bg-notion-bg/50 backdrop-blur-md border-b border-notion-border z-10">
                 <div className="flex flex-col">
-                    <h1 className="text-xl font-bold text-[#37352f] tracking-tight diary-serif">Personal Diary</h1>
-                    <p className="text-[10px] font-bold text-[#9b9a97] uppercase tracking-widest mt-0.5">Chronological Archive</p>
+                    <h1 className="text-xl font-bold text-notion-text tracking-tight diary-serif">Personal Diary</h1>
+                    <p className="text-[10px] font-bold text-notion-muted uppercase tracking-widest mt-0.5">Chronological Archive</p>
                 </div>
 
-                <div className="mx-auto flex items-center gap-2 bg-[#f1f1ef]/50 p-1.5 rounded-full border border-[#e9e9e7]/50">
+                <div className="mx-auto flex items-center gap-2 bg-[#f1f1ef]/50 p-1.5 rounded-full border border-notion-border/50">
                     {MOODS.map(mood => (
                         <button
                             key={mood}
                             onClick={() => setSelectedMood(mood)}
                             title={`Add entry as ${mood}`}
-                            className={`w-8 h-8 flex items-center justify-center rounded-full transition-all duration-300 ${selectedMood === mood ? 'bg-white shadow-md scale-110' : 'opacity-40 hover:opacity-100 hover:scale-105'}`}
+                            className={`w-8 h-8 flex items-center justify-center rounded-full transition-all duration-300 ${selectedMood === mood ? 'bg-notion-bg shadow-md scale-110' : 'opacity-40 hover:opacity-100 hover:scale-105'}`}
                         >
                             <span className="text-lg">{MOOD_EMOJI[mood]}</span>
                         </button>
@@ -103,9 +103,9 @@ export default function JournalPage() {
             <div className="flex-1 overflow-auto p-8 paper-texture">
                 <div className="max-w-xl mx-auto space-y-6">
                     {sorted.length === 0 ? (
-                        <div className="text-center py-32 bg-white/80 paper-shadow rounded-2xl border border-[#e9e9e7]/50">
+                        <div className="text-center py-32 bg-notion-bg/80 paper-shadow rounded-2xl border border-notion-border/50">
                             <BookMarked size={48} className="mx-auto mb-4 text-[#d3d1cb]" />
-                            <p className="text-sm font-medium text-[#9b9a97] diary-serif italic">Your diary is empty. Start your first entry today.</p>
+                            <p className="text-sm font-medium text-notion-muted diary-serif italic">Your diary is empty. Start your first entry today.</p>
                         </div>
                     ) : (
                         <div className="space-y-4">
@@ -116,7 +116,7 @@ export default function JournalPage() {
                                     style={{ animationDelay: `${idx * 50}ms` }}
                                 >
                                     <Link href={`/dashboard/journal/${entry.id}`}
-                                        className="block bg-white p-6 rounded-sm paper-shadow border border-[#e9e9e7]/30 hover:border-[#2eaadc]/30 transition-all hover:-translate-y-1 hover:shadow-xl group"
+                                        className="block bg-notion-bg p-6 rounded-sm paper-shadow border border-notion-border/30 hover:border-[#2eaadc]/30 transition-all hover:-translate-y-1 hover:shadow-xl group"
                                     >
                                         <div className="flex items-center justify-between mb-4">
                                             <div className="flex items-center gap-4">
@@ -124,8 +124,8 @@ export default function JournalPage() {
                                                     {MOOD_EMOJI[entry.mood] || '📝'}
                                                 </div>
                                                 <div>
-                                                    <p className="text-base font-bold text-[#37352f] diary-serif">{getDateLabel(entry.date)}</p>
-                                                    <p className="text-xs font-bold text-[#9b9a97] uppercase tracking-widest">{entry.mood}</p>
+                                                    <p className="text-base font-bold text-notion-text diary-serif">{getDateLabel(entry.date)}</p>
+                                                    <p className="text-xs font-bold text-notion-muted uppercase tracking-widest">{entry.mood}</p>
                                                 </div>
                                             </div>
                                             <button
@@ -139,18 +139,18 @@ export default function JournalPage() {
                                         {/* Content Preview */}
                                         <div className="pl-16 relative">
                                             <div className="absolute left-6 top-0 bottom-0 w-[1px] bg-[#f1f1ef]" />
-                                            <p className="text-sm text-[#787774] line-clamp-2 diary-serif leading-relaxed italic">
+                                            <p className="text-sm text-notion-muted line-clamp-2 diary-serif leading-relaxed italic">
                                                 {entry.preview || 'Dear Diary... content awaited.'}
                                             </p>
                                         </div>
 
                                         <div className="mt-4 flex justify-end">
-                                            <span className="text-[10px] font-bold text-[#d3d1cb] uppercase tracking-widest group-hover:text-[#2eaadc] transition-colors">Read Entry →</span>
+                                            <span className="text-[10px] font-bold text-[#d3d1cb] uppercase tracking-widest group-hover:text-notion-accent transition-colors">Read Entry →</span>
                                         </div>
                                     </Link>
 
                                     {/* Stack effect */}
-                                    <div className="absolute -bottom-1 -right-1 left-1 h-2 bg-[#f1f1ef] border border-[#e9e9e7] -z-10 rounded-sm" />
+                                    <div className="absolute -bottom-1 -right-1 left-1 h-2 bg-[#f1f1ef] border border-notion-border -z-10 rounded-sm" />
                                 </div>
                             ))}
                         </div>

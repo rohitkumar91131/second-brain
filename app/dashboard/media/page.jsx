@@ -31,15 +31,15 @@ export default function MediaBankPage() {
     return (
         <div className="flex flex-col h-full bg-[#fcfaf7]">
 
-            <div className="flex items-center gap-3 px-6 py-4 bg-white border-b border-[#e9e9e7] sticky top-0 z-10">
-                <div className="flex-1 flex items-center gap-2 px-3 py-1.5 border border-[#e9e9e7] rounded-md bg-[#f7f7f5]">
-                    <Search size={14} className="text-[#9b9a97]" />
+            <div className="flex items-center gap-3 px-6 py-4 bg-notion-bg border-b border-notion-border sticky top-0 z-10">
+                <div className="flex-1 flex items-center gap-2 px-3 py-1.5 border border-notion-border rounded-md bg-notion-sidebar">
+                    <Search size={14} className="text-notion-muted" />
                     <input
                         type="text"
                         placeholder="Search media..."
                         value={search}
                         onChange={e => setSearch(e.target.value)}
-                        className="flex-1 text-sm bg-transparent focus:outline-none text-[#37352f]"
+                        className="flex-1 text-sm bg-transparent focus:outline-none text-notion-text"
                     />
                 </div>
 
@@ -72,18 +72,18 @@ export default function MediaBankPage() {
             <div className="flex-1 overflow-auto p-6">
                 <div className="max-w-6xl mx-auto">
                     {filteredMedia.length === 0 ? (
-                        <div className="text-center py-32 bg-white rounded-2xl border border-dashed border-[#e9e9e7]">
+                        <div className="text-center py-32 bg-notion-bg rounded-2xl border border-dashed border-notion-border">
                             <ImageIcon size={48} className="mx-auto mb-4 text-[#d3d1cb]" />
-                            <p className="text-sm font-medium text-[#9b9a97]">No media found. Upload your first item!</p>
+                            <p className="text-sm font-medium text-notion-muted">No media found. Upload your first item!</p>
                         </div>
                     ) : (
                         <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-4 space-y-4">
                             {filteredMedia.map((item, idx) => (
                                 <div
                                     key={`${item.id}-${idx}`}
-                                    className="group bg-white rounded-xl border border-[#e9e9e7] overflow-hidden hover:shadow-lg transition-all flex flex-col break-inside-avoid"
+                                    className="group bg-notion-bg rounded-xl border border-notion-border overflow-hidden hover:shadow-lg transition-all flex flex-col break-inside-avoid"
                                 >
-                                    <div className={`relative flex items-center justify-center bg-[#f7f7f5] ${item.type === 'video' ? 'aspect-video' : 'aspect-auto'}`}>
+                                    <div className={`relative flex items-center justify-center bg-notion-sidebar ${item.type === 'video' ? 'aspect-video' : 'aspect-auto'}`}>
                                         {item.type === 'image' && (
                                             <img
                                                 src={item.content}
@@ -94,8 +94,8 @@ export default function MediaBankPage() {
 
                                         {item.type === 'video' && (
                                             <div className="w-full h-full flex flex-col items-center justify-center gap-2">
-                                                <Video size={40} className="text-[#9b9a97]" />
-                                                <span className="text-[10px] font-bold text-[#9b9a97] uppercase">
+                                                <Video size={40} className="text-notion-muted" />
+                                                <span className="text-[10px] font-bold text-notion-muted uppercase">
                                                     Video Embed
                                                 </span>
                                             </div>
@@ -103,8 +103,8 @@ export default function MediaBankPage() {
 
                                         {item.type === 'audio' && (
                                             <div className="w-full h-24 flex flex-col items-center justify-center gap-2">
-                                                <Music size={40} className="text-[#9b9a97]" />
-                                                <span className="text-[10px] font-bold text-[#9b9a97] uppercase">
+                                                <Music size={40} className="text-notion-muted" />
+                                                <span className="text-[10px] font-bold text-notion-muted uppercase">
                                                     Audio Embed
                                                 </span>
                                             </div>
@@ -113,19 +113,19 @@ export default function MediaBankPage() {
                                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                                             <Link
                                                 href={`/dashboard/notes/${item.entityId}`}
-                                                className="p-2 bg-white rounded-full hover:scale-110 transition-transform text-[#37352f]"
+                                                className="p-2 bg-notion-bg rounded-full hover:scale-110 transition-transform text-notion-text"
                                             >
                                                 <ExternalLink size={16} />
                                             </Link>
                                         </div>
                                     </div>
 
-                                    <div className="p-3 bg-white">
-                                        <p className="text-xs font-semibold text-[#37352f] truncate mb-1">
+                                    <div className="p-3 bg-notion-bg">
+                                        <p className="text-xs font-semibold text-notion-text truncate mb-1">
                                             {item.noteTitle}
                                         </p>
                                         <div className="flex items-center justify-between">
-                                            <span className="flex items-center gap-1 text-[10px] font-bold text-[#9b9a97] uppercase tracking-widest">
+                                            <span className="flex items-center gap-1 text-[10px] font-bold text-notion-muted uppercase tracking-widest">
                                                 {item.type === 'image' && <ImageIcon size={10} />}
                                                 {item.type === 'video' && <Video size={10} />}
                                                 {item.type === 'audio' && <Music size={10} />}

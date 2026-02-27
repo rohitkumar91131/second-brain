@@ -17,7 +17,7 @@ export default function Loader({ className = "" }) {
                 .dot-spinner {
                   --uib-size: 2.8rem;
                   --uib-speed: .9s;
-                  --uib-color: #37352f;
+                  --uib-color: var(--notion-text);
                   position: relative;
                   display: flex;
                   align-items: center;

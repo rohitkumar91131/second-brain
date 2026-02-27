@@ -72,7 +72,7 @@ export default function TableView({ items, columns, onUpdate, onDelete, onAdd, e
             {/* Add row button */}
             <button
                 onClick={onAdd}
-                className="flex items-center gap-2 w-full px-4 py-2 text-xs text-[#9b9a97] hover:text-[#37352f] hover:bg-[#f7f7f5] transition-colors border-t border-[#e9e9e7]"
+                className="flex items-center gap-2 w-full px-4 py-2 text-xs text-notion-muted hover:text-notion-text hover:bg-notion-sidebar transition-colors border-t border-notion-border"
             >
                 <Plus size={13} />
                 New {entityType}
@@ -120,7 +120,7 @@ function CellRenderer({ col, value, isEditing, onSave, onCancel }) {
                         onSave(!value)
                     }
                 }}
-                className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${value ? 'bg-[#37352f] border-[#37352f]' : 'border-[#d3d1cb] hover:border-[#37352f]'
+                className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${value ? 'bg-[#37352f] border-[#37352f]' : 'border-notion-border hover:border-[#37352f]'
                     }`}
             >
                 {value && <Check size={10} className="text-white" />}
@@ -132,7 +132,7 @@ function CellRenderer({ col, value, isEditing, onSave, onCancel }) {
         return (
             <div className="flex flex-wrap gap-1">
                 {(value || []).map(tag => (
-                    <span key={tag} className="px-1.5 py-0.5 bg-[#f1f1ef] text-[#37352f] text-xs rounded">
+                    <span key={tag} className="px-1.5 py-0.5 bg-[#f1f1ef] text-notion-text text-xs rounded">
                         {tag}
                     </span>
                 ))}
@@ -153,7 +153,7 @@ function CellRenderer({ col, value, isEditing, onSave, onCancel }) {
                 />
             )
         }
-        return <span className="text-xs text-[#9b9a97]">{value ? format(new Date(value), 'MMM d') : '—'}</span>
+        return <span className="text-xs text-notion-muted">{value ? format(new Date(value), 'MMM d') : '—'}</span>
     }
 
     // Default: text
@@ -171,7 +171,7 @@ function CellRenderer({ col, value, isEditing, onSave, onCancel }) {
     }
 
     return (
-        <span className={`text-sm ${col.key === 'title' ? 'font-medium text-[#37352f]' : 'text-[#787774]'}`}>
+        <span className={`text-sm ${col.key === 'title' ? 'font-medium text-notion-text' : 'text-notion-muted'}`}>
             {value || <span className="text-[#d3d1cb]">Empty</span>}
         </span>
     )

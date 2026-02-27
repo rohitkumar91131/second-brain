@@ -36,7 +36,7 @@ export default function Sidebar({ mobileOpen, onMobileClose }) {
             {/* Desktop sidebar */}
             <aside
                 className={`
-          hidden md:flex flex-col h-full bg-[#f7f7f5] border-r border-[#e9e9e7]
+          hidden md:flex flex-col h-full bg-notion-sidebar border-r border-notion-border
           sidebar-transition overflow-hidden flex-shrink-0
           ${sidebarCollapsed ? 'w-14' : 'w-56'}
         `}
@@ -51,7 +51,7 @@ export default function Sidebar({ mobileOpen, onMobileClose }) {
             {/* Mobile sidebar drawer */}
             <aside
                 className={`
-          md:hidden fixed top-0 left-0 h-full w-64 bg-[#f7f7f5] border-r border-[#e9e9e7]
+          md:hidden fixed top-0 left-0 h-full w-64 bg-notion-sidebar border-r border-notion-border
           z-50 sidebar-transition flex flex-col
           ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}
         `}
@@ -74,16 +74,16 @@ function SidebarContent({ collapsed, pathname, onToggle, isMobile }) {
     return (
         <>
             {/* Header */}
-            <div className={`flex items-center h-12 px-3 border-b border-[#e9e9e7] flex-shrink-0 ${collapsed ? 'justify-center' : 'justify-between'}`}>
+            <div className={`flex items-center h-12 px-3 border-b border-notion-border flex-shrink-0 ${collapsed ? 'justify-center' : 'justify-between'}`}>
                 {!collapsed && (
                     <Link href="/" className="flex items-center gap-2 min-w-0">
-                        <Brain size={18} className="text-[#2eaadc] flex-shrink-0" />
-                        <span className="font-semibold text-sm text-[#37352f] truncate">Second Brain</span>
+                        <Brain size={18} className="text-notion-accent flex-shrink-0" />
+                        <span className="font-semibold text-sm text-notion-text truncate">Second Brain</span>
                     </Link>
                 )}
                 <button
                     onClick={onToggle}
-                    className="p-1 rounded hover:bg-[#efefef] text-[#9b9a97] hover:text-[#37352f] transition-colors flex-shrink-0"
+                    className="p-1 rounded hover:bg-notion-hover text-notion-muted hover:text-notion-text transition-colors flex-shrink-0"
                     title={isMobile ? 'Close' : collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
                 >
                     {isMobile ? (
@@ -113,8 +113,8 @@ function SidebarContent({ collapsed, pathname, onToggle, isMobile }) {
                 flex items-center gap-2.5 px-2 py-1.5 rounded-md text-sm mb-0.5
                 transition-colors duration-100 group
                 ${isActive
-                                    ? 'bg-[#efefef] text-[#37352f] font-medium'
-                                    : 'text-[#787774] hover:bg-[#efefef] hover:text-[#37352f]'
+                                    ? 'bg-notion-hover text-notion-text font-medium'
+                                    : 'text-notion-muted hover:bg-notion-hover hover:text-notion-text'
                                 }
                 ${collapsed ? 'justify-center' : ''}
               `}
@@ -128,7 +128,7 @@ function SidebarContent({ collapsed, pathname, onToggle, isMobile }) {
 
             {/* User footer */}
             {!collapsed && (
-                <div className="px-3 py-3 border-t border-[#e9e9e7]">
+                <div className="px-3 py-3 border-t border-notion-border">
                     {isAuthenticated && user ? (
                         <div className="flex items-center gap-2">
                             {user.image ? (
@@ -145,30 +145,30 @@ function SidebarContent({ collapsed, pathname, onToggle, isMobile }) {
                                 </div>
                             )}
                             <div className="flex-1 min-w-0">
-                                <p className="text-xs font-medium text-[#37352f] truncate">{user.name}</p>
-                                <p className="text-[10px] text-[#9b9a97] truncate">{user.email}</p>
+                                <p className="text-xs font-medium text-notion-text truncate">{user.name}</p>
+                                <p className="text-[10px] text-notion-muted truncate">{user.email}</p>
                             </div>
                             <button
                                 onClick={() => signOut({ callbackUrl: '/' })}
                                 title="Sign out"
-                                className="p-1 rounded hover:bg-red-50 text-[#9b9a97] hover:text-red-500 transition-colors flex-shrink-0"
+                                className="p-1 rounded hover:bg-red-50 text-notion-muted hover:text-red-500 transition-colors flex-shrink-0"
                             >
                                 <LogOut size={13} />
                             </button>
                         </div>
                     ) : (
-                        <p className="text-[10px] text-[#9b9a97]">Public Viewing Mode</p>
+                        <p className="text-[10px] text-notion-muted">Public Viewing Mode</p>
                     )}
                 </div>
             )}
 
             {/* Collapsed user avatar */}
             {collapsed && isAuthenticated && user && (
-                <div className="px-2 py-3 border-t border-[#e9e9e7] flex justify-center">
+                <div className="px-2 py-3 border-t border-notion-border flex justify-center">
                     <button
                         onClick={() => signOut({ callbackUrl: '/' })}
                         title="Sign out"
-                        className="p-1 rounded hover:bg-red-50 text-[#9b9a97] hover:text-red-500 transition-colors"
+                        className="p-1 rounded hover:bg-red-50 text-notion-muted hover:text-red-500 transition-colors"
                     >
                         <LogOut size={14} />
                     </button>
