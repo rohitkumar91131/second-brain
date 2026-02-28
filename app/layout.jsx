@@ -5,7 +5,7 @@ import { Analytics } from '@vercel/analytics/react';
 import { ThemeProvider } from '@/components/ThemeProvider';
 
 export const metadata = {
-    title: 'Second Brain Tracker',
+    title: 'Second Brain',
     description: 'Your personal knowledge management system',
 };
 
