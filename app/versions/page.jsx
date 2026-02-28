@@ -3,13 +3,26 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, CheckCircle2, History, Rocket, ScrollText, Sparkles } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, History, Rocket, ScrollText, Sparkles, Zap } from 'lucide-react';
 
 const VERSIONS = [
     {
+        id: '4.0.0',
+        title: 'Version 4.0.0',
+        date: 'February 28, 2026',
+        icon: <Zap size={20} className="text-blue-500" />,
+        features: [
+            'Advanced Drag & Drop: Seamlessly drag text from any website and retain its original HTML structure (Headings, Paragraphs, Lists).',
+            'Smart Table Pasting: Automatically convert copy-pasted Excel, Web, or ChatGPT markdown tables into native Table Blocks.',
+            'Media Reordering: Image, Video, Audio, and Link blocks now feature draggable grip handles for effortless sorting.',
+            'External Drop Zones: Added visual UI feedback (blue dashed borders) when dragging files or text into the editor.',
+            'Native Table Drag Support: Full internal drag-and-drop support seamlessly integrated into Table Blocks.'
+        ]
+    },
+    {
         id: '3.0.0',
         title: 'Version 3.0.0',
-        date: 'February 27, 2026', // Aaj ki date
+        date: 'February 27, 2026',
         icon: <Sparkles size={20} className="text-yellow-500" />,
         features: [
             'Enhanced Slash Commands (/) with arrow-key navigation and instant Enter selection',
@@ -27,7 +40,7 @@ const VERSIONS = [
     {
         id: '2.0.0',
         title: 'Version 2.0.0',
-        date: 'February 22, 2026', // 5 din pehle
+        date: 'February 22, 2026',
         icon: <Rocket size={20} className="text-purple-500" />,
         features: [
             'Global Loading Fixes with Turkey Animation',
@@ -47,8 +60,8 @@ const VERSIONS = [
     {
         id: '1.0.0',
         title: 'Version 1.0.0',
-        date: 'February 17, 2026', // 10 din pehle
-        icon: <History size={20} className="text-blue-500" />,
+        date: 'February 17, 2026',
+        icon: <History size={20} className="text-gray-500" />,
         features: [
             'Authentication (Login & Registration)',
             'Dashboard & Basic Analytics',
@@ -105,7 +118,8 @@ export default function VersionsPage() {
 
                 <main className="flex-1 bg-notion-bg rounded-2xl border border-notion-border shadow-sm p-8 md:p-12">
                     <div className="mb-10">
-                        <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-4 ${activeVersion.id === '3.0.0' ? 'bg-yellow-50 text-yellow-700' : 'bg-gray-100 text-gray-600'
+                        <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-4 ${activeVersion.id === '4.0.0' ? 'bg-blue-50 text-blue-700' :
+                            activeVersion.id === '3.0.0' ? 'bg-yellow-50 text-yellow-700' : 'bg-gray-100 text-gray-600'
                             }`}>
                             {activeVersion.date}
                         </div>
@@ -113,9 +127,11 @@ export default function VersionsPage() {
                             {activeVersion.title}
                         </h1>
                         <p className="text-notion-muted text-lg">
-                            {activeVersion.id === '3.0.0'
-                                ? 'The Experience Update: Making the editor and landing page feel elite.'
-                                : `Release summary for ${activeVersion.title}.`}
+                            {activeVersion.id === '4.0.0'
+                                ? 'The Workflow Update: Powerful drag-and-drop and seamless copy-paste integrations.'
+                                : activeVersion.id === '3.0.0'
+                                    ? 'The Experience Update: Making the editor and landing page feel elite.'
+                                    : `Release summary for ${activeVersion.title}.`}
                         </p>
                     </div>
 
