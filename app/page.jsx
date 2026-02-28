@@ -16,15 +16,40 @@ export default function LandingPage() {
     const router = useRouter()
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
+    // --- REDIRECT TIMER STATES ---
+    const [redirectCountdown, setRedirectCountdown] = useState(null)
+    const redirectTimerRef = useRef(null)
+
     // GSAP Refs for animations
     const menuRef = useRef(null)
     const menuLinksRef = useRef([])
 
+    // --- AUTO-REDIRECT LOGIC ---
     useEffect(() => {
+        // Check if auto-redirect is enabled in settings
         if (localStorage.getItem('setting_homepage_dashboard') === 'true') {
-            router.push('/dashboard')
+            setRedirectCountdown(3); // Start 3 second countdown
         }
-    }, [router])
+    }, [])
+
+    useEffect(() => {
+        if (redirectCountdown === null) return;
+
+        if (redirectCountdown === 0) {
+            router.push('/dashboard');
+        } else {
+            redirectTimerRef.current = setTimeout(() => {
+                setRedirectCountdown(prev => prev - 1);
+            }, 1000);
+        }
+
+        return () => clearTimeout(redirectTimerRef.current);
+    }, [redirectCountdown, router]);
+
+    const stopRedirect = () => {
+        clearTimeout(redirectTimerRef.current);
+        setRedirectCountdown(null);
+    }
 
     // --- GSAP MOBILE MENU ANIMATION ---
     useEffect(() => {
@@ -56,7 +81,33 @@ export default function LandingPage() {
     const closeMenu = () => setMobileMenuOpen(false)
 
     return (
-        <div className="min-h-screen bg-notion-bg text-notion-text overflow-x-hidden">
+        <div className="min-h-screen bg-notion-bg text-notion-text overflow-x-hidden relative">
+
+            {/* --- REDIRECT TOAST UI --- */}
+            {redirectCountdown !== null && (
+                <div className="fixed bottom-6 right-6 w-80 z-[200] animate-in slide-in-from-bottom-4 fade-in duration-300 font-sans">
+                    <div className="bg-white/90 backdrop-blur-md border border-blue-100 shadow-2xl rounded-2xl p-4 flex flex-col gap-3 ring-1 ring-black/5">
+                        <div className="flex justify-between items-center">
+                            <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center animate-pulse">
+                                    <Zap size={16} />
+                                </div>
+                                <div>
+                                    <h4 className="text-[14px] font-bold text-gray-800 leading-tight">Auto-Redirect Active</h4>
+                                    <p className="text-[12px] text-gray-500 mt-0.5">Going to dashboard in <span className="text-blue-600 font-bold">{redirectCountdown}s</span></p>
+                                </div>
+                            </div>
+                        </div>
+                        <button
+                            onClick={stopRedirect}
+                            className="w-full py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-sm font-bold shadow-sm transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+                        >
+                            <X size={16} /> Stop Redirect
+                        </button>
+                    </div>
+                </div>
+            )}
+
             {/* Navigation */}
             <nav className="fixed top-0 w-full z-[100] bg-notion-bg/80 backdrop-blur-md border-b border-notion-border">
                 <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between relative z-[110] bg-transparent">
@@ -124,13 +175,13 @@ export default function LandingPage() {
             <section className="pt-32 pb-20 px-6">
                 <div className="max-w-5xl mx-auto text-center">
 
-                    {/* --- VERSION 5.0.0 BADGE --- */}
+                    {/* --- VERSION 5.0.0 BADGE (Fixed Apostrophe) --- */}
                     <Link
                         href="/versions"
                         className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-600 text-sm font-semibold mb-8 hover:bg-indigo-100 hover:scale-105 transition-all shadow-sm"
                     >
                         <Star size={16} className="text-indigo-500 fill-indigo-500" />
-                        Version 5.0.0 is live! See what's new <ArrowRight size={14} />
+                        Version 5.0.0 is live! See what&apos;s new <ArrowRight size={14} />
                     </Link>
 
                     <h1 className="text-4xl md:text-7xl font-extrabold tracking-tight mb-8 leading-[1.1]">
