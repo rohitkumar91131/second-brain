@@ -11,8 +11,6 @@ export default function BlockEditor({ blocks, onChange, isDiary = false }) {
     const [toggleOpen, setToggleOpen] = useState({})
     const [isSaving, setIsSaving] = useState(false)
     const [activeDragId, setActiveDragId] = useState(null)
-
-    // --- NEW STATE: Bahar se drag hone ka visual feedback ---
     const [isExternalDrag, setIsExternalDrag] = useState(false)
 
     const dragItem = useRef(null)
@@ -44,10 +42,9 @@ export default function BlockEditor({ blocks, onChange, isDiary = false }) {
         onChange(reOrderedBlocks);
     }, [blocks, onChange]);
 
-    // --- EXTERNAL DRAG AND DROP LOGIC ---
+    // --- EXTERNAL DRAG AND DROP LOGIC (WITH HTML PARSING) ---
     const handleContainerDragOver = (e) => {
         e.preventDefault();
-        // Agar internal drag (block reordering) nahi ho raha, iska matlab bahar se kuch aa raha hai
         if (dragItem.current === null) {
             setIsExternalDrag(true);
             e.dataTransfer.dropEffect = 'copy';
@@ -63,51 +60,95 @@ export default function BlockEditor({ blocks, onChange, isDiary = false }) {
         e.preventDefault();
         setIsExternalDrag(false);
 
-        // Agar hum internally blocks ko upar-niche kar rahe hain, toh ye external logic mat chalao
         if (dragItem.current !== null) return;
 
         const files = Array.from(e.dataTransfer.files);
         let newBlocksToAdd = [];
 
-        // 1. Agar Files drop ki gayi hain (Desktop se Image/Video)
         if (files.length > 0) {
             files.forEach(file => {
-                const url = URL.createObjectURL(file); // Local preview URL
+                const url = URL.createObjectURL(file);
                 if (file.type.startsWith('image/')) newBlocksToAdd.push({ type: 'image', content: url });
                 else if (file.type.startsWith('video/')) newBlocksToAdd.push({ type: 'video', content: url });
                 else if (file.type.startsWith('audio/')) newBlocksToAdd.push({ type: 'audio', content: url });
             });
         }
-        // 2. Agar Text ya Link drop kiya gaya hai (Browser se)
         else {
-            const text = e.dataTransfer.getData('text/plain');
+            const htmlData = e.dataTransfer.getData('text/html');
+            const textData = e.dataTransfer.getData('text/plain');
             const urlData = e.dataTransfer.getData('URL') || e.dataTransfer.getData('text/uri-list');
-            const content = urlData || text;
+            const content = urlData || textData;
+            const lowerContent = content ? content.toLowerCase() : '';
 
-            if (content) {
-                const lowerContent = content.toLowerCase();
+            if (content && (lowerContent.includes('youtube.com') || lowerContent.includes('youtu.be') || lowerContent.includes('vimeo.com'))) {
+                newBlocksToAdd.push({ type: 'video', content });
+            }
+            else if (content && lowerContent.match(/\.(jpeg|jpg|gif|png|webp)(\?.*)?$/i)) {
+                newBlocksToAdd.push({ type: 'image', content });
+            }
+            // HTML DOM Parsing Logic
+            else if (htmlData) {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(htmlData, 'text/html');
 
-                // YouTube/Vimeo check
-                if (lowerContent.includes('youtube.com') || lowerContent.includes('youtu.be') || lowerContent.includes('vimeo.com')) {
-                    newBlocksToAdd.push({ type: 'video', content });
-                }
-                // Image URL check
-                else if (lowerContent.match(/\.(jpeg|jpg|gif|png|webp)(\?.*)?$/i)) {
-                    newBlocksToAdd.push({ type: 'image', content });
-                }
-                // Normal Link check
-                else if (content.startsWith('http')) {
-                    newBlocksToAdd.push({ type: 'link', content });
-                }
-                // Normal Text (Multiple lines ko alag-alag paragraph banayega)
-                else {
-                    const paragraphs = content.split('\n').filter(p => p.trim() !== '');
+                const processNode = (node) => {
+                    if (node.nodeType === Node.TEXT_NODE) {
+                        const txt = node.textContent.trim();
+                        if (txt && ['DIV', 'BODY', 'SPAN', 'SECTION'].includes(node.parentNode?.tagName)) {
+                            newBlocksToAdd.push({ type: 'paragraph', content: txt });
+                        }
+                        return;
+                    }
+
+                    if (node.nodeType !== Node.ELEMENT_NODE) return;
+
+                    const tag = node.tagName.toLowerCase();
+                    const textContent = node.textContent.trim();
+
+                    if (tag === 'h1' && textContent) { newBlocksToAdd.push({ type: 'heading1', content: textContent }); return; }
+                    if (tag === 'h2' && textContent) { newBlocksToAdd.push({ type: 'heading2', content: textContent }); return; }
+                    if (['h3', 'h4', 'h5', 'h6'].includes(tag) && textContent) { newBlocksToAdd.push({ type: 'heading3', content: textContent }); return; }
+                    if (tag === 'p' && textContent) { newBlocksToAdd.push({ type: 'paragraph', content: textContent }); return; }
+
+                    if (tag === 'li' && textContent) {
+                        const isNumbered = node.closest('ol');
+                        newBlocksToAdd.push({ type: isNumbered ? 'numbered' : 'bullet', content: textContent });
+                        return;
+                    }
+
+                    if (tag === 'img' && node.src) { newBlocksToAdd.push({ type: 'image', content: node.src }); return; }
+                    if (tag === 'hr') { newBlocksToAdd.push({ type: 'divider', content: '' }); return; }
+
+                    if (tag === 'table') {
+                        const rows = Array.from(node.querySelectorAll('tr')).map(tr =>
+                            Array.from(tr.querySelectorAll('th, td')).map(td => td.textContent.trim())
+                        ).filter(row => row.length > 0);
+
+                        if (rows.length > 0) {
+                            newBlocksToAdd.push({ type: 'table', content: JSON.stringify(rows) });
+                        }
+                        return;
+                    }
+
+                    Array.from(node.childNodes).forEach(processNode);
+                };
+
+                Array.from(doc.body.childNodes).forEach(processNode);
+
+                if (newBlocksToAdd.length === 0 && textData) {
+                    const paragraphs = textData.split('\n').filter(p => p.trim() !== '');
                     paragraphs.forEach(p => newBlocksToAdd.push({ type: 'paragraph', content: p }));
                 }
             }
+            else if (content && content.startsWith('http')) {
+                newBlocksToAdd.push({ type: 'link', content });
+            }
+            else if (textData) {
+                const paragraphs = textData.split('\n').filter(p => p.trim() !== '');
+                paragraphs.forEach(p => newBlocksToAdd.push({ type: 'paragraph', content: p }));
+            }
         }
 
-        // Naye blocks ko array ke end me add karna
         if (newBlocksToAdd.length > 0) {
             const currentBlocks = [...blocks];
             newBlocksToAdd.forEach((b, i) => {
@@ -118,14 +159,16 @@ export default function BlockEditor({ blocks, onChange, isDiary = false }) {
                     order: currentBlocks.length
                 });
             });
-            // Order update karke save karna
             onChange(currentBlocks.map((b, i) => ({ ...b, order: i })));
         }
     };
 
-    // ... (Baki purane functions same rahenge) ...
-    const handleSave = async () => { /* ... */ }
-    const updateBlock = useCallback((id, updates) => { onChange(blocks.map(b => b.id === id ? { ...b, ...updates } : b)) }, [blocks, onChange])
+    const handleSave = async () => { /* Tumhara save logic yahan aayega */ }
+
+    const updateBlock = useCallback((id, updates) => {
+        onChange(blocks.map(b => b.id === id ? { ...b, ...updates } : b))
+    }, [blocks, onChange])
+
     const addBlock = useCallback((afterId, type = 'paragraph') => {
         const idx = blocks.findIndex(b => b.id === afterId)
         const newOrder = idx + 1
@@ -135,6 +178,7 @@ export default function BlockEditor({ blocks, onChange, isDiary = false }) {
         onChange(newBlocks.map((b, i) => ({ ...b, order: i })))
         return newBlock.id
     }, [blocks, onChange])
+
     const deleteBlock = useCallback(async (id) => {
         if (blocks.length <= 1) return
         const isSavedInDb = !id.startsWith('b-');
@@ -146,6 +190,7 @@ export default function BlockEditor({ blocks, onChange, isDiary = false }) {
         }
         onChange(blocks.filter(b => b.id !== id).map((b, i) => ({ ...b, order: i })));
     }, [blocks, onChange])
+
     const changeType = useCallback((id, type) => {
         updateBlock(id, { type })
         setShowMenu(null)
@@ -154,7 +199,6 @@ export default function BlockEditor({ blocks, onChange, isDiary = false }) {
     let currentListNumber = 0;
 
     return (
-        // MAIN CONTAINER: Yahan external drop events aur visual UI lagaya hai
         <div
             className={`max-w-3xl mx-auto py-8 px-6 min-h-screen transition-colors duration-200 ${isDiary ? 'diary-serif' : ''} ${isExternalDrag ? 'bg-blue-50/40 border-2 border-dashed border-blue-300 rounded-2xl' : 'border-2 border-transparent'}`}
             onDragOver={handleContainerDragOver}
@@ -162,7 +206,6 @@ export default function BlockEditor({ blocks, onChange, isDiary = false }) {
             onDrop={handleContainerDrop}
         >
             <div className="flex justify-between items-center mb-6">
-                {/* External Drop indicator text */}
                 <div className={`text-xs font-semibold text-blue-500 transition-opacity ${isExternalDrag ? 'opacity-100' : 'opacity-0'}`}>
                     Drop files, text, or links here...
                 </div>
@@ -194,7 +237,6 @@ export default function BlockEditor({ blocks, onChange, isDiary = false }) {
                             handleSort();
                             setActiveDragId(null);
                         }}
-                        // Child par drag aane se rokna nahi hai, pass karna hai
                         onDragOver={(e) => e.preventDefault()}
                     >
                         <BlockRow

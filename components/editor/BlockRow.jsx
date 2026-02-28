@@ -48,6 +48,37 @@ export default function BlockRow({
         resize(toggleChildRef)
     }, [block.content, block.children, toggleOpen])
 
+    const handlePaste = (e) => {
+        const pastedText = e.clipboardData.getData('text/plain');
+
+        if (pastedText.includes('\t') && pastedText.includes('\n')) {
+            e.preventDefault();
+            const rows = pastedText.trim().split('\n').map(row =>
+                row.split('\t').map(cell => cell.trim())
+            );
+            onUpdate({ type: 'table', content: JSON.stringify(rows) });
+            return;
+        }
+
+        if (pastedText.trim().startsWith('|') && pastedText.includes('\n')) {
+            const rows = pastedText.trim().split('\n')
+                .filter(row => !row.includes('---'))
+                .map(row => {
+                    const cells = row.split('|').map(cell => cell.trim());
+                    if (cells[0] === '') cells.shift();
+                    if (cells[cells.length - 1] === '') cells.pop();
+                    return cells;
+                })
+                .filter(row => row.length > 0);
+
+            if (rows.length > 0) {
+                e.preventDefault();
+                onUpdate({ type: 'table', content: JSON.stringify(rows) });
+                return;
+            }
+        }
+    };
+
     const handleKeyDown = (e) => {
         if (showMenu) {
             if (e.key === 'ArrowDown') {
@@ -94,11 +125,35 @@ export default function BlockRow({
         }
     }
 
-    if (block.type === 'link') return <LinkBlock block={block} onUpdate={onUpdate} onDelete={onDelete} />
-    if (block.type === 'video') return <VideoBlock block={block} onUpdate={onUpdate} onDelete={onDelete} onDragHandleDown={onDragHandleDown} onDragHandleUp={onDragHandleUp} />
-    if (block.type === 'audio') return <AudioBlock block={block} onUpdate={onUpdate} onDelete={onDelete} onDragHandleDown={onDragHandleDown} onDragHandleUp={onDragHandleUp} />
-    if (block.type === 'image') return <ImageBlock block={block} onUpdate={onUpdate} onDelete={onDelete} onDragHandleDown={onDragHandleDown} onDragHandleUp={onDragHandleUp} />
+    // Table ke andar humne pehle se drag handle daala hua hai
     if (block.type === 'table') return <TableBlock block={block} onUpdate={onUpdate} onDelete={onDelete} onDragHandleDown={onDragHandleDown} onDragHandleUp={onDragHandleUp} />
+
+    // --- NAYA MEDIA WRAPPER: Image, Video, Audio aur Link ko Drag Drop me fit karne ke liye ---
+    if (['video', 'audio', 'image', 'link'].includes(block.type)) {
+        return (
+            <div className="group flex items-start gap-2 my-4 relative w-full">
+                {/* 6-Dots Drag Handle */}
+                <div
+                    className="absolute -left-6 top-1 opacity-0 group-hover:opacity-100 cursor-grab text-notion-muted hover:bg-notion-border rounded w-5 h-6 flex items-center justify-center transition-all z-10"
+                    onMouseDown={onDragHandleDown}
+                    onMouseUp={onDragHandleUp}
+                    onMouseLeave={onDragHandleUp}
+                    onTouchStart={onDragHandleDown}
+                    onTouchEnd={onDragHandleUp}
+                >
+                    <GripVertical size={14} />
+                </div>
+
+                {/* Asli Block Component */}
+                <div className="flex-1 w-full relative">
+                    {block.type === 'link' && <LinkBlock block={block} onUpdate={onUpdate} onDelete={onDelete} />}
+                    {block.type === 'video' && <VideoBlock block={block} onUpdate={onUpdate} onDelete={onDelete} />}
+                    {block.type === 'audio' && <AudioBlock block={block} onUpdate={onUpdate} onDelete={onDelete} />}
+                    {block.type === 'image' && <ImageBlock block={block} onUpdate={onUpdate} onDelete={onDelete} />}
+                </div>
+            </div>
+        )
+    }
 
     if (block.type === 'divider') {
         return (
@@ -139,6 +194,7 @@ export default function BlockRow({
                     value={block.content}
                     onChange={e => onUpdate({ content: e.target.value })}
                     onKeyDown={handleKeyDown}
+                    onPaste={handlePaste}
                     placeholder="Callout text..."
                     rows={1}
                     className={`block-editor-line flex-1 text-sm resize-none overflow-hidden leading-relaxed ${isDiary ? 'text-base' : ''}`}
@@ -172,6 +228,7 @@ export default function BlockRow({
                         value={block.content}
                         onChange={e => onUpdate({ content: e.target.value })}
                         onKeyDown={handleKeyDown}
+                        onPaste={handlePaste}
                         placeholder="Toggle title..."
                         rows={1}
                         className={`block-editor-line text-sm font-medium flex-1 resize-none overflow-hidden leading-relaxed ${isDiary ? 'text-lg' : ''}`}
@@ -239,6 +296,7 @@ export default function BlockRow({
                     value={block.content}
                     onChange={e => onUpdate({ content: e.target.value })}
                     onKeyDown={handleKeyDown}
+                    onPaste={handlePaste}
                     placeholder={block.type === 'paragraph' ? "Type '/' for commands..." : `${BLOCK_TYPES.find(b => b.type === block.type)?.label}...`}
                     rows={1}
                     className={`block-editor-line w-full resize-none overflow-hidden ${getStyles()}`}
