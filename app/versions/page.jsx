@@ -3,9 +3,23 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, CheckCircle2, History, Rocket, ScrollText, Sparkles, Zap } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, History, Rocket, ScrollText, Sparkles, Zap, Star } from 'lucide-react';
 
 const VERSIONS = [
+    {
+        id: '5.0.0',
+        title: 'Version 5.0.0',
+        date: 'March 1, 2026',
+        icon: <Star size={20} className="text-indigo-500" />,
+        features: [
+            'Virtual DOM Rendering: Integrated @tanstack/react-virtual to handle hundreds of blocks effortlessly. Only visible blocks are rendered, completely eliminating lag while maintaining perfect list numbering calculations.',
+            'Smart Clipboard Integration: Instantly detects copied content (text, links, rich HTML) upon returning to the app and presents a sleek glassmorphic toast for one-click pasting.',
+            'Intelligent Undo/Redo (Ctrl+Z / Ctrl+Y): Comprehensive history tracking with a smart 800ms typing debounce, ensuring every logical step is saved without cluttering history.',
+            'Browser Security Bypass: Clipboard detection triggers seamlessly via visibility changes and pointer events, bypassing strict browser focus limitations.',
+            'Sexy UI Elements: Upgraded the clipboard toast with modern backdrop-blur, subtle gradients, and smooth slide-in animations.',
+            'Performance Optimization: Refactored event listeners using refs to eliminate re-render lag during clipboard detection.'
+        ]
+    },
     {
         id: '4.0.0',
         title: 'Version 4.0.0',
@@ -118,8 +132,10 @@ export default function VersionsPage() {
 
                 <main className="flex-1 bg-notion-bg rounded-2xl border border-notion-border shadow-sm p-8 md:p-12">
                     <div className="mb-10">
-                        <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-4 ${activeVersion.id === '4.0.0' ? 'bg-blue-50 text-blue-700' :
-                            activeVersion.id === '3.0.0' ? 'bg-yellow-50 text-yellow-700' : 'bg-gray-100 text-gray-600'
+                        <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-4 
+                            ${activeVersion.id === '5.0.0' ? 'bg-indigo-50 text-indigo-700' :
+                                activeVersion.id === '4.0.0' ? 'bg-blue-50 text-blue-700' :
+                                    activeVersion.id === '3.0.0' ? 'bg-yellow-50 text-yellow-700' : 'bg-gray-100 text-gray-600'
                             }`}>
                             {activeVersion.date}
                         </div>
@@ -127,11 +143,13 @@ export default function VersionsPage() {
                             {activeVersion.title}
                         </h1>
                         <p className="text-notion-muted text-lg">
-                            {activeVersion.id === '4.0.0'
-                                ? 'The Workflow Update: Powerful drag-and-drop and seamless copy-paste integrations.'
-                                : activeVersion.id === '3.0.0'
-                                    ? 'The Experience Update: Making the editor and landing page feel elite.'
-                                    : `Release summary for ${activeVersion.title}.`}
+                            {activeVersion.id === '5.0.0'
+                                ? 'The Editor Mastery Update: Smart clipboard detection, virtual loading, and robust Undo/Redo capabilities.'
+                                : activeVersion.id === '4.0.0'
+                                    ? 'The Workflow Update: Powerful drag-and-drop and seamless copy-paste integrations.'
+                                    : activeVersion.id === '3.0.0'
+                                        ? 'The Experience Update: Making the editor and landing page feel elite.'
+                                        : `Release summary for ${activeVersion.title}.`}
                         </p>
                     </div>
 

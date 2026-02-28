@@ -7,7 +7,7 @@ import { useSession } from 'next-auth/react'
 import {
     Brain, ArrowRight, CheckCircle2, Zap, Shield, Sparkles,
     Loader2, Download, Monitor, Apple, Terminal, Smartphone,
-    Tablet, Menu, X, Layout
+    Tablet, Menu, X, Layout, Star
 } from 'lucide-react'
 import { gsap } from 'gsap'
 
@@ -123,6 +123,16 @@ export default function LandingPage() {
             {/* Hero Section */}
             <section className="pt-32 pb-20 px-6">
                 <div className="max-w-5xl mx-auto text-center">
+
+                    {/* --- VERSION 5.0.0 BADGE --- */}
+                    <Link
+                        href="/versions"
+                        className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-600 text-sm font-semibold mb-8 hover:bg-indigo-100 hover:scale-105 transition-all shadow-sm"
+                    >
+                        <Star size={16} className="text-indigo-500 fill-indigo-500" />
+                        Version 5.0.0 is live! See what's new <ArrowRight size={14} />
+                    </Link>
+
                     <h1 className="text-4xl md:text-7xl font-extrabold tracking-tight mb-8 leading-[1.1]">
                         Build your <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">Digital Second Brain</span>
                     </h1>
