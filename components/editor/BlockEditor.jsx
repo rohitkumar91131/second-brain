@@ -5,7 +5,6 @@ import { Plus, Image as ImageIcon, Video, Music, Save, Clipboard, Undo, Redo, X 
 import BlockRow from './BlockRow'
 import { polyfill } from "mobile-drag-drop"
 import "mobile-drag-drop/default.css"
-import { useWindowVirtualizer } from '@tanstack/react-virtual'
 
 export default function BlockEditor({ blocks, onChange, isDiary = false }) {
     const [showMenu, setShowMenu] = useState(null)
@@ -355,10 +354,31 @@ export default function BlockEditor({ blocks, onChange, isDiary = false }) {
         setShowMenu(null)
     }, [updateBlock])
 
+    const handlePasteMulti = useCallback((afterIndex, text) => {
+        const paragraphs = text.split('\n').filter(p => p.trim() !== '');
+        if (paragraphs.length === 0) return;
+
+        let currentBlocks = [...blocks];
+        let insertIndex = afterIndex + 1;
+
+        paragraphs.forEach((p, i) => {
+            const newBlock = {
+                id: `b-${Date.now()}-${i}`,
+                type: 'paragraph',
+                content: p,
+                order: insertIndex + i
+            };
+            currentBlocks.splice(insertIndex + i, 0, newBlock);
+        });
+
+        handleBlockChange(currentBlocks.map((b, i) => ({ ...b, order: i })), false);
+    }, [blocks, handleBlockChange]);
+
     // --- PRE-CALCULATE LIST NUMBERS FOR VIRTUALIZATION ---
     // Kyunki virtualization un-visible elements ko DOM se nikaal deta hai, 
     // humhe counting upar se pehle karni padegi.
     const blocksWithComputedMeta = useMemo(() => {
+        if (!blocks) return [];
         let currentListNum = 0;
         return blocks.map(b => {
             if (b.type === 'numbered') {
@@ -370,13 +390,6 @@ export default function BlockEditor({ blocks, onChange, isDiary = false }) {
             }
         });
     }, [blocks]);
-
-    // --- TANSTACK VIRTUAL SETUP ---
-    const virtualizer = useWindowVirtualizer({
-        count: blocksWithComputedMeta.length,
-        estimateSize: () => 45, // Default average height of a line
-        overscan: 10, // Scroll smooth rakhne ke liye viewport ke baahar kuch blocks render karega
-    });
 
     return (
         <div
@@ -408,79 +421,66 @@ export default function BlockEditor({ blocks, onChange, isDiary = false }) {
                 </div>
             </div>
 
-            {/* --- VIRTUALIZED LIST CONTAINER --- */}
-            <div style={{ height: `${virtualizer.getTotalSize()}px`, width: '100%', position: 'relative' }}>
-                {virtualizer.getVirtualItems().map((virtualItem) => {
-                    const block = blocksWithComputedMeta[virtualItem.index];
-                    const idx = virtualItem.index;
-
-                    return (
-                        <div
-                            key={block.id}
-                            data-index={virtualItem.index}
-                            ref={virtualizer.measureElement}
-                            style={{
-                                position: 'absolute',
-                                top: 0,
-                                left: 0,
-                                width: '100%',
-                                transform: `translateY(${virtualItem.start}px)`,
+            {/* --- STANDARD BLOCK LIST (Virtualization disabled for debugging) --- */}
+            <div className="space-y-1">
+                {blocksWithComputedMeta.map((block, idx) => (
+                    <div
+                        key={block.id}
+                        draggable={activeDragId === block.id}
+                        onDragStart={(e) => {
+                            dragItem.current = idx;
+                            e.dataTransfer.effectAllowed = 'move';
+                            e.dataTransfer.setData('text/plain', '');
+                        }}
+                        onDragEnter={() => (dragOverItem.current = idx)}
+                        onDragEnd={() => {
+                            handleSort();
+                            setActiveDragId(null);
+                        }}
+                        onDragOver={(e) => e.preventDefault()}
+                    >
+                        <BlockRow
+                            block={block}
+                            isDiary={isDiary}
+                            index={idx}
+                            listNumber={block.computedListNumber}
+                            showMenu={showMenu === block.id}
+                            toggleOpen={toggleOpen[block.id]}
+                            onToggleOpen={() => setToggleOpen(prev => ({ ...prev, [block.id]: !prev[block.id] }))}
+                            onUpdate={(updates) => updateBlock(block.id, updates, true)}
+                            onAddAfter={(type) => addBlock(block.id, type)}
+                            onDelete={() => deleteBlock(block.id)}
+                            onShowMenu={() => setShowMenu(showMenu === block.id ? null : block.id)}
+                            onHideMenu={() => setShowMenu(null)}
+                            onChangeType={(type) => changeType(block.id, type)}
+                            onDragHandleDown={() => setActiveDragId(block.id)}
+                            onDragHandleUp={() => setActiveDragId(null)}
+                            onPasteMulti={(text) => handlePasteMulti(idx, text)}
+                            onEnter={() => {
+                                const newType = (block.type === 'bullet' || block.type === 'numbered') ? block.type : 'paragraph';
+                                const newId = addBlock(block.id, newType);
+                                setTimeout(() => document.getElementById(`block-${newId}`)?.focus(), 50)
                             }}
-                            draggable={activeDragId === block.id}
-                            onDragStart={(e) => {
-                                dragItem.current = idx;
-                                e.dataTransfer.effectAllowed = 'move';
-                                e.dataTransfer.setData('text/plain', '');
-                            }}
-                            onDragEnter={() => (dragOverItem.current = idx)}
-                            onDragEnd={() => {
-                                handleSort();
-                                setActiveDragId(null);
-                            }}
-                            onDragOver={(e) => e.preventDefault()}
-                        >
-                            <BlockRow
-                                block={block}
-                                isDiary={isDiary}
-                                index={idx}
-                                listNumber={block.computedListNumber}
-                                showMenu={showMenu === block.id}
-                                toggleOpen={toggleOpen[block.id]}
-                                onToggleOpen={() => setToggleOpen(prev => ({ ...prev, [block.id]: !prev[block.id] }))}
-                                onUpdate={(updates) => updateBlock(block.id, updates, true)}
-                                onAddAfter={(type) => addBlock(block.id, type)}
-                                onDelete={() => deleteBlock(block.id)}
-                                onShowMenu={() => setShowMenu(showMenu === block.id ? null : block.id)}
-                                onHideMenu={() => setShowMenu(null)}
-                                onChangeType={(type) => changeType(block.id, type)}
-                                onDragHandleDown={() => setActiveDragId(block.id)}
-                                onDragHandleUp={() => setActiveDragId(null)}
-                                onEnter={() => {
-                                    const newType = (block.type === 'bullet' || block.type === 'numbered') ? block.type : 'paragraph';
-                                    const newId = addBlock(block.id, newType);
-                                    // Choti si delay dete hain taaki naya block mount ho jaye
-                                    setTimeout(() => document.getElementById(`block-${newId}`)?.focus(), 50)
-                                }}
-                                onBackspace={(isEmpty) => {
-                                    if (isEmpty) {
-                                        if (block.type !== 'paragraph') changeType(block.id, 'paragraph');
-                                        else if (blocks.length > 1) {
-                                            const prevBlock = blocks[idx - 1]
-                                            deleteBlock(block.id)
-                                            if (prevBlock) setTimeout(() => document.getElementById(`block-${prevBlock.id}`)?.focus(), 50)
-                                        }
+                            onBackspace={(isEmpty) => {
+                                if (isEmpty) {
+                                    if (block.type !== 'paragraph') changeType(block.id, 'paragraph');
+                                    else if (blocks.length > 1) {
+                                        const prevBlock = blocks[idx - 1]
+                                        deleteBlock(block.id)
+                                        if (prevBlock) setTimeout(() => document.getElementById(`block-${prevBlock.id}`)?.focus(), 50)
                                     }
-                                }}
-                            />
-                        </div>
-                    )
-                })}
+                                }
+                            }}
+                        />
+                    </div>
+                ))}
             </div>
 
             <button
                 onClick={() => {
-                    const last = blocks[blocks.length - 1]
-                    if (last) addBlock(last.id)
+                    const last = blocks && blocks.length > 0 ? blocks[blocks.length - 1] : null;
+                    if (last) addBlock(last.id);
+                    else addBlock(null); // If no blocks exist, add the first one
                 }}
                 className="flex items-center gap-2 mt-10 mb-20 text-xs text-notion-muted hover:text-notion-text transition-colors opacity-40 hover:opacity-100"
             >

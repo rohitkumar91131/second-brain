@@ -4,9 +4,16 @@ import { useApp } from '@/context/AppContext'
 import { useParams, useRouter } from 'next/navigation'
 import { useEffect, useState, useCallback } from 'react'
 import BlockEditor from '@/components/editor/BlockEditor'
-import { ArrowLeft, Trash2, Save } from 'lucide-react'
+import { ArrowLeft, Trash2, Save, Share2, FileText, X } from 'lucide-react'
 import Link from 'next/link'
 import { format, parseISO } from 'date-fns'
+import { toast } from 'sonner'
+import {
+    WhatsappShareButton, WhatsappIcon,
+    TwitterShareButton, TwitterIcon,
+    TelegramShareButton, TelegramIcon,
+    EmailShareButton, EmailIcon
+} from 'react-share'
 
 const MOOD_EMOJI = {
     Amazing: '🌟',
@@ -44,6 +51,11 @@ export default function JournalEntryPage() {
     const [visible, setVisible] = useState(false)
 
     const [initialized, setInitialized] = useState(false)
+    const [shareUrl, setShareUrl] = useState('')
+    const [pdfModalOpen, setPdfModalOpen] = useState(false)
+    const [pdfTheme, setPdfTheme] = useState('bright')
+    const [pdfGenerating, setPdfGenerating] = useState(false)
+    const [sharing, setSharing] = useState(false)
 
     useEffect(() => {
         if (id) fetchBlocks(id, 'JournalEntry')
@@ -56,6 +68,45 @@ export default function JournalEntryPage() {
             requestAnimationFrame(() => setVisible(true))
         }
     }, [entry, loading, initialized])
+
+    const handleShare = async () => {
+        setSharing(true)
+        try {
+            const res = await fetch(`/api/journal/${id}/share`, { method: 'POST' })
+            if (res.ok) {
+                const { id: sharedId } = await res.json()
+                const url = `${window.location.origin}/share/${sharedId}`
+                setShareUrl(url)
+            }
+        } catch (err) {
+            console.error('Share failed', err)
+        } finally {
+            setSharing(false)
+        }
+    }
+
+    const handleDownloadPDF = async () => {
+        setPdfGenerating(true)
+        try {
+            const response = await fetch(`/api/journal/${id}/pdf?theme=${pdfTheme}`)
+            if (!response.ok) throw new Error('PDF conversion failed')
+
+            const blob = await response.blob()
+            const url = window.URL.createObjectURL(blob)
+            const a = document.createElement('a')
+            a.href = url
+            a.download = `${entry.title || 'Journal'}.pdf`
+            document.body.appendChild(a)
+            a.click()
+            a.remove()
+            setPdfModalOpen(false)
+        } catch (err) {
+            console.error('PDF generation failed', err)
+            toast.error('PDF generation failed. Please try again.')
+        } finally {
+            setPdfGenerating(false)
+        }
+    }
 
     // Ensure at least one block if loading is done and none exist
     useEffect(() => {
@@ -197,6 +248,25 @@ export default function JournalEntryPage() {
                                             ? `Saved ${format(new Date(lastSaved), 'h:mm a')}`
                                             : 'Not saved'}
                                 </span>
+                            </div>
+
+                            <div className="flex items-center gap-1 border-r border-notion-border pr-2">
+                                <button
+                                    onClick={handleShare}
+                                    disabled={sharing}
+                                    title="Share Entry"
+                                    className="p-1.5 rounded-lg hover:bg-notion-hover text-notion-muted transition-all disabled:opacity-50"
+                                >
+                                    <Share2 size={15} className={sharing ? 'animate-pulse' : ''} />
+                                </button>
+
+                                <button
+                                    onClick={() => setPdfModalOpen(true)}
+                                    title="Download PDF"
+                                    className="p-1.5 rounded-lg hover:bg-notion-hover text-notion-muted transition-all"
+                                >
+                                    <FileText size={15} />
+                                </button>
                             </div>
 
                             <button

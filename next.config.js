@@ -14,6 +14,9 @@ const nextConfig = {
             { protocol: 'https', hostname: '*.googleusercontent.com' },
         ],
     },
+    experimental: {
+        serverComponentsExternalPackages: ['@react-pdf/renderer'],
+    },
 }
 
 module.exports = nextConfig

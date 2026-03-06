@@ -4,10 +4,18 @@ import { useApp } from '@/context/AppContext'
 import { useParams, useRouter } from 'next/navigation'
 import { useEffect, useState, useCallback } from 'react'
 import BlockEditor from '@/components/editor/BlockEditor'
-import { ArrowLeft, Trash2, FileText, Save } from 'lucide-react'
+import ReadOnlyBlock from '@/components/editor/ReadOnlyBlock'
+import { ArrowLeft, Trash2, FileText, Save, Share2, X } from 'lucide-react'
 import Link from 'next/link'
 import { format } from 'date-fns'
+import { toast } from 'sonner'
 import Loader from '@/components/ui/Loader'
+import {
+    WhatsappShareButton, WhatsappIcon,
+    TwitterShareButton, TwitterIcon,
+    TelegramShareButton, TelegramIcon,
+    EmailShareButton, EmailIcon
+} from 'react-share'
 
 export default function NoteEditorPage() {
     const { id } = useParams()
@@ -38,6 +46,11 @@ export default function NoteEditorPage() {
     const [ready, setReady] = useState(false)
     const [notFoundDelay, setNotFoundDelay] = useState(false)
     const [initialized, setInitialized] = useState(false)
+    const [shareUrl, setShareUrl] = useState('')
+    const [pdfModalOpen, setPdfModalOpen] = useState(false)
+    const [pdfTheme, setPdfTheme] = useState('bright')
+    const [pdfGenerating, setPdfGenerating] = useState(false)
+    const [sharing, setSharing] = useState(false)
 
     useEffect(() => {
         if (id) fetchBlocks(id, 'Note')
@@ -111,6 +124,45 @@ export default function NoteEditorPage() {
         return () => window.removeEventListener('keydown', onKey)
     }, [handleSave])
 
+    const handleShare = async () => {
+        setSharing(true)
+        try {
+            const res = await fetch(`/api/notes/${id}/share`, { method: 'POST' })
+            if (res.ok) {
+                const { id: sharedId } = await res.json()
+                const url = `${window.location.origin}/share/${sharedId}`
+                setShareUrl(url)
+            }
+        } catch (err) {
+            console.error('Share failed', err)
+        } finally {
+            setSharing(false)
+        }
+    }
+
+    const handleDownloadPDF = async () => {
+        setPdfGenerating(true)
+        try {
+            const response = await fetch(`/api/notes/${id}/pdf?theme=${pdfTheme}`)
+            if (!response.ok) throw new Error('PDF conversion failed')
+
+            const blob = await response.blob()
+            const url = window.URL.createObjectURL(blob)
+            const a = document.createElement('a')
+            a.href = url
+            a.download = `${title || 'Note'}.pdf`
+            document.body.appendChild(a)
+            a.click()
+            a.remove()
+            setPdfModalOpen(false)
+        } catch (err) {
+            console.error('PDF generation failed', err)
+            toast.error('PDF generation failed. Please try again.')
+        } finally {
+            setPdfGenerating(false)
+        }
+    }
+
     const handleDelete = () => {
         deleteNote(id)
         router.push('/dashboard/notes')
@@ -169,11 +221,33 @@ export default function NoteEditorPage() {
                                     {isSaving ? 'Saving...' : lastSaved === 'Draft (Unsaved)' ? 'Draft' : lastSaved ? `Saved ${format(new Date(lastSaved), 'h:mm')}` : 'New'}
                                 </span>
                             </div>
+                            <div className="flex items-center gap-4">
+                                <div className="flex items-center gap-1 border-r border-notion-border pr-2">
+                                    <button
+                                        onClick={handleShare}
+                                        title="Share Note"
+                                        className="p-1.5 rounded-lg hover:bg-notion-hover text-notion-muted transition-all"
+                                    >
+                                        <Share2 size={15} />
+                                    </button>
 
-                            <button onClick={handleSave} disabled={isSaving} className="p-1.5 rounded-lg hover:bg-notion-hover text-notion-muted transition-all">
-                                <Save size={15} />
-                            </button>
-
+                                    <button
+                                        onClick={() => setPdfModalOpen(true)}
+                                        title="Download PDF"
+                                        className="p-1.5 rounded-lg hover:bg-notion-hover text-notion-muted transition-all"
+                                    >
+                                        <FileText size={15} />
+                                    </button>
+                                </div>
+                                <button
+                                    onClick={handleSave}
+                                    disabled={isSaving}
+                                    className="text-sm font-medium text-notion-text px-3 py-1.5 rounded-lg bg-[#f1f1ef] hover:bg-notion-border transition-all flex items-center gap-2"
+                                >
+                                    <Save size={14} className={isSaving ? 'animate-spin' : ''} />
+                                    {isSaving ? 'Saving...' : 'Save Changes'}
+                                </button>
+                            </div>
                             <button onClick={handleDelete} className="p-1.5 rounded-lg hover:bg-red-50 text-notion-muted hover:text-red-500">
                                 <Trash2 size={15} />
                             </button>
@@ -210,6 +284,134 @@ export default function NoteEditorPage() {
                                     isDiary={false}
                                 />
                             </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {/* Share Dropdown */}
+            {shareUrl && (
+                <div className="fixed inset-0 bg-black/5 z-[100] flex items-center justify-center p-4 animate-in fade-in zoom-in-95 duration-200">
+                    <div className="bg-white rounded-2xl shadow-2xl border border-notion-border p-6 w-full max-w-sm relative">
+                        <button
+                            onClick={() => setShareUrl('')}
+                            className="absolute top-4 right-4 text-notion-muted hover:text-notion-text"
+                        >
+                            <X size={18} />
+                        </button>
+                        <h3 className="font-bold text-notion-text mb-2 flex items-center gap-2">
+                            <Share2 size={18} className="text-blue-500" />
+                            Share Note
+                        </h3>
+                        <p className="text-sm text-notion-muted mb-4 uppercase tracking-widest font-bold text-[10px]">Invite Others to Read</p>
+
+                        <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg border border-notion-border mb-6">
+                            <input
+                                readOnly
+                                value={shareUrl}
+                                className="bg-transparent text-xs text-notion-text flex-1 outline-none font-mono truncate"
+                            />
+                            <button
+                                onClick={() => {
+                                    navigator.clipboard.writeText(shareUrl)
+                                    toast.success('Link copied!')
+                                }}
+                                className="p-1.5 bg-white border border-notion-border rounded-md text-[10px] font-bold hover:bg-gray-50 uppercase shadow-sm"
+                            >
+                                Copy
+                            </button>
+                        </div>
+
+                        <div className="grid grid-cols-4 gap-4">
+                            <WhatsappShareButton url={shareUrl} title={title}>
+                                <div className="flex flex-col items-center gap-1.5">
+                                    <WhatsappIcon size={36} round />
+                                    <span className="text-[10px] text-notion-muted font-medium">WhatsApp</span>
+                                </div>
+                            </WhatsappShareButton>
+                            <TwitterShareButton url={shareUrl} title={title}>
+                                <div className="flex flex-col items-center gap-1.5">
+                                    <TwitterIcon size={36} round />
+                                    <span className="text-[10px] text-notion-muted font-medium">Twitter</span>
+                                </div>
+                            </TwitterShareButton>
+                            <TelegramShareButton url={shareUrl} title={title}>
+                                <div className="flex flex-col items-center gap-1.5">
+                                    <TelegramIcon size={36} round />
+                                    <span className="text-[10px] text-notion-muted font-medium">Telegram</span>
+                                </div>
+                            </TelegramShareButton>
+                            <EmailShareButton url={shareUrl} subject={title}>
+                                <div className="flex flex-col items-center gap-1.5">
+                                    <EmailIcon size={36} round />
+                                    <span className="text-[10px] text-notion-muted font-medium">Email</span>
+                                </div>
+                            </EmailShareButton>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* PDF THEME MODAL */}
+            {pdfModalOpen && (
+                <div className="fixed inset-0 bg-[#37352f]/40 backdrop-blur-[2px] z-[100] flex items-center justify-center animate-in fade-in duration-200">
+                    <div className="bg-white w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 border border-notion-border">
+                        <div className="px-6 py-5 border-b border-notion-border flex justify-between items-center">
+                            <h3 className="font-bold text-notion-text">Export to PDF</h3>
+                            <button onClick={() => setPdfModalOpen(false)} className="text-notion-muted hover:text-notion-text transition-colors">
+                                <X size={20} />
+                            </button>
+                        </div>
+                        <div className="p-6">
+                            <p className="text-sm text-notion-muted mb-6">Choose a style for your SecondBrain export:</p>
+
+                            <div className="grid grid-cols-2 gap-4 mb-8">
+                                <button
+                                    onClick={() => setPdfTheme('bright')}
+                                    className={`relative flex flex-col items-center gap-3 p-4 rounded-xl border-2 transition-all ${pdfTheme === 'bright' ? 'border-notion-accent bg-notion-accent/5 ring-4 ring-notion-accent/10' : 'border-notion-border hover:border-notion-muted'}`}
+                                >
+                                    <div className="w-full aspect-[4/3] bg-white border border-notion-border rounded-lg shadow-sm flex items-center justify-center">
+                                        <div className="w-2/3 space-y-1.5">
+                                            <div className="h-1.5 w-full bg-gray-200 rounded"></div>
+                                            <div className="h-1 w-2/3 bg-gray-100 rounded"></div>
+                                        </div>
+                                    </div>
+                                    <span className="text-xs font-bold uppercase tracking-wider text-notion-text">Bright Mode</span>
+                                    {pdfTheme === 'bright' && <div className="absolute top-2 right-2 w-4 h-4 bg-notion-accent rounded-full flex items-center justify-center text-[10px] text-white">✓</div>}
+                                </button>
+
+                                <button
+                                    onClick={() => setPdfTheme('dark')}
+                                    className={`relative flex flex-col items-center gap-3 p-4 rounded-xl border-2 transition-all ${pdfTheme === 'dark' ? 'border-notion-accent bg-notion-accent/5 ring-4 ring-notion-accent/10' : 'border-notion-border hover:border-notion-muted'}`}
+                                >
+                                    <div className="w-full aspect-[4/3] bg-[#191919] border border-gray-800 rounded-lg shadow-sm flex items-center justify-center">
+                                        <div className="w-2/3 space-y-1.5">
+                                            <div className="h-1.5 w-full bg-gray-700 rounded"></div>
+                                            <div className="h-1 w-2/3 bg-gray-600 rounded"></div>
+                                        </div>
+                                    </div>
+                                    <span className="text-xs font-bold uppercase tracking-wider text-notion-text">Dark Mode</span>
+                                    {pdfTheme === 'dark' && <div className="absolute top-2 right-2 w-4 h-4 bg-notion-accent rounded-full flex items-center justify-center text-[10px] text-white">✓</div>}
+                                </button>
+                            </div>
+
+                            <button
+                                onClick={handleDownloadPDF}
+                                disabled={pdfGenerating}
+                                className="w-full py-3 bg-[#37352f] hover:bg-black text-white rounded-xl font-bold flex items-center justify-center gap-3 transition-all active:scale-[0.98] disabled:opacity-50"
+                            >
+                                {pdfGenerating ? (
+                                    <>
+                                        <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                                        <span>Generating PDF...</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Save size={18} />
+                                        <span>Download PDF</span>
+                                    </>
+                                )}
+                            </button>
+                            <p className="text-[10px] text-center text-notion-muted mt-4 uppercase tracking-[0.2em] font-bold">SecondBrain Engine 1.0</p>
                         </div>
                     </div>
                 </div>

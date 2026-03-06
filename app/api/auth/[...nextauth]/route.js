@@ -27,6 +27,9 @@ export const authOptions = {
                     response_type: 'code',
                 },
             },
+            httpOptions: {
+                timeout: 10000,
+            },
         }),
 
         FacebookProvider({

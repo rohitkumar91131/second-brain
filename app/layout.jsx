@@ -1,6 +1,7 @@
 import './globals.css';
+import { Toaster } from 'sonner';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 import { AppProvider } from '@/context/AppContext';
-import { ToastProvider } from '@/components/ui/Toast';
 import { Analytics } from '@vercel/analytics/react';
 import { ThemeProvider } from '@/components/ThemeProvider';
 
@@ -13,14 +14,15 @@ export default function RootLayout({ children }) {
     return (
         <html lang="en" suppressHydrationWarning>
             <body>
-                <ThemeProvider>
-                    <ToastProvider>
+                <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID}>
+                    <ThemeProvider>
                         <AppProvider>
                             {children}
                         </AppProvider>
-                    </ToastProvider>
-                </ThemeProvider>
-                <Analytics />
+                        <Toaster position="bottom-right" richColors closeButton />
+                    </ThemeProvider>
+                    <Analytics />
+                </GoogleOAuthProvider>
             </body>
         </html>
     );

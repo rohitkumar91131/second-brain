@@ -5,6 +5,7 @@ import { useApp } from '@/context/AppContext'
 import Link from 'next/link'
 import { Plus, FileText, Search, Trash2 } from 'lucide-react'
 import { format } from 'date-fns'
+import { toast } from 'sonner'
 import QuickAddModal from '@/components/ui/QuickAddModal'
 import LoadingScreen from '@/components/ui/LoadingScreen'
 import ContextNoteCard from '@/components/ui/ContextNoteCard'
@@ -44,7 +45,7 @@ export default function NotesPage() {
             }).catch(() => { })
         } else {
             navigator.clipboard.writeText(window.location.href + '/' + note.id)
-            alert('Share copied to clipboard!')
+            toast.success('Share copied to clipboard!')
         }
     }
 
