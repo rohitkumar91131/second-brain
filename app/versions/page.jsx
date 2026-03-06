@@ -7,6 +7,21 @@ import { ArrowLeft, CheckCircle2, History, Rocket, ScrollText, Sparkles, Zap, St
 
 const VERSIONS = [
     {
+        id: '6.0.0',
+        title: 'Version 6.0.0',
+        date: 'March 6, 2026',
+        icon: <Rocket size={20} className="text-pink-500" />,
+        features: [
+            'Premium Google OAuth: Simplified login experience focusing exclusively on Google for a faster, more secure entry.',
+            'Animated Gradient UI: Introduced vibrant, smooth-shifting backgrounds to the login and registration pages for a premium feel.',
+            'Sonner Notification System: Migrated the entire app to the Sonner library, providing sleek, theme-aware toasts for all user interactions.',
+            'Server-Side PDF Generation: Rebuilt the PDF export engine on the server with custom "SecondBrain" branding and perfect image rendering.',
+            'Public Note Sharing: Generate secure, snapshot-based public links for any note or journal entry.',
+            'One-Click Note Import: Users can now instantly clone a shared note into their own collection with a single click.',
+            'Smart Timeout Management: Increased OAuth handshake window to 10s to ensure reliable connectivity in all network conditions.'
+        ]
+    },
+    {
         id: '5.0.0',
         title: 'Version 5.0.0',
         date: 'March 1, 2026',
@@ -133,9 +148,10 @@ export default function VersionsPage() {
                 <main className="flex-1 bg-notion-bg rounded-2xl border border-notion-border shadow-sm p-8 md:p-12">
                     <div className="mb-10">
                         <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-4 
-                            ${activeVersion.id === '5.0.0' ? 'bg-indigo-50 text-indigo-700' :
-                                activeVersion.id === '4.0.0' ? 'bg-blue-50 text-blue-700' :
-                                    activeVersion.id === '3.0.0' ? 'bg-yellow-50 text-yellow-700' : 'bg-gray-100 text-gray-600'
+                            ${activeVersion.id === '6.0.0' ? 'bg-pink-50 text-pink-700' :
+                                activeVersion.id === '5.0.0' ? 'bg-indigo-50 text-indigo-700' :
+                                    activeVersion.id === '4.0.0' ? 'bg-blue-50 text-blue-700' :
+                                        activeVersion.id === '3.0.0' ? 'bg-yellow-50 text-yellow-700' : 'bg-gray-100 text-gray-600'
                             }`}>
                             {activeVersion.date}
                         </div>
@@ -143,13 +159,15 @@ export default function VersionsPage() {
                             {activeVersion.title}
                         </h1>
                         <p className="text-notion-muted text-lg">
-                            {activeVersion.id === '5.0.0'
-                                ? 'The Editor Mastery Update: Smart clipboard detection, virtual loading, and robust Undo/Redo capabilities.'
-                                : activeVersion.id === '4.0.0'
-                                    ? 'The Workflow Update: Powerful drag-and-drop and seamless copy-paste integrations.'
-                                    : activeVersion.id === '3.0.0'
-                                        ? 'The Experience Update: Making the editor and landing page feel elite.'
-                                        : `Release summary for ${activeVersion.title}.`}
+                            {activeVersion.id === '6.0.0'
+                                ? 'The Connectivity & Sharing Update: Premium Google Auth, Sonner notifications, and high-fidelity public sharing.'
+                                : activeVersion.id === '5.0.0'
+                                    ? 'The Editor Mastery Update: Smart clipboard detection, virtual loading, and robust Undo/Redo capabilities.'
+                                    : activeVersion.id === '4.0.0'
+                                        ? 'The Workflow Update: Powerful drag-and-drop and seamless copy-paste integrations.'
+                                        : activeVersion.id === '3.0.0'
+                                            ? 'The Experience Update: Making the editor and landing page feel elite.'
+                                            : `Release summary for ${activeVersion.title}.`}
                         </p>
                     </div>
 
