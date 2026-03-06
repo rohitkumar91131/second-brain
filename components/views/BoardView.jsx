@@ -172,7 +172,7 @@ function KanbanCard({ item, onUpdate, onDelete, isDragging }) {
                     )}
                     {item.progress !== undefined && (
                         <div className="mt-2">
-                            <div className="w-full bg-gray-100 rounded-full h-1">
+                            <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-1">
                                 <div
                                     className="h-1 rounded-full bg-[#2eaadc]"
                                     style={{ width: `${item.progress}%` }}

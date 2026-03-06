@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useApp } from '@/context/AppContext'
 import { format, parseISO } from 'date-fns'
-import { Calendar, FileText, CheckSquare, ChevronLeft, ChevronRight, Plus, Save, Trash2, LoaderIcon } from 'lucide-react'
+import { Calendar, FileText, CheckSquare, ChevronLeft, ChevronRight, Plus, Save, Trash2, LoaderIcon, FolderOpen } from 'lucide-react'
 import Link from 'next/link'
 import QuickAddModal from '@/components/ui/QuickAddModal'
 import BlockEditor from '@/components/editor/BlockEditor'
@@ -21,6 +21,7 @@ export default function ProjectDetailPage() {
     const [projectsLoaded, setProjectsLoaded] = useState(false)
     const [showAddTask, setShowAddTask] = useState(false)
     const [showAddNote, setShowAddNote] = useState(false)
+    const [showAddSubproject, setShowAddSubproject] = useState(false)
     const [filter, setFilter] = useState('all')
     const [selectedNote, setSelectedNote] = useState(null)
     const [noteTitle, setNoteTitle] = useState('')
@@ -89,7 +90,10 @@ export default function ProjectDetailPage() {
     })
 
     // Filter notes for this project
-    const projectNotes = notes.filter(n => n.projectId === projectId)
+    const projectNotes = notes.filter(n => n.projectIds?.includes(projectId))
+
+    // Filter subprojects
+    const subprojects = projects.filter(p => p.parentProjectId === projectId)
 
     // Filter notes for selected date (for editor)
     const notesForDate = projectNotes.filter(note => {
@@ -289,12 +293,12 @@ export default function ProjectDetailPage() {
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-notion-border">
                 <div className="flex items-center gap-3">
-                    <Link
-                        href="/dashboard/projects"
-                        className="p-1.5 hover:bg-[#f0f0ee] rounded-md transition-colors"
+                    <button
+                        onClick={() => router.back()}
+                        className="p-1.5 hover:bg-notion-hover rounded-md transition-colors"
                     >
                         <ChevronLeft size={20} className="text-notion-text" />
-                    </Link>
+                    </button>
                     <div>
                         <h1 className="text-2xl font-bold text-notion-text">{project.title}</h1>
                         <p className="text-xs text-notion-muted mt-1">{project.description}</p>
@@ -331,6 +335,40 @@ export default function ProjectDetailPage() {
             {/* Content */}
             <div className="flex-1 overflow-auto">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6">
+                    {/* Subprojects Section */}
+                    <div className="bg-notion-sidebar rounded-xl p-6 flex flex-col lg:col-span-2">
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-2">
+                                <FolderOpen size={18} className="text-blue-600" />
+                                <h2 className="text-lg font-bold text-notion-text">Subprojects ({subprojects.length})</h2>
+                            </div>
+                            <button
+                                onClick={() => setShowAddSubproject(true)}
+                                className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium bg-[#37352f] text-white rounded hover:bg-[#2f2d28] transition-colors"
+                            >
+                                <Plus size={13} /> Add Subproject
+                            </button>
+                        </div>
+
+                        {subprojects.length === 0 ? (
+                            <div className="py-2 text-center">
+                                <p className="text-sm text-notion-muted italic">No subprojects</p>
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                {subprojects.map(p => (
+                                    <Link key={p.id} href={`/dashboard/projects/${p.id}`} className="block p-4 bg-notion-bg rounded-lg hover:bg-notion-hover transition-colors border border-notion-border group">
+                                        <h3 className="font-semibold text-sm text-notion-text group-hover:text-blue-600 truncate">{p.title}</h3>
+                                        <div className="flex justify-between items-center mt-2 text-xs text-notion-muted">
+                                            <span>{p.status}</span>
+                                            <span className="font-medium text-notion-text">{p.progress}%</span>
+                                        </div>
+                                    </Link>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
                     {/* Notes Section */}
                     <div className="bg-notion-sidebar rounded-xl p-6 flex flex-col">
                         <div className="flex items-center justify-between mb-4">
@@ -376,7 +414,7 @@ export default function ProjectDetailPage() {
                                                 {note.tags.slice(0, 3).map(tag => (
                                                     <span
                                                         key={tag}
-                                                        className="text-xs px-2 py-1 bg-[#f0f0ee] text-notion-muted rounded"
+                                                        className="text-xs px-2 py-1 bg-[#f1f1ef] dark:bg-notion-sidebar text-notion-muted rounded"
                                                     >
                                                         {tag}
                                                     </span>
@@ -503,7 +541,7 @@ export default function ProjectDetailPage() {
 
                 {/* Project Stats */}
                 <div className="px-6 pb-6">
-                    <div className="bg-gradient-to-br from-[#f7f7f5] to-[#f0f0ee] rounded-xl p-6 border border-notion-border">
+                    <div className="bg-notion-sidebar rounded-xl p-6 border border-notion-border">
                         <h3 className="font-bold text-notion-text mb-4">Project Overview</h3>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                             <div className="bg-notion-bg rounded-lg p-4">
@@ -583,7 +621,6 @@ export default function ProjectDetailPage() {
                 />
             )}
 
-            {/* Add Note Modal */}
             {showAddNote && (
                 <QuickAddModal
                     defaultType="note"
@@ -594,6 +631,17 @@ export default function ProjectDetailPage() {
                         date: selectedDate
                     }}
                     onNoteCreated={handleNoteCreatedInModal}
+                />
+            )}
+
+            {showAddSubproject && (
+                <QuickAddModal
+                    defaultType="project"
+                    onClose={() => setShowAddSubproject(false)}
+                    prefilledData={{
+                        projectId,
+                        projectName: project?.title
+                    }}
                 />
             )}
         </div>

@@ -6,6 +6,8 @@ import AudioBlock from './blocks/AudioBlock'
 import ImageBlock from './blocks/ImageBlock'
 import TableBlock from './blocks/TableBlock'
 import LinkBlock from './blocks/LinkBlock'
+import TodoBlock from './blocks/TodoBlock'
+import NoteReferenceBlock from './blocks/NoteReferenceBlock'
 
 const CATEGORIZED_BLOCKS = BLOCK_TYPES.map(b => {
     if (['image', 'video', 'audio'].includes(b.type)) return { ...b, category: 'Media' };
@@ -80,6 +82,17 @@ export default function BlockRow({
     };
 
     const handleKeyDown = (e) => {
+        if (e.key === ' ' && block.content.startsWith('/')) {
+            const cmd = block.content.substring(1).toLowerCase()
+            const match = { h1: 'heading1', h2: 'heading2', h3: 'heading3', todo: 'todo', task: 'todo', notes: 'note_reference' }[cmd] || CATEGORIZED_BLOCKS.find(b => b.type === cmd)?.type
+            if (match) {
+                e.preventDefault()
+                onUpdate({ type: match, content: '' })
+                onHideMenu()
+                return
+            }
+        }
+
         if (showMenu) {
             if (e.key === 'ArrowDown') {
                 e.preventDefault();
@@ -127,6 +140,9 @@ export default function BlockRow({
 
     // Table ke andar humne pehle se drag handle daala hua hai
     if (block.type === 'table') return <TableBlock block={block} onUpdate={onUpdate} onDelete={onDelete} onDragHandleDown={onDragHandleDown} onDragHandleUp={onDragHandleUp} />
+
+    if (block.type === 'todo') return <TodoBlock block={block} onUpdate={onUpdate} onDelete={onDelete} onEnter={onEnter} onBackspace={onBackspace} onDragHandleDown={onDragHandleDown} onDragHandleUp={onDragHandleUp} />
+    if (block.type === 'note_reference') return <NoteReferenceBlock block={block} onUpdate={onUpdate} onDelete={onDelete} onDragHandleDown={onDragHandleDown} onDragHandleUp={onDragHandleUp} />
 
     // --- NAYA MEDIA WRAPPER: Image, Video, Audio aur Link ko Drag Drop me fit karne ke liye ---
     if (['video', 'audio', 'image', 'link'].includes(block.type)) {

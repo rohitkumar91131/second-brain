@@ -404,16 +404,16 @@ export default function BlockEditor({ blocks, onChange, isDiary = false }) {
                 </div>
 
                 <div className="flex items-center gap-2">
-                    <button onClick={handleUndo} title="Undo (Ctrl+Z)" className="p-1.5 text-notion-muted hover:text-notion-text hover:bg-gray-100 rounded transition-colors disabled:opacity-30" disabled={historyIndexRef.current <= 0}>
+                    <button onClick={handleUndo} title="Undo (Ctrl+Z)" className="p-1.5 text-notion-muted hover:text-notion-text hover:bg-notion-hover rounded transition-colors disabled:opacity-30" disabled={historyIndexRef.current <= 0}>
                         <Undo size={16} />
                     </button>
-                    <button onClick={handleRedo} title="Redo (Ctrl+Y)" className="p-1.5 text-notion-muted hover:text-notion-text hover:bg-gray-100 rounded transition-colors disabled:opacity-30 mr-2" disabled={historyIndexRef.current >= historyRef.current.length - 1}>
+                    <button onClick={handleRedo} title="Redo (Ctrl+Y)" className="p-1.5 text-notion-muted hover:text-notion-text hover:bg-notion-hover rounded transition-colors disabled:opacity-30 mr-2" disabled={historyIndexRef.current >= historyRef.current.length - 1}>
                         <Redo size={16} />
                     </button>
                     <button
                         onClick={handleSave}
                         disabled={isSaving}
-                        className="flex items-center gap-2 px-3 py-1.5 bg-[#f1f1ef] hover:bg-notion-border text-notion-text text-sm rounded transition-colors"
+                        className="flex items-center gap-2 px-3 py-1.5 bg-[#f1f1ef] dark:bg-[#202020] hover:bg-notion-border transition-all text-notion-text text-sm rounded"
                     >
                         <Save size={14} />
                         {isSaving ? 'Saving...' : 'Save Order'}
@@ -513,26 +513,26 @@ export default function BlockEditor({ blocks, onChange, isDiary = false }) {
             {/* --- CLIPBOARD TOAST UI --- */}
             {clipboardToast && (
                 <div className="fixed bottom-6 right-6 w-80 z-50 animate-in slide-in-from-bottom-4 fade-in duration-300 font-sans">
-                    <div className="bg-white/80 backdrop-blur-md border border-blue-100/50 shadow-2xl rounded-2xl p-4 flex flex-col gap-3 relative overflow-hidden group ring-1 ring-black/5">
-                        <div className="absolute inset-0 bg-gradient-to-br from-blue-50/40 via-purple-50/30 to-transparent pointer-events-none -z-10"></div>
+                    <div className="bg-white/80 dark:bg-[#252525]/80 backdrop-blur-md border border-blue-100/50 dark:border-blue-900/30 shadow-2xl rounded-2xl p-4 flex flex-col gap-3 relative overflow-hidden group ring-1 ring-black/5 dark:ring-white/5">
+                        <div className="absolute inset-0 bg-gradient-to-br from-blue-50/40 via-purple-50/30 dark:from-blue-900/10 dark:via-purple-900/10 to-transparent pointer-events-none -z-10"></div>
                         <div className="flex justify-between items-start">
                             <div className="flex items-center gap-3">
-                                <div className="bg-gradient-to-br from-blue-100 to-blue-200 p-2 rounded-xl text-blue-600 shadow-sm">
+                                <div className="bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900/50 dark:to-blue-800/50 p-2 rounded-xl text-blue-600 dark:text-blue-400 shadow-sm">
                                     <Clipboard size={18} strokeWidth={2.5} />
                                 </div>
                                 <div>
-                                    <h4 className="text-[15px] font-bold text-gray-800 leading-tight">Clipboard Detected</h4>
-                                    <p className="text-[11px] text-blue-600 font-semibold uppercase tracking-wider mt-0.5">{clipboardToast.type}</p>
+                                    <h4 className="text-[15px] font-bold text-gray-800 dark:text-gray-100 leading-tight">Clipboard Detected</h4>
+                                    <p className="text-[11px] text-blue-600 dark:text-blue-400 font-semibold uppercase tracking-wider mt-0.5">{clipboardToast.type}</p>
                                 </div>
                             </div>
                             <button
                                 onClick={() => setClipboardToast(null)}
-                                className="text-gray-400 hover:text-gray-700 transition-colors p-1.5 rounded-full hover:bg-gray-100/80 -mr-1 -mt-1"
+                                className="text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors p-1.5 rounded-full hover:bg-gray-100/80 dark:hover:bg-[#363636]/80 -mr-1 -mt-1"
                             >
                                 <X size={16} />
                             </button>
                         </div>
-                        <div className="bg-gray-50/80 border border-gray-100/80 rounded-xl p-3 text-xs text-gray-600 leading-relaxed max-h-24 overflow-y-auto scrollbar-hide font-medium shadow-inner">
+                        <div className="bg-gray-50/80 dark:bg-[#191919]/80 border border-gray-100/80 dark:border-[#363636]/80 rounded-xl p-3 text-xs text-gray-600 dark:text-gray-300 leading-relaxed max-h-24 overflow-y-auto scrollbar-hide font-medium shadow-inner">
                             {clipboardToast.preview}
                         </div>
                         <button

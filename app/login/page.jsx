@@ -82,13 +82,13 @@ function LoginContent() {
                     <p className="text-sm text-notion-muted mt-2 font-medium">Your intelligence engine, organized.</p>
                 </div>
 
-                <div className="glass rounded-3xl border border-white/20 p-8 shadow-2xl backdrop-blur-xl bg-white/40">
+                <div className="glass rounded-3xl border border-white/20 dark:border-white/10 p-8 shadow-2xl backdrop-blur-xl bg-white/40 dark:bg-black/40">
                     <h2 className="text-lg font-semibold text-notion-text mb-6 text-center">Welcome Back</h2>
 
                     <button
                         onClick={handleGoogleSignIn}
                         disabled={loading || redirecting}
-                        className="w-full h-12 flex items-center justify-center gap-3 px-6 py-3 bg-white border border-notion-border rounded-xl text-sm font-bold text-notion-text hover:bg-notion-sidebar hover:shadow-md active:scale-95 transition-all disabled:opacity-50"
+                        className="w-full h-12 flex items-center justify-center gap-3 px-6 py-3 bg-notion-bg border border-notion-border rounded-xl text-sm font-bold text-notion-text hover:bg-notion-sidebar hover:shadow-md active:scale-95 transition-all disabled:opacity-50"
                     >
                         {loading ? (
                             <Loader2 size={18} className="animate-spin text-notion-accent" />

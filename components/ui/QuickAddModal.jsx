@@ -50,14 +50,14 @@ export default function QuickAddModal({ onClose, defaultType = 'task', prefilled
             let created
             if (type === 'task') created = await addTask({ ...base, completed: false, priority: 'Medium', projectId: prefilledData.projectId || null, notes: '' })
             if (type === 'note') {
-                created = await addNote({ ...base, projectId: prefilledData.projectId || null })
+                created = await addNote({ ...base, projectIds: prefilledData.projectId ? [prefilledData.projectId] : [] })
                 if (created?.id) {
                     await bulkUpdateBlocks(created.id, 'Note', [
                         { type: 'paragraph', content: '', order: 100 }
                     ])
                 }
             }
-            if (type === 'project') created = await addProject({ ...base, progress: 0, areaId: null, description: '' })
+            if (type === 'project') created = await addProject({ ...base, parentProjectId: prefilledData.projectId || null, progress: 0, areaId: null, description: '' })
             if (type === 'goal') created = await addGoal({ ...base, progress: 0, areaId: null, metric: '' })
             if (type === 'resource') created = await addResource({ ...base, type: 'Link', url: '', notes: '', areaId: null })
 

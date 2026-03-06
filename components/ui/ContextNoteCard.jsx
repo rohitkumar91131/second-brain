@@ -71,7 +71,7 @@ export default function ContextNoteCard({ note, project, onDelete, onArchive, on
                     <div className="flex items-center justify-between mt-2">
                         <div className="flex flex-wrap gap-1">
                             {note.tags?.slice(0, 2).map(tag => (
-                                <span key={tag} className="px-1.5 py-0.5 bg-[#f1f1ef] text-notion-muted text-[10px] rounded">
+                                <span key={tag} className="px-1.5 py-0.5 bg-[#f1f1ef] dark:bg-notion-sidebar text-notion-muted text-[10px] rounded">
                                     {tag}
                                 </span>
                             ))}
@@ -88,7 +88,7 @@ export default function ContextNoteCard({ note, project, onDelete, onArchive, on
                         e.preventDefault()
                         onDelete(note.id)
                     }}
-                    className="absolute top-2 right-2 p-1 rounded hover:bg-red-50 text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="absolute top-2 right-2 p-1 rounded hover:bg-red-50 dark:hover:bg-red-900/20 text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
                 >
                     <Trash2 size={12} />
                 </button>
@@ -114,7 +114,7 @@ export default function ContextNoteCard({ note, project, onDelete, onArchive, on
                         <Share2 size={14} /> Share Note
                     </button>
                     <div className="h-px bg-notion-border my-1" />
-                    <button onClick={() => { onDelete(note.id); setMenuPos(null) }} className="flex items-center gap-2 px-4 py-2 hover:bg-red-50 text-red-600 transition-colors w-full text-left">
+                    <button onClick={() => { onDelete(note.id); setMenuPos(null) }} className="flex items-center gap-2 px-4 py-2 hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 transition-colors w-full text-left">
                         <Trash2 size={14} /> Move to Recycle Bin
                     </button>
                 </div>

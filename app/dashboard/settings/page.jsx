@@ -12,6 +12,7 @@ const themeOptions = [
 
 export default function SettingsPage() {
     const [homepageDashboard, setHomepageDashboard] = useState(false)
+    const [defaultPdfTheme, setDefaultPdfTheme] = useState('bright')
     const { theme, setTheme } = useTheme()
     const [mounted, setMounted] = useState(false)
 
@@ -19,12 +20,20 @@ export default function SettingsPage() {
         setMounted(true)
         const val = localStorage.getItem('setting_homepage_dashboard') === 'true'
         setHomepageDashboard(val)
+
+        const pdfVal = localStorage.getItem('setting_pdf_theme') || 'bright'
+        setDefaultPdfTheme(pdfVal)
     }, [])
 
     const toggleHomepageDashboard = () => {
         const newVal = !homepageDashboard
         setHomepageDashboard(newVal)
         localStorage.setItem('setting_homepage_dashboard', newVal.toString())
+    }
+
+    const handlePdfThemeChange = (val) => {
+        setDefaultPdfTheme(val)
+        localStorage.setItem('setting_pdf_theme', val)
     }
 
     return (
@@ -110,6 +119,37 @@ export default function SettingsPage() {
                                 />
                                 <div className="w-11 h-6 bg-notion-border peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-notion-accent"></div>
                             </label>
+                        </div>
+                    </section>
+
+                    {/* Export Preferences Section */}
+                    <section className="mb-10">
+                        <h2 className="text-sm font-semibold text-notion-muted uppercase tracking-wider mb-4">Export Preferences</h2>
+
+                        <div className="p-4 border border-notion-border rounded-xl bg-notion-card">
+                            <div className="flex justify-between items-center mb-4">
+                                <div>
+                                    <h3 className="font-semibold text-notion-text text-sm">Default PDF Theme</h3>
+                                    <p className="text-xs text-notion-muted mt-1">
+                                        Choose the default visual style for PDF exports.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="flex gap-4">
+                                <button
+                                    onClick={() => handlePdfThemeChange('bright')}
+                                    className={`px-4 py-2 border rounded-lg text-sm font-medium transition-colors ${defaultPdfTheme === 'bright' ? 'border-notion-accent bg-notion-accent/10 text-notion-text' : 'border-notion-border text-notion-muted hover:border-notion-muted'}`}
+                                >
+                                    Bright Mode
+                                </button>
+                                <button
+                                    onClick={() => handlePdfThemeChange('dark')}
+                                    className={`px-4 py-2 border rounded-lg text-sm font-medium transition-colors ${defaultPdfTheme === 'dark' ? 'border-notion-accent bg-notion-accent/10 text-notion-text' : 'border-notion-border text-notion-muted hover:border-notion-muted'}`}
+                                >
+                                    Dark Mode
+                                </button>
+                            </div>
                         </div>
                     </section>
 

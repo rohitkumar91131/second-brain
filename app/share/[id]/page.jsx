@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import ReadOnlyBlock from '@/components/editor/ReadOnlyBlock'
 import Loader from '@/components/ui/Loader'
-import { Plus, Check, ArrowRight } from 'lucide-react'
+import { Plus, Check, ArrowRight, Sun, Moon } from 'lucide-react'
+import { useTheme } from 'next-themes'
 import { format } from 'date-fns'
 import Link from 'next/link'
 import {
@@ -23,7 +24,11 @@ export default function SharePage() {
     const [importedId, setImportedId] = useState(null)
     const [error, setError] = useState(null)
 
+    const { resolvedTheme, setTheme } = useTheme()
+    const [mounted, setMounted] = useState(false)
+
     useEffect(() => {
+        setMounted(true)
         const fetchSharedNote = async () => {
             try {
                 const res = await fetch(`/api/shared/${id}`)
@@ -83,6 +88,15 @@ export default function SharePage() {
                     </div>
 
                     <div className="flex items-center gap-3">
+                        {mounted && (
+                            <button
+                                onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
+                                className="p-2 rounded-lg hover:bg-notion-hover text-notion-muted transition-colors mr-1"
+                                title="Toggle Theme"
+                            >
+                                {resolvedTheme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
+                            </button>
+                        )}
                         {importedId ? (
                             <Link
                                 href={`/dashboard/notes/${importedId}`}

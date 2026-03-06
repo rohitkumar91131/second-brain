@@ -3,7 +3,7 @@ export default function ProgressBar({ value = 0, showLabel = true, color = '#2ea
     return (
         <div className="flex items-center gap-2 w-full">
             <div
-                className="flex-1 bg-gray-100 rounded-full overflow-hidden"
+                className="flex-1 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden"
                 style={{ height }}
             >
                 <div

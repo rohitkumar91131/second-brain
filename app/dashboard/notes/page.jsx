@@ -28,24 +28,49 @@ export default function NotesPage() {
         n.tags?.some(t => t.toLowerCase().includes(search.toLowerCase()))
     )
 
-    const handlePdfContent = (note) => {
-        const preview = note.preview || ''
-        const html = `<html><head><title>${note.title}</title><style>body{font-family:sans-serif;padding:40px;line-height:1.6}h1{font-size:32px;margin-bottom:20px}p{font-size:16px;margin:10px 0;color:#333}</style></head><body><h1>${note.title}</h1><p>${preview}</p><p style="margin-top:50px;font-size:12px;color:grey;">Exported from Second Brain</p><script>window.onload=function(){window.print()}</script></body></html>`
-        const win = window.open('', '_blank')
-        win.document.write(html)
-        win.document.close()
+    const handlePdfContent = async (note) => {
+        const toastId = toast.loading(`Generating PDF for "${note.title}"...`)
+        try {
+            const response = await fetch(`/api/notes/${note.id}/pdf?theme=light`)
+            if (!response.ok) throw new Error('PDF conversion failed')
+
+            const blob = await response.blob()
+            const url = window.URL.createObjectURL(blob)
+            const a = document.createElement('a')
+            a.href = url
+            a.download = `${note.title || 'Note'}.pdf`
+            document.body.appendChild(a)
+            a.click()
+            a.remove()
+            toast.success('PDF downloaded successfully!', { id: toastId })
+        } catch (err) {
+            console.error('PDF generation failed', err)
+            toast.error('PDF generation failed. Please try again.', { id: toastId })
+        }
     }
 
-    const handleShare = (note) => {
-        if (navigator.share) {
-            navigator.share({
-                title: note.title,
-                text: 'Check out this note on Second Brain Tracker.',
-                url: window.location.href + '/' + note.id,
-            }).catch(() => { })
-        } else {
-            navigator.clipboard.writeText(window.location.href + '/' + note.id)
-            toast.success('Share copied to clipboard!')
+    const handleShare = async (note) => {
+        const toastId = toast.loading(`Preparing share link for "${note.title}"...`)
+        try {
+            const res = await fetch(`/api/notes/${note.id}/share`, { method: 'POST' })
+            if (!res.ok) throw new Error('Share request failed')
+
+            const { id: sharedId } = await res.json()
+            const url = `${window.location.origin}/share/${sharedId}`
+
+            if (navigator.share) {
+                await navigator.share({
+                    title: note.title,
+                    text: 'Check out this note on Second Brain Tracker.',
+                    url: url,
+                })
+            } else {
+                await navigator.clipboard.writeText(url)
+                toast.success('Share link copied to clipboard!', { id: toastId })
+            }
+        } catch (err) {
+            console.error('Share failed', err)
+            toast.error('Failed to generate share link.', { id: toastId })
         }
     }
 
@@ -89,7 +114,7 @@ export default function NotesPage() {
                             <ContextNoteCard
                                 key={note.id}
                                 note={note}
-                                project={projects?.find(p => p.id === note.projectId)}
+                                project={projects?.find(p => note.projectIds?.includes(p.id))}
                                 onUpdate={(id, updates) => updateNote(id, updates)}
                                 onDelete={async (id) => {
                                     await recycleNote(id)

@@ -134,7 +134,7 @@ export default function VersionsPage() {
                                     onClick={() => setActiveVersion(v)}
                                     className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all text-sm font-medium ${activeVersion.id === v.id
                                         ? 'bg-blue-50 text-blue-700 shadow-sm'
-                                        : 'text-notion-muted hover:bg-gray-100 hover:text-notion-text'
+                                        : 'text-notion-muted hover:bg-notion-hover hover:text-notion-text'
                                         }`}
                                 >
                                     {v.icon}
@@ -151,7 +151,7 @@ export default function VersionsPage() {
                             ${activeVersion.id === '6.0.0' ? 'bg-pink-50 text-pink-700' :
                                 activeVersion.id === '5.0.0' ? 'bg-indigo-50 text-indigo-700' :
                                     activeVersion.id === '4.0.0' ? 'bg-blue-50 text-blue-700' :
-                                        activeVersion.id === '3.0.0' ? 'bg-yellow-50 text-yellow-700' : 'bg-gray-100 text-gray-600'
+                                        activeVersion.id === '3.0.0' ? 'bg-yellow-50 dark:bg-yellow-900/50 text-yellow-700 dark:text-yellow-400' : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300'
                             }`}>
                             {activeVersion.date}
                         </div>
@@ -173,7 +173,7 @@ export default function VersionsPage() {
 
                     <div className="space-y-4">
                         {activeVersion.features.map((feature, idx) => (
-                            <div key={idx} className="flex gap-4 p-4 rounded-xl border border-transparent hover:border-notion-border hover:bg-gray-50 transition-colors">
+                            <div key={idx} className="flex gap-4 p-4 rounded-xl border border-transparent hover:border-notion-border hover:bg-notion-hover transition-colors">
                                 <CheckCircle2 size={24} className="text-green-500 flex-shrink-0" />
                                 <span className="text-notion-text leading-relaxed pt-0.5">{feature}</span>
                             </div>

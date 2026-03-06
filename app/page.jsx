@@ -86,21 +86,21 @@ export default function LandingPage() {
             {/* --- REDIRECT TOAST UI --- */}
             {redirectCountdown !== null && (
                 <div className="fixed bottom-6 right-6 w-80 z-[200] animate-in slide-in-from-bottom-4 fade-in duration-300 font-sans">
-                    <div className="bg-white/90 backdrop-blur-md border border-blue-100 shadow-2xl rounded-2xl p-4 flex flex-col gap-3 ring-1 ring-black/5">
+                    <div className="bg-white/90 dark:bg-[#252525]/90 backdrop-blur-md border border-blue-100 dark:border-blue-900/50 shadow-2xl rounded-2xl p-4 flex flex-col gap-3 ring-1 ring-black/5 dark:ring-white/5">
                         <div className="flex justify-between items-center">
                             <div className="flex items-center gap-3">
                                 <div className="w-8 h-8 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center animate-pulse">
                                     <Zap size={16} />
                                 </div>
                                 <div>
-                                    <h4 className="text-[14px] font-bold text-gray-800 leading-tight">Auto-Redirect Active</h4>
-                                    <p className="text-[12px] text-gray-500 mt-0.5">Going to dashboard in <span className="text-blue-600 font-bold">{redirectCountdown}s</span></p>
+                                    <h4 className="text-[14px] font-bold text-gray-800 dark:text-gray-200 leading-tight">Auto-Redirect Active</h4>
+                                    <p className="text-[12px] text-gray-500 dark:text-gray-400 mt-0.5">Going to dashboard in <span className="text-blue-600 dark:text-blue-400 font-bold">{redirectCountdown}s</span></p>
                                 </div>
                             </div>
                         </div>
                         <button
                             onClick={stopRedirect}
-                            className="w-full py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-sm font-bold shadow-sm transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+                            className="w-full py-2 bg-notion-sidebar hover:bg-notion-hover text-notion-text rounded-xl text-sm font-bold shadow-sm transition-all active:scale-[0.98] flex items-center justify-center gap-2"
                         >
                             <X size={16} /> Stop Redirect
                         </button>
@@ -133,7 +133,7 @@ export default function LandingPage() {
                         ) : (
                             <button
                                 onClick={() => signIn('google', { callbackUrl: '/dashboard' })}
-                                className="flex items-center gap-2 px-5 py-2.5 bg-white border border-notion-border rounded-full hover:bg-notion-sidebar transition-all shadow-sm font-semibold text-sm"
+                                className="flex items-center gap-2 px-5 py-2.5 bg-notion-bg border border-notion-border rounded-full hover:bg-notion-sidebar transition-all shadow-sm font-semibold text-sm"
                             >
                                 <svg width="16" height="16" viewBox="0 0 24 24">
                                     <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -174,7 +174,7 @@ export default function LandingPage() {
                         <button
                             ref={el => menuLinksRef.current[5] = el}
                             onClick={() => { closeMenu(); signIn('google', { callbackUrl: '/dashboard' }); }}
-                            className="w-full flex items-center justify-center gap-3 py-4 bg-white border border-notion-border rounded-2xl shadow-md text-base"
+                            className="w-full flex items-center justify-center gap-3 py-4 bg-notion-bg border border-notion-border rounded-2xl shadow-md text-base"
                         >
                             <svg width="20" height="20" viewBox="0 0 24 24">
                                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -288,11 +288,11 @@ export default function LandingPage() {
 
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-5">
                         {[
-                            { id: 'windows', name: 'Windows', icon: <Monitor size={28} />, bg: 'bg-blue-50', color: 'text-blue-500' },
-                            { id: 'mac', name: 'macOS', icon: <Apple size={28} />, bg: 'bg-gray-50', color: 'text-gray-700' },
-                            { id: 'linux', name: 'Linux', icon: <Terminal size={28} />, bg: 'bg-orange-50', color: 'text-orange-500' },
-                            { id: 'android', name: 'Android', icon: <Smartphone size={28} />, bg: 'bg-green-50', color: 'text-green-500' },
-                            { id: 'ios', name: 'iOS', icon: <Tablet size={28} />, bg: 'bg-purple-50', color: 'text-purple-500' },
+                            { id: 'windows', name: 'Windows', icon: <Monitor size={28} />, bg: 'bg-blue-50 dark:bg-blue-900/30', color: 'text-blue-500 dark:text-blue-400' },
+                            { id: 'mac', name: 'macOS', icon: <Apple size={28} />, bg: 'bg-gray-50 dark:bg-gray-800/80', color: 'text-gray-700 dark:text-gray-300' },
+                            { id: 'linux', name: 'Linux', icon: <Terminal size={28} />, bg: 'bg-orange-50 dark:bg-orange-900/30', color: 'text-orange-500 dark:text-orange-400' },
+                            { id: 'android', name: 'Android', icon: <Smartphone size={28} />, bg: 'bg-green-50 dark:bg-green-900/30', color: 'text-green-500 dark:text-green-400' },
+                            { id: 'ios', name: 'iOS', icon: <Tablet size={28} />, bg: 'bg-purple-50 dark:bg-purple-900/30', color: 'text-purple-500 dark:text-purple-400' },
                         ].map((platform) => (
                             <Link
                                 key={platform.id}

@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { useEffect, useState, useCallback } from 'react'
 import BlockEditor from '@/components/editor/BlockEditor'
 import ReadOnlyBlock from '@/components/editor/ReadOnlyBlock'
-import { ArrowLeft, Trash2, FileText, Save, Share2, X } from 'lucide-react'
+import { ArrowLeft, Trash2, FileText, Save, Share2, X, FolderOpen, Check } from 'lucide-react'
 import Link from 'next/link'
 import { format } from 'date-fns'
 import { toast } from 'sonner'
@@ -32,15 +32,17 @@ export default function NoteEditorPage() {
             fetchEntity('Note', id).catch(e => console.error('Fetch note failed', e))
         }
     }, [id, note, fetchEntity])
-    const project = projects?.find(p => p.id === note?.projectId)
+    const project = projects?.find(p => note?.projectIds?.includes(p.id))
 
     useEffect(() => {
-        if (!note?.projectId) return
-        const has = projects && projects.find(p => p.id === note.projectId)
+        if (!note?.projectIds?.length) return
+        const has = projects && note.projectIds.some(id => projects.find(p => p.id === id))
         if (!has) fetchEndpoint('projects')
-    }, [note?.projectId, projects, fetchEndpoint])
+    }, [note?.projectIds, projects, fetchEndpoint])
 
     const [title, setTitle] = useState('')
+    const [projectIds, setProjectIds] = useState([])
+    const [projectMenuOpen, setProjectMenuOpen] = useState(false)
     const [isSaving, setIsSaving] = useState(false)
     const [lastSaved, setLastSaved] = useState(null)
     const [ready, setReady] = useState(false)
@@ -63,15 +65,18 @@ export default function NoteEditorPage() {
                 try {
                     const draft = JSON.parse(draftStr)
                     setTitle(draft.title || note.title || '')
+                    setProjectIds(draft.projectIds || note.projectIds || [])
                     if (draft.blocks && draft.blocks.length > 0) {
                         setActiveBlocks(draft.blocks)
                     }
                     setLastSaved('Draft (Unsaved)')
                 } catch (e) {
                     setTitle(note.title || '')
+                    setProjectIds(note.projectIds || [])
                 }
             } else {
                 setTitle(note.title || '')
+                setProjectIds(note.projectIds || [])
                 setLastSaved(note.updatedAt)
             }
 
@@ -91,17 +96,32 @@ export default function NoteEditorPage() {
     }, [initialized, activeBlocks?.length, loading, setActiveBlocks])
 
     useEffect(() => {
-        if (ready) {
-            localStorage.setItem(`note_draft_${id}`, JSON.stringify({ title, blocks: activeBlocks }))
+        if (!ready || !note) return
+
+        const isTitleChanged = title !== (note.title || '')
+        const currentBlocksStr = JSON.stringify(activeBlocks || [])
+        const savedBlocksStr = JSON.stringify(note.content || [])
+        const isProjectIdsChanged = JSON.stringify(projectIds) !== JSON.stringify(note.projectIds || [])
+
+        if (isTitleChanged || currentBlocksStr !== savedBlocksStr || isProjectIdsChanged) {
+            localStorage.setItem(`note_draft_${id}`, JSON.stringify({ title, blocks: activeBlocks, projectIds }))
+            if (lastSaved !== 'Draft (Unsaved)') {
+                setLastSaved('Draft (Unsaved)')
+            }
+        } else {
+            localStorage.removeItem(`note_draft_${id}`)
+            if (lastSaved === 'Draft (Unsaved)') {
+                setLastSaved(note.updatedAt)
+            }
         }
-    }, [title, activeBlocks, ready, id])
+    }, [title, activeBlocks, ready, id, note])
 
     const handleSave = useCallback(async () => {
         if (!note) return
         setIsSaving(true)
         try {
             await Promise.all([
-                updateNote(id, { title }),
+                updateNote(id, { title, projectIds }),
                 bulkUpdateBlocks(id, 'Note', activeBlocks)
             ])
             localStorage.removeItem(`note_draft_${id}`)
@@ -208,13 +228,6 @@ export default function NoteEditorPage() {
                         </div>
 
                         <div className="flex items-center gap-2 md:gap-4 flex-shrink-0">
-                            {project && (
-                                <div className="group relative hidden md:block">
-                                    <span className="text-sm font-bold text-notion-text cursor-help">{project.title}</span>
-                                    <span className="absolute -top-8 right-0 bg-[#37352f] text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap">Project</span>
-                                </div>
-                            )}
-
                             <div className="flex items-center gap-1.5">
                                 <div className={`w-1.5 h-1.5 rounded-full ${isSaving ? 'bg-yellow-500 animate-pulse' : 'bg-[#2eaadc]'}`} />
                                 <span className="text-[9px] sm:text-[10px] font-bold text-notion-muted uppercase tracking-tighter max-w-[60px] sm:max-w-none truncate">
@@ -226,9 +239,15 @@ export default function NoteEditorPage() {
                                     <button
                                         onClick={handleShare}
                                         title="Share Note"
-                                        className="p-1.5 rounded-lg hover:bg-notion-hover text-notion-muted transition-all"
+                                        className="p-1.5 rounded-lg hover:bg-notion-hover text-notion-muted transition-all relative"
                                     >
-                                        <Share2 size={15} />
+                                        {sharing ? (
+                                            <div className="absolute inset-0 flex items-center justify-center">
+                                                <div className="w-3.5 h-3.5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                                            </div>
+                                        ) : (
+                                            <Share2 size={15} />
+                                        )}
                                     </button>
 
                                     <button
@@ -242,13 +261,13 @@ export default function NoteEditorPage() {
                                 <button
                                     onClick={handleSave}
                                     disabled={isSaving}
-                                    className="text-sm font-medium text-notion-text px-3 py-1.5 rounded-lg bg-[#f1f1ef] hover:bg-notion-border transition-all flex items-center gap-2"
+                                    className="text-sm font-medium text-notion-text px-3 py-1.5 rounded-lg bg-[#f1f1ef] dark:bg-[#202020] hover:bg-notion-border transition-all flex items-center gap-2"
                                 >
                                     <Save size={14} className={isSaving ? 'animate-spin' : ''} />
                                     {isSaving ? 'Saving...' : 'Save Changes'}
                                 </button>
                             </div>
-                            <button onClick={handleDelete} className="p-1.5 rounded-lg hover:bg-red-50 text-notion-muted hover:text-red-500">
+                            <button onClick={handleDelete} className="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-notion-muted hover:text-red-500">
                                 <Trash2 size={15} />
                             </button>
                         </div>
@@ -267,6 +286,46 @@ export default function NoteEditorPage() {
                                 <div className="flex flex-wrap items-center gap-2 mt-4 md:mt-6">
                                     <div className="flex items-center gap-1.5 px-2.5 py-1 bg-[#f1f1ef] text-notion-muted text-[10px] md:text-xs font-bold rounded-lg border border-notion-border/50 uppercase tracking-wider">
                                         <FileText size={12} /> Note
+                                    </div>
+
+                                    <div className="relative">
+                                        <button
+                                            onClick={() => setProjectMenuOpen(!projectMenuOpen)}
+                                            className="flex items-center gap-1.5 px-2.5 py-1 bg-notion-bg text-notion-muted hover:bg-notion-hover text-[10px] md:text-xs font-semibold rounded-lg border border-notion-border transition-colors"
+                                        >
+                                            <FolderOpen size={12} />
+                                            {projectIds.length === 0 ? 'Add Project' :
+                                                projectIds.length === 1 ? projects?.find(p => p.id === projectIds[0])?.title || '1 Project' :
+                                                    `${projectIds.length} Projects`}
+                                        </button>
+
+                                        {projectMenuOpen && (
+                                            <>
+                                                <div className="fixed inset-0 z-40" onClick={() => setProjectMenuOpen(false)}></div>
+                                                <div className="absolute top-full mt-1 left-0 z-50 w-64 bg-notion-bg border border-notion-border rounded-xl shadow-lg py-2 max-h-64 overflow-y-auto animate-in fade-in slide-in-from-top-2 duration-200">
+                                                    <div className="px-3 py-1 text-[10px] font-bold text-notion-muted uppercase tracking-widest">Select Projects</div>
+                                                    {projects?.map(p => {
+                                                        const isSelected = projectIds.includes(p.id);
+                                                        return (
+                                                            <button
+                                                                key={p.id}
+                                                                onClick={() => {
+                                                                    if (isSelected) setProjectIds(projectIds.filter(id => id !== p.id));
+                                                                    else setProjectIds([...projectIds, p.id]);
+                                                                }}
+                                                                className="w-full flex items-center justify-between px-3 py-1.5 hover:bg-notion-hover text-left text-xs text-notion-text transition-colors"
+                                                            >
+                                                                <span className="truncate pr-2 font-medium">{p.title}</span>
+                                                                {isSelected && <Check size={14} className="text-blue-500 flex-shrink-0" />}
+                                                            </button>
+                                                        )
+                                                    })}
+                                                    {(!projects || projects.length === 0) && (
+                                                        <div className="px-3 py-2 text-xs text-notion-muted italic">No projects found.</div>
+                                                    )}
+                                                </div>
+                                            </>
+                                        )}
                                     </div>
 
                                     {note.tags?.map(tag => (
@@ -291,7 +350,7 @@ export default function NoteEditorPage() {
             {/* Share Dropdown */}
             {shareUrl && (
                 <div className="fixed inset-0 bg-black/5 z-[100] flex items-center justify-center p-4 animate-in fade-in zoom-in-95 duration-200">
-                    <div className="bg-white rounded-2xl shadow-2xl border border-notion-border p-6 w-full max-w-sm relative">
+                    <div className="bg-notion-bg rounded-2xl shadow-2xl border border-notion-border p-6 w-full max-w-sm relative">
                         <button
                             onClick={() => setShareUrl('')}
                             className="absolute top-4 right-4 text-notion-muted hover:text-notion-text"
@@ -304,7 +363,7 @@ export default function NoteEditorPage() {
                         </h3>
                         <p className="text-sm text-notion-muted mb-4 uppercase tracking-widest font-bold text-[10px]">Invite Others to Read</p>
 
-                        <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg border border-notion-border mb-6">
+                        <div className="flex items-center gap-2 p-2 bg-notion-sidebar rounded-lg border border-notion-border mb-6">
                             <input
                                 readOnly
                                 value={shareUrl}
@@ -315,7 +374,7 @@ export default function NoteEditorPage() {
                                     navigator.clipboard.writeText(shareUrl)
                                     toast.success('Link copied!')
                                 }}
-                                className="p-1.5 bg-white border border-notion-border rounded-md text-[10px] font-bold hover:bg-gray-50 uppercase shadow-sm"
+                                className="p-1.5 bg-notion-bg border border-notion-border rounded-md text-[10px] font-bold hover:bg-notion-hover uppercase shadow-sm"
                             >
                                 Copy
                             </button>
@@ -354,7 +413,7 @@ export default function NoteEditorPage() {
             {/* PDF THEME MODAL */}
             {pdfModalOpen && (
                 <div className="fixed inset-0 bg-[#37352f]/40 backdrop-blur-[2px] z-[100] flex items-center justify-center animate-in fade-in duration-200">
-                    <div className="bg-white w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 border border-notion-border">
+                    <div className="bg-notion-bg w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 border border-notion-border">
                         <div className="px-6 py-5 border-b border-notion-border flex justify-between items-center">
                             <h3 className="font-bold text-notion-text">Export to PDF</h3>
                             <button onClick={() => setPdfModalOpen(false)} className="text-notion-muted hover:text-notion-text transition-colors">
@@ -397,7 +456,7 @@ export default function NoteEditorPage() {
                             <button
                                 onClick={handleDownloadPDF}
                                 disabled={pdfGenerating}
-                                className="w-full py-3 bg-[#37352f] hover:bg-black text-white rounded-xl font-bold flex items-center justify-center gap-3 transition-all active:scale-[0.98] disabled:opacity-50"
+                                className="w-full py-3 bg-notion-text hover:opacity-80 text-notion-bg rounded-xl font-bold flex items-center justify-center gap-3 transition-all active:scale-[0.98] disabled:opacity-50"
                             >
                                 {pdfGenerating ? (
                                     <>
