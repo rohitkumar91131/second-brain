@@ -43,11 +43,24 @@ export default function BoardView({ items, onUpdate, onDelete, onAdd, entityType
     const handleDragEnd = ({ active, over }) => {
         setActiveId(null)
         if (!over) return
-        const overItem = items.find(i => i.id === over.id)
-        const overColumn = COLUMNS.find(col => col === over.id)
+
+        const dragId = active.id
+        const dropId = over.id
+
+        if (dragId === dropId) return
+
+        const overItem = items.find(i => i.id === dropId)
+        const overColumn = COLUMNS.find(col => col === dropId)
+
+        // If dropping onto another project, make it a subproject
+        if (overItem && entityType === 'project' && overItem.id !== dragId) {
+            onUpdate(dragId, { parentProjectId: overItem.id })
+            return
+        }
+
         const newStatus = overColumn || overItem?.status
-        if (newStatus && active.id !== over.id) {
-            onUpdate(active.id, { status: newStatus })
+        if (newStatus) {
+            onUpdate(dragId, { status: newStatus })
         }
     }
 

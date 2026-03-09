@@ -53,6 +53,13 @@ function AppContextInner({ children }) {
     const [viewPreferences, setViewPreferences] = useState({})
     const [activeBlocks, setActiveBlocks] = useState([])
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+
+    useEffect(() => {
+        const stored = safeGetStorage('sidebarCollapsed');
+        if (stored !== null) {
+            setSidebarCollapsed(stored);
+        }
+    }, [])
     const [loading, setLoading] = useState(true)
     const [isInitialized, setIsInitialized] = useState(false)
     const [activeFetches, setActiveFetches] = useState(0)
@@ -244,6 +251,11 @@ function AppContextInner({ children }) {
         })
         safeSetStorage('viewPreferences', viewPreferences)
     }, [tasks, projects, goals, notes, archivedNotes, deletedNotes, journal, areas, resources, media, archive, viewPreferences, loading, isInitialized])
+
+    useEffect(() => {
+        if (!isInitialized) return
+        safeSetStorage('sidebarCollapsed', sidebarCollapsed)
+    }, [sidebarCollapsed, isInitialized])
 
     const apiCall = useCallback(async (method, url, body) => {
         const res = await fetch(url, {

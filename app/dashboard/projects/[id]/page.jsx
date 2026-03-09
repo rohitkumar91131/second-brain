@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useApp } from '@/context/AppContext'
 import { format, parseISO } from 'date-fns'
@@ -9,12 +9,13 @@ import Link from 'next/link'
 import QuickAddModal from '@/components/ui/QuickAddModal'
 import BlockEditor from '@/components/editor/BlockEditor'
 import Loader from '@/components/ui/Loader'
+import ProjectContextMenu from '@/components/ui/ProjectContextMenu'
 
 export default function ProjectDetailPage() {
     const params = useParams()
     const router = useRouter()
     const projectId = params.id
-    const { projects, tasks, notes, addTask, updateTask, deleteTask, loading, updateNote, deleteNote, fetchEndpoint } = useApp()
+    const { projects, tasks, notes, addTask, updateTask, deleteTask, loading, updateNote, deleteNote, fetchEndpoint, updateProject, deleteProject } = useApp()
 
     const [selectedDate, setSelectedDate] = useState(new Date())
     const [project, setProject] = useState(null)
@@ -29,6 +30,11 @@ export default function ProjectDetailPage() {
     const [isSaving, setIsSaving] = useState(false)
     const [lastSaved, setLastSaved] = useState(null)
     const [notFoundDelay, setNotFoundDelay] = useState(false)
+
+    // Context Menu State
+    const [contextMenu, setContextMenu] = useState(null) // { x, y, project, isMobile }
+    const longPressTimer = useRef(null)
+
     // Ensure projects, tasks and notes are loaded only once
     useEffect(() => {
         let mounted = true
@@ -78,9 +84,62 @@ export default function ProjectDetailPage() {
             return () => clearTimeout(timer)
         }
     }, [projects, projectId, projectsLoaded])
+
+    // Context Menu Handlers
+    const handleContextMenu = (e, targetProject) => {
+        e.preventDefault()
+        setContextMenu({
+            x: e.clientX,
+            y: e.clientY,
+            project: targetProject,
+            isMobile: false
+        })
+    }
+
+    const handleTouchStart = (e, targetProject) => {
+        const touch = e.touches[0]
+        const x = touch.clientX
+        const y = touch.clientY
+        longPressTimer.current = setTimeout(() => {
+            setContextMenu({
+                x,
+                y,
+                project: targetProject,
+                isMobile: true
+            })
+        }, 500) // 500ms for long press
+    }
+
+    const handleTouchEnd = () => {
+        if (longPressTimer.current) {
+            clearTimeout(longPressTimer.current)
+        }
+    }
+
+    const handleRemoveSubproject = async (subprojectId) => {
+        if (confirm('Remove this subproject from the current project?')) {
+            await updateProject(subprojectId, { parentProjectId: null })
+        }
+    }
+
+    const handleDeleteSubproject = async (subprojectId) => {
+        if (confirm('Are you sure you want to delete this project? This cannot be undone.')) {
+            await deleteProject(subprojectId)
+        }
+    }
+
+    const handleEditSubproject = (subProject) => {
+        // We'll use a simple prompt for title for now to keep it straightforward
+        // In a real app, we'd open an Edit Modal
+        const newTitle = prompt('Enter new project title:', subProject.title)
+        if (newTitle && newTitle.trim() !== subProject.title) {
+            updateProject(subProject.id, { title: newTitle.trim() })
+        }
+    }
+
     // Filter tasks for this project
     const projectTasks = tasks.filter(t => t.projectId === projectId)
-
+    // ... rest of the logic remains the same ...
     // Filter tasks for selected date
     const tasksForDate = projectTasks.filter(task => {
         if (!task.dueDate) return false
@@ -290,6 +349,19 @@ export default function ProjectDetailPage() {
 
     return (
         <div className="flex flex-col h-full bg-notion-bg">
+            {/* Context Menu Overlay */}
+            {contextMenu && (
+                <ProjectContextMenu
+                    x={contextMenu.x}
+                    y={contextMenu.y}
+                    isMobile={contextMenu.isMobile}
+                    onClose={() => setContextMenu(null)}
+                    onEdit={() => handleEditSubproject(contextMenu.project)}
+                    onDelete={() => handleDeleteSubproject(contextMenu.project.id)}
+                    onRemoveFromParent={() => handleRemoveSubproject(contextMenu.project.id)}
+                />
+            )}
+
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-notion-border">
                 <div className="flex items-center gap-3">
@@ -357,13 +429,20 @@ export default function ProjectDetailPage() {
                         ) : (
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                                 {subprojects.map(p => (
-                                    <Link key={p.id} href={`/dashboard/projects/${p.id}`} className="block p-4 bg-notion-bg rounded-lg hover:bg-notion-hover transition-colors border border-notion-border group">
+                                    <div
+                                        key={p.id}
+                                        className="relative block p-4 bg-notion-bg rounded-lg hover:bg-notion-hover transition-colors border border-notion-border group cursor-pointer"
+                                        onContextMenu={(e) => handleContextMenu(e, p)}
+                                        onTouchStart={(e) => handleTouchStart(e, p)}
+                                        onTouchEnd={handleTouchEnd}
+                                        onClick={() => router.push(`/dashboard/projects/${p.id}`)}
+                                    >
                                         <h3 className="font-semibold text-sm text-notion-text group-hover:text-blue-600 truncate">{p.title}</h3>
                                         <div className="flex justify-between items-center mt-2 text-xs text-notion-muted">
                                             <span>{p.status}</span>
                                             <span className="font-medium text-notion-text">{p.progress}%</span>
                                         </div>
-                                    </Link>
+                                    </div>
                                 ))}
                             </div>
                         )}

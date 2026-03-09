@@ -2,12 +2,52 @@
 
 import StatusTag from '@/components/properties/StatusTag'
 import ProgressBar from '@/components/properties/ProgressBar'
-import { Trash2, Plus, Check } from 'lucide-react'
+import { Trash2, Plus, Check, GripVertical } from 'lucide-react'
 import { format } from 'date-fns'
 import { useRouter } from 'next/navigation'
+import { useState } from 'react'
+import {
+    DndContext,
+    closestCorners,
+    PointerSensor,
+    useSensor,
+    useSensors,
+    DragOverlay,
+} from '@dnd-kit/core'
+import {
+    SortableContext,
+    verticalListSortingStrategy,
+    useSortable,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 
 export default function ListView({ items, columns, onUpdate, onDelete, onAdd, entityType }) {
     const router = useRouter()
+    const [activeId, setActiveId] = useState(null)
+
+    const sensors = useSensors(
+        useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
+    )
+
+    const handleDragStart = ({ active }) => setActiveId(active.id)
+
+    const handleDragEnd = ({ active, over }) => {
+        setActiveId(null)
+        if (!over) return
+
+        const dragId = active.id
+        const dropId = over.id
+
+        if (dragId === dropId) return
+
+        const overItem = items.find(i => i.id === dropId)
+
+        // If dropping onto another project, make it a subproject
+        if (overItem && entityType === 'project') {
+            onUpdate(dragId, { parentProjectId: overItem.id })
+            return
+        }
+    }
 
     const handleRowClick = (item) => {
         if (entityType === 'project') {
@@ -19,36 +59,79 @@ export default function ListView({ items, columns, onUpdate, onDelete, onAdd, en
         }
     }
 
+    const activeItem = items.find(i => i.id === activeId)
+
     return (
-        <div className="divide-y divide-[#e9e9e7]">
-            {items.map(item => (
-                <ListRow
-                    key={item.id}
-                    item={item}
-                    columns={columns}
-                    onUpdate={onUpdate}
-                    onDelete={onDelete}
-                    entityType={entityType}
-                    onRowClick={() => handleRowClick(item)}
-                />
-            ))}
-            <button
-                onClick={onAdd}
-                className="flex items-center gap-2 w-full px-4 py-3 text-xs text-notion-muted hover:text-notion-text hover:bg-notion-sidebar transition-colors"
-            >
-                <Plus size={13} />
-                New {entityType}
-            </button>
-        </div>
+        <DndContext
+            sensors={sensors}
+            collisionDetection={closestCorners}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+        >
+            <div className="divide-y divide-[#e9e9e7]">
+                <SortableContext items={items.map(i => i.id)} strategy={verticalListSortingStrategy}>
+                    {items.map(item => (
+                        <ListRow
+                            key={item.id}
+                            item={item}
+                            columns={columns}
+                            onUpdate={onUpdate}
+                            onDelete={onDelete}
+                            entityType={entityType}
+                            onRowClick={() => handleRowClick(item)}
+                        />
+                    ))}
+                </SortableContext>
+                <button
+                    onClick={onAdd}
+                    className="flex items-center gap-2 w-full px-4 py-3 text-xs text-notion-muted hover:text-notion-text hover:bg-notion-sidebar transition-colors"
+                >
+                    <Plus size={13} />
+                    New {entityType}
+                </button>
+            </div>
+
+            <DragOverlay>
+                {activeItem && (
+                    <div className="bg-white shadow-xl border border-notion-border opacity-80 pointer-events-none">
+                        <div className="flex items-center gap-3 px-4 py-2.5">
+                            <GripVertical size={12} className="text-notion-muted" />
+                            <span className="text-sm font-medium text-notion-text">{activeItem.title}</span>
+                        </div>
+                    </div>
+                )}
+            </DragOverlay>
+        </DndContext>
     )
 }
 
 function ListRow({ item, columns, onUpdate, onDelete, entityType, onRowClick }) {
+    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: item.id })
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: isDragging ? 0.4 : 1,
+        backgroundColor: isDragging ? '#fafafa' : undefined,
+    }
+
     return (
-        <div 
-            className="flex items-center gap-3 px-4 py-2.5 hover:bg-[#fafafa] group cursor-pointer transition-colors"
+        <div
+            ref={setNodeRef}
+            style={style}
+            className="flex items-center gap-3 px-4 py-2.5 hover:bg-[#fafafa] group cursor-pointer transition-colors relative"
             onClick={onRowClick}
         >
+            {/* Drag Handle */}
+            <button
+                {...attributes}
+                {...listeners}
+                className="hover-reveal p-0.5 rounded hover:bg-notion-hover text-[#d3d1cb] hover:text-notion-muted cursor-grab active:cursor-grabbing flex-shrink-0"
+                onClick={(e) => e.stopPropagation()}
+            >
+                <GripVertical size={12} />
+            </button>
+
             {/* Checkbox if applicable */}
             {item.completed !== undefined && (
                 <button

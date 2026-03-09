@@ -45,6 +45,7 @@ export default function NoteEditorPage() {
     const [projectMenuOpen, setProjectMenuOpen] = useState(false)
     const [isSaving, setIsSaving] = useState(false)
     const [lastSaved, setLastSaved] = useState(null)
+    const [savedBlocks, setSavedBlocks] = useState([])
     const [ready, setReady] = useState(false)
     const [notFoundDelay, setNotFoundDelay] = useState(false)
     const [initialized, setInitialized] = useState(false)
@@ -68,6 +69,7 @@ export default function NoteEditorPage() {
                     setProjectIds(draft.projectIds || note.projectIds || [])
                     if (draft.blocks && draft.blocks.length > 0) {
                         setActiveBlocks(draft.blocks)
+                        setSavedBlocks(note.content || []) // This will be compared against
                     }
                     setLastSaved('Draft (Unsaved)')
                 } catch (e) {
@@ -78,6 +80,9 @@ export default function NoteEditorPage() {
                 setTitle(note.title || '')
                 setProjectIds(note.projectIds || [])
                 setLastSaved(note.updatedAt)
+                // When first loading, activeBlocks will be what we fetched.
+                // We shouldn't compare against note.content (which is empty).
+                // Instead, we use a trick: the first time we get blocks, we mark them as saved.
             }
 
             setInitialized(true)
@@ -93,14 +98,19 @@ export default function NoteEditorPage() {
         if (initialized && activeBlocks?.length === 0 && !loading) {
             setActiveBlocks([{ id: `b-init-${Date.now()}`, type: 'paragraph', content: '', order: 0 }])
         }
-    }, [initialized, activeBlocks?.length, loading, setActiveBlocks])
+        // If we just loaded blocks for the first time and they are the initial blocks,
+        // mark them as the "saved" blocks so we don't immediately trigger Draft status.
+        if (initialized && activeBlocks?.length > 0 && savedBlocks.length === 0 && lastSaved !== 'Draft (Unsaved)') {
+            setSavedBlocks(activeBlocks)
+        }
+    }, [initialized, activeBlocks, loading, savedBlocks.length, lastSaved])
 
     useEffect(() => {
         if (!ready || !note) return
 
         const isTitleChanged = title !== (note.title || '')
         const currentBlocksStr = JSON.stringify(activeBlocks || [])
-        const savedBlocksStr = JSON.stringify(note.content || [])
+        const savedBlocksStr = JSON.stringify(savedBlocks || [])
         const isProjectIdsChanged = JSON.stringify(projectIds) !== JSON.stringify(note.projectIds || [])
 
         if (isTitleChanged || currentBlocksStr !== savedBlocksStr || isProjectIdsChanged) {
@@ -125,6 +135,7 @@ export default function NoteEditorPage() {
                 bulkUpdateBlocks(id, 'Note', activeBlocks)
             ])
             localStorage.removeItem(`note_draft_${id}`)
+            setSavedBlocks(activeBlocks)
             setLastSaved(new Date())
         } catch (err) {
             console.error('Save failed', err)
