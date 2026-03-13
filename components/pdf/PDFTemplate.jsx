@@ -302,6 +302,7 @@ const PDFTemplate = ({ title, blocks, theme = 'bright' }) => {
                                 <Image
                                     src={imageUrl}
                                     style={s.image}
+                                    alt=""
                                 />
                                 {block.caption && (
                                     <Text style={[s.engineInfo, { textAlign: 'center', marginTop: 4 }]}>{block.caption}</Text>

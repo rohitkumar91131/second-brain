@@ -87,7 +87,7 @@ export default function MediaBankPage() {
                                         {item.type === 'image' && (
                                             <img
                                                 src={item.content}
-                                                alt={item.noteTitle}
+                                                alt={item.noteTitle || 'Media asset'}
                                                 className="w-full h-auto object-contain"
                                             />
                                         )}

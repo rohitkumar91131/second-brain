@@ -59,7 +59,7 @@ export default function ImageBlock({ block, onUpdate, onDelete, onDragHandleDown
                     <div className="relative inline-flex w-full justify-center group/img">
                         <img
                             src={block.content}
-                            alt="Block"
+                            alt="Note image"
                             onClick={() => setIsFullScreen(true)}
                             className="max-w-full h-auto object-contain rounded-lg border border-notion-border cursor-zoom-in hover:brightness-95 transition-all"
                         />

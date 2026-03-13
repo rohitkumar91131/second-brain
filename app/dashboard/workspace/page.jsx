@@ -139,7 +139,7 @@ export default function WorkspacePage() {
     }, [activeBlocks, activeTabId])
 
     // Save active note blocks
-    const handleSave = async (title = undefined) => {
+    const handleSave = useCallback(async (title = undefined) => {
         if (!activeTabId) return
         setIsSaving(true)
         try {
@@ -162,7 +162,7 @@ export default function WorkspacePage() {
         } finally {
             setIsSaving(false)
         }
-    }
+    }, [activeTabId, activeBlocks, notes, updateNote, bulkUpdateBlocks])
 
     // Keyboard shortcuts for saving and Quick Open
     useEffect(() => {
@@ -386,7 +386,7 @@ export default function WorkspacePage() {
                             ) : (
                                 <div className="py-12 flex flex-col items-center justify-center text-[#94A3B8] dark:text-[#64748B]">
                                     <Search size={32} className="mb-4 opacity-50" />
-                                    <p className="text-sm">No notes found matching "{searchQuery}"</p>
+                                    <p className="text-sm">No notes found matching &quot;{searchQuery}&quot;</p>
                                 </div>
                             )}
                         </div>

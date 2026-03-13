@@ -103,7 +103,7 @@ export default function NoteEditorPage() {
         if (initialized && activeBlocks?.length > 0 && savedBlocks.length === 0 && lastSaved !== 'Draft (Unsaved)') {
             setSavedBlocks(activeBlocks)
         }
-    }, [initialized, activeBlocks, loading, savedBlocks.length, lastSaved])
+    }, [initialized, activeBlocks, loading, savedBlocks.length, lastSaved, setActiveBlocks])
 
     useEffect(() => {
         if (!ready || !note) return
@@ -124,7 +124,7 @@ export default function NoteEditorPage() {
                 setLastSaved(note.updatedAt)
             }
         }
-    }, [title, activeBlocks, ready, id, note])
+    }, [title, activeBlocks, ready, id, note, lastSaved, projectIds, savedBlocks])
 
     const handleSave = useCallback(async () => {
         if (!note) return
@@ -142,7 +142,7 @@ export default function NoteEditorPage() {
         } finally {
             setIsSaving(false)
         }
-    }, [note, id, title, activeBlocks, updateNote, bulkUpdateBlocks])
+    }, [note, id, title, activeBlocks, updateNote, bulkUpdateBlocks, projectIds])
 
     useEffect(() => {
         const onKey = (e) => {
