@@ -319,6 +319,12 @@ export default function BlockEditor({ blocks, onChange, isDiary = false }) {
     const handleSave = async () => { /* Tumhara save logic yahan aayega */ }
 
     const updateBlock = useCallback((id, updates, isTyping = true) => {
+        const block = blocks.find(b => b.id === id);
+        if (!block) return;
+
+        const hasChange = Object.keys(updates).some(key => updates[key] !== block[key]);
+        if (!hasChange) return;
+
         const newBlocks = blocks.map(b => b.id === id ? { ...b, ...updates } : b);
         handleBlockChange(newBlocks, isTyping);
     }, [blocks, handleBlockChange])

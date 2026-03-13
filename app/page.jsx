@@ -198,7 +198,7 @@ export default function LandingPage() {
                         className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-600 text-sm font-semibold mb-8 hover:bg-indigo-100 hover:scale-105 transition-all shadow-sm"
                     >
                         <Star size={16} className="text-indigo-500 fill-indigo-500" />
-                        Version 5.0.0 is live! See what&apos;s new <ArrowRight size={14} />
+                        Version 7.0.0 is live! See what&apos;s new <ArrowRight size={14} />
                     </Link>
 
                     <h1 className="text-4xl md:text-7xl font-extrabold tracking-tight mb-8 leading-[1.1]">

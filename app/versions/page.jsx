@@ -7,6 +7,19 @@ import { ArrowLeft, CheckCircle2, History, Rocket, ScrollText, Sparkles, Zap, St
 
 const VERSIONS = [
     {
+        id: '7.0.0',
+        title: 'Version 7.0.0',
+        date: 'March 14, 2026',
+        icon: <Sparkles size={20} className="text-emerald-500" />,
+        features: [
+            'VS Code-Style Workspace: A full-screen, IDE-like file exploration and note editing environment.',
+            'Tabbed Interface: Seamlessly switch between multiple open notes with persistent session state.',
+            'File Explorer: A custom sidebar with expandable project folders and an "Unassigned Notes" section.',
+            'Dynamic Light/Dark Themes: Premium minimal redesign with soft neutral colors for light mode, and deep navy/charcoal for dark mode.',
+            'Journal Makeover: The Journal now contextually adapts from a crisp white paper look to a sleek dark charcoal aesthetic.'
+        ]
+    },
+    {
         id: '6.0.0',
         title: 'Version 6.0.0',
         date: 'March 6, 2026',
@@ -148,10 +161,11 @@ export default function VersionsPage() {
                 <main className="flex-1 bg-notion-bg rounded-2xl border border-notion-border shadow-sm p-8 md:p-12">
                     <div className="mb-10">
                         <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-4 
-                            ${activeVersion.id === '6.0.0' ? 'bg-pink-50 text-pink-700' :
-                                activeVersion.id === '5.0.0' ? 'bg-indigo-50 text-indigo-700' :
-                                    activeVersion.id === '4.0.0' ? 'bg-blue-50 text-blue-700' :
-                                        activeVersion.id === '3.0.0' ? 'bg-yellow-50 dark:bg-yellow-900/50 text-yellow-700 dark:text-yellow-400' : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300'
+                            ${activeVersion.id === '7.0.0' ? 'bg-emerald-50 text-emerald-700' :
+                                activeVersion.id === '6.0.0' ? 'bg-pink-50 text-pink-700' :
+                                    activeVersion.id === '5.0.0' ? 'bg-indigo-50 text-indigo-700' :
+                                        activeVersion.id === '4.0.0' ? 'bg-blue-50 text-blue-700' :
+                                            activeVersion.id === '3.0.0' ? 'bg-yellow-50 dark:bg-yellow-900/50 text-yellow-700 dark:text-yellow-400' : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300'
                             }`}>
                             {activeVersion.date}
                         </div>
@@ -159,15 +173,17 @@ export default function VersionsPage() {
                             {activeVersion.title}
                         </h1>
                         <p className="text-notion-muted text-lg">
-                            {activeVersion.id === '6.0.0'
-                                ? 'The Connectivity & Sharing Update: Premium Google Auth, Sonner notifications, and high-fidelity public sharing.'
-                                : activeVersion.id === '5.0.0'
-                                    ? 'The Editor Mastery Update: Smart clipboard detection, virtual loading, and robust Undo/Redo capabilities.'
-                                    : activeVersion.id === '4.0.0'
-                                        ? 'The Workflow Update: Powerful drag-and-drop and seamless copy-paste integrations.'
-                                        : activeVersion.id === '3.0.0'
-                                            ? 'The Experience Update: Making the editor and landing page feel elite.'
-                                            : `Release summary for ${activeVersion.title}.`}
+                            {activeVersion.id === '7.0.0'
+                                ? 'The Workspace & Theming Update: A completely new VS Code-style workspace with dynamic Dark/Light modes.'
+                                : activeVersion.id === '6.0.0'
+                                    ? 'The Connectivity & Sharing Update: Premium Google Auth, Sonner notifications, and high-fidelity public sharing.'
+                                    : activeVersion.id === '5.0.0'
+                                        ? 'The Editor Mastery Update: Smart clipboard detection, virtual loading, and robust Undo/Redo capabilities.'
+                                        : activeVersion.id === '4.0.0'
+                                            ? 'The Workflow Update: Powerful drag-and-drop and seamless copy-paste integrations.'
+                                            : activeVersion.id === '3.0.0'
+                                                ? 'The Experience Update: Making the editor and landing page feel elite.'
+                                                : `Release summary for ${activeVersion.title}.`}
                         </p>
                     </div>
 

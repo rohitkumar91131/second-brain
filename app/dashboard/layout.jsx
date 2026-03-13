@@ -3,9 +3,16 @@
 import { useState } from 'react'
 import Sidebar from '@/components/layout/Sidebar'
 import Header from '@/components/layout/Header'
+import { usePathname } from 'next/navigation'
 
 export default function DashboardLayout({ children }) {
     const [mobileOpen, setMobileOpen] = useState(false)
+    const pathname = usePathname()
+
+    // Skip full layout wrap for workspace to behave like an IDE
+    if (pathname === '/dashboard/workspace') {
+        return <div className="h-screen bg-notion-bg overflow-hidden">{children}</div>
+    }
 
     return (
         <div className="flex h-screen overflow-hidden bg-notion-bg">

@@ -9,11 +9,13 @@ import {
     LayoutDashboard, CheckSquare, FolderOpen, Target, Map,
     BookOpen, FileText, BookMarked, Archive, ChevronLeft,
     ChevronRight, Brain, LogOut, User, Settings, Trash2,
-    Image as ImageIcon
+    Image as ImageIcon,
+    ExternalLink
 } from 'lucide-react'
 
 const navItems = [
     { href: '/dashboard', label: 'Overview', icon: LayoutDashboard },
+    { href: '/dashboard/workspace', label: 'Workspace', icon: LayoutDashboard, target: '_blank', title: 'Open in new tab' },
     { href: '/dashboard/tasks', label: 'Tasks', icon: CheckSquare },
     { href: '/dashboard/media', label: 'Media Bank', icon: ImageIcon },
     { href: '/dashboard/projects', label: 'Projects', icon: FolderOpen },
@@ -98,7 +100,8 @@ function SidebarContent({ collapsed, pathname, onToggle, isMobile }) {
 
             {/* Navigation */}
             <nav className="flex-1 overflow-y-auto py-2 px-2">
-                {navItems.map(({ href, label, icon: Icon }) => {
+                {navItems.map((item) => {
+                    const { href, label, icon: Icon } = item;
                     // Check if link is active. /dashboard should only match exactly to avoid matching other /dashboard/ routes
                     const isActive = href === '/dashboard'
                         ? pathname === '/dashboard'
@@ -108,7 +111,9 @@ function SidebarContent({ collapsed, pathname, onToggle, isMobile }) {
                         <Link
                             key={href}
                             href={href}
-                            title={collapsed ? label : undefined}
+                            target={item.target}
+                            rel={item.target === '_blank' ? "noopener noreferrer" : undefined}
+                            title={collapsed ? label : item.title}
                             className={`
                 flex items-center gap-2.5 px-2 py-1.5 rounded-md text-sm mb-0.5
                 transition-colors duration-100 group
@@ -120,7 +125,12 @@ function SidebarContent({ collapsed, pathname, onToggle, isMobile }) {
               `}
                         >
                             <Icon size={16} className="flex-shrink-0" />
-                            {!collapsed && <span className="truncate">{label}</span>}
+                            {!collapsed && (
+                                <span className="truncate flex-1">{label}</span>
+                            )}
+                            {!collapsed && item.target === '_blank' && (
+                                <ExternalLink size={12} className="text-notion-muted/50 ml-auto group-hover:text-notion-text transition-colors" />
+                            )}
                         </Link>
                     )
                 })}
