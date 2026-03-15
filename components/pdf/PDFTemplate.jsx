@@ -270,13 +270,26 @@ const PDFTemplate = ({ title, blocks, theme = 'bright' }) => {
                         const urlWithoutQuery = urlParts[0].toLowerCase();
                         const hasValidExt = validExts.some(ext => urlWithoutQuery.endsWith(`.${ext}`));
 
-                        if (!hasValidExt) {
-                            if (imageUrl.includes('cloudinary.com')) {
-                                // Cloudinary handles extensions at the end of the public ID path
-                                imageUrl = imageUrl.includes('?')
-                                    ? imageUrl.replace('?', '.png?')
-                                    : `${imageUrl}.png`;
-                            } else {
+                        if (imageUrl.includes('cloudinary.com')) {
+                            // Cloudinary handles extensions at the end of the public ID path.
+                            // We force PNG to ensure @react-pdf can render it correctly.
+
+                            // 1. Remove existing query params temporarily
+                            const [baseUrl, query] = imageUrl.split('?');
+
+                            // 2. Clear out any existing common image extensions at the end of the path
+                            let cleanUrl = baseUrl.replace(/\.(jpg|jpeg|png|webp|gif|avif)$/i, '');
+
+                            // 3. Append .png and re-add query params
+                            imageUrl = query ? `${cleanUrl}.png?${query}` : `${cleanUrl}.png`;
+                        } else {
+                            // Non-Cloudinary: Check for valid extension
+                            const validExts = ['jpg', 'jpeg', 'png', 'webp'];
+                            const urlParts = imageUrl.split('?');
+                            const urlWithoutQuery = urlParts[0].toLowerCase();
+                            const hasValidExt = validExts.some(ext => urlWithoutQuery.endsWith(`.${ext}`));
+
+                            if (!hasValidExt) {
                                 // If no valid extension and not Cloudinary, skip to avoid "Not valid image extension" crash
                                 return (
                                     <View key={block.id || idx} style={[s.callout, { backgroundColor: theme === 'dark' ? '#222222' : '#f9f9f9', py: 10, px: 15, borderStyle: 'dashed', borderWidth: 1 }]}>
