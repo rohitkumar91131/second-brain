@@ -57,7 +57,7 @@ export default function ContextNoteCard({ note, project, onDelete, onArchive, on
                 onTouchMove={handleTouchEnd}
                 className="group relative border border-notion-border rounded-xl p-4 bg-notion-bg hover:shadow-md transition-all cursor-context-menu"
             >
-                <Link href={`/dashboard/notes/${note.id}`} className="block">
+                <Link href={`/dashboard/notes/${note.id}`} target="_blank" className="block">
                     <h3 className="text-sm font-semibold text-notion-text mb-1 truncate">
                         {project ? `${note.title} / ${project.title}` : note.title}
                     </h3>
@@ -101,7 +101,7 @@ export default function ContextNoteCard({ note, project, onDelete, onArchive, on
                     style={{ top: menuPos.y, left: menuPos.x }}
                     onClick={(e) => e.stopPropagation()}
                 >
-                    <Link href={`/dashboard/notes/${note.id}`} className="flex items-center gap-2 px-4 py-2 hover:bg-notion-sidebar transition-colors w-full text-left">
+                    <Link href={`/dashboard/notes/${note.id}`} target="_blank" className="flex items-center gap-2 px-4 py-2 hover:bg-notion-sidebar transition-colors w-full text-left">
                         <ExternalLink size={14} /> Open in Window
                     </Link>
                     <button onClick={() => { onArchive(note.id); setMenuPos(null) }} className="flex items-center gap-2 px-4 py-2 hover:bg-notion-sidebar transition-colors w-full text-left">

@@ -147,7 +147,7 @@ export default function DashboardPage() {
                         {recentNotes.length === 0 ? <EmptyWidget text="Your mind is empty..." /> : (
                             <div className="space-y-2">
                                 {recentNotes.map(note => (
-                                    <Link key={note.id} href={`/dashboard/notes/${note.id}`}
+                                    <Link key={note.id} href={`/dashboard/notes/${note.id}`} target="_blank"
                                         className="flex items-center gap-4 p-3 rounded-2xl hover:bg-white/5 transition-all group">
                                         <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center group-hover:bg-indigo-500/10 transition-colors">
                                             <FileText size={18} className="text-slate-400 group-hover:text-indigo-400" />

@@ -124,6 +124,7 @@ export default function MediaBankPage() {
                                         <div className="absolute inset-0 bg-indigo-900/40 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center gap-3">
                                             <Link
                                                 href={`/dashboard/notes/${item.entityId}`}
+                                                target="_blank"
                                                 className="p-3 bg-white text-indigo-600 rounded-2xl hover:scale-110 transition-transform shadow-xl"
                                                 title="View in Note"
                                             >

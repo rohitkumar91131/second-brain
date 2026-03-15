@@ -607,7 +607,7 @@ export default function ProjectDetailPage() {
                                         onContextMenu={(e) => handleNoteContextMenu(e, note)}
                                         onTouchStart={(e) => handleNoteTouchStart(e, note)}
                                         onTouchEnd={handleNoteTouchEnd}
-                                        onClick={() => handleSelectNote(note)}
+                                        onClick={() => window.open(`/dashboard/notes/${note.id}`, '_blank')}
                                     >
                                         <div className="flex items-start justify-between">
                                             <h3 className="font-bold text-white text-sm group-hover/note:text-green-400 transition-colors flex-1 min-w-0 truncate pr-2">
