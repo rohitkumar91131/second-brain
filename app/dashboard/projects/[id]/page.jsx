@@ -480,7 +480,7 @@ export default function ProjectDetailPage() {
                         onClick={() => router.back()}
                         className="p-2 md:p-2.5 hover:bg-white/5 rounded-xl transition-all text-slate-400 hover:text-white shrink-0"
                     >
-                        <ChevronLeft size={20} md:size={22} />
+                        <ChevronLeft className="w-5 h-5 md:w-[22px] md:h-[22px]" />
                     </button>
                     <div className="min-w-0">
                         <div className="flex items-center gap-2 md:gap-3 flex-wrap">
@@ -504,7 +504,7 @@ export default function ProjectDetailPage() {
                     </button>
 
                     <div className="flex items-center gap-3 px-3 md:px-4 flex-1 md:min-w-[200px] justify-center">
-                        <Calendar size={14} md:size={16} className="text-indigo-400" />
+                        <Calendar className="w-3.5 h-3.5 md:w-4 md:h-4 text-indigo-400" />
                         <span className="text-[10px] md:text-sm font-black text-white uppercase tracking-widest">
                             {format(selectedDate, 'MMM d, yyyy')}
                         </span>
