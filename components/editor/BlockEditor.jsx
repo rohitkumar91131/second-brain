@@ -261,18 +261,52 @@ export default function BlockEditor({ blocks, onChange, isDiary = false }) {
         return newBlocksToAdd;
     };
 
-    const appendParsedBlocks = (newBlocksToAdd) => {
+    const insertParsedBlocks = (newBlocksToAdd, atIndex = null) => {
         if (newBlocksToAdd.length > 0) {
             const currentBlocks = [...blocks];
+            const insertedBlockIds = [];
+
+            // If atIndex is provided, we insert there, otherwise append
+            const insertPos = atIndex !== null ? atIndex : currentBlocks.length;
+
             newBlocksToAdd.forEach((b, i) => {
-                currentBlocks.push({
-                    id: `b-${Date.now()}-${i}`,
+                const newId = `b-${Date.now()}-${i}`;
+                insertedBlockIds.push(newId);
+                currentBlocks.splice(insertPos + i, 0, {
+                    id: newId,
                     type: b.type,
                     content: b.content,
-                    order: currentBlocks.length
+                    order: insertPos + i
                 });
             });
             handleBlockChange(currentBlocks.map((b, i) => ({ ...b, order: i })), false);
+            return insertedBlockIds;
+        }
+        return [];
+    };
+
+    const uploadFile = async (file, blockId) => {
+        try {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onloadend = async () => {
+                const base64data = reader.result;
+                try {
+                    const res = await fetch('/api/upload', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ file: base64data })
+                    });
+                    const data = await res.json();
+                    if (data.url) {
+                        updateBlock(blockId, { content: data.url }, false);
+                    }
+                } catch (err) {
+                    console.error("Upload error:", err);
+                }
+            };
+        } catch (err) {
+            console.error("File reading error:", err);
         }
     };
 
@@ -295,24 +329,35 @@ export default function BlockEditor({ blocks, onChange, isDiary = false }) {
 
         if (dragItem.current !== null) return;
 
+        // Determine drop point
+        const insertIndex = dragOverItem.current !== null ? dragOverItem.current : blocks.length;
+
         const files = Array.from(e.dataTransfer.files);
         let newBlocksToAdd = [];
 
         if (files.length > 0) {
-            files.forEach(file => {
-                const url = URL.createObjectURL(file);
-                if (file.type.startsWith('image/')) newBlocksToAdd.push({ type: 'image', content: url });
-                else if (file.type.startsWith('video/')) newBlocksToAdd.push({ type: 'video', content: url });
-                else if (file.type.startsWith('audio/')) newBlocksToAdd.push({ type: 'audio', content: url });
+            files.forEach((file, idx) => {
+                const tempUrl = URL.createObjectURL(file);
+                let type = 'paragraph';
+                if (file.type.startsWith('image/')) type = 'image';
+                else if (file.type.startsWith('video/')) type = 'video';
+                else if (file.type.startsWith('audio/')) type = 'audio';
+
+                const newBlock = { type, content: tempUrl };
+                const [newId] = insertParsedBlocks([newBlock], insertIndex + idx);
+
+                // If it's an image, upload to host and get permanent URL
+                if (type === 'image') {
+                    uploadFile(file, newId);
+                }
             });
-            appendParsedBlocks(newBlocksToAdd);
         } else {
             const htmlData = e.dataTransfer.getData('text/html');
             const textData = e.dataTransfer.getData('text/plain');
             const urlData = e.dataTransfer.getData('URL') || e.dataTransfer.getData('text/uri-list');
 
             newBlocksToAdd = processContentToBlocks(htmlData, textData, urlData);
-            appendParsedBlocks(newBlocksToAdd);
+            insertParsedBlocks(newBlocksToAdd, insertIndex);
         }
     };
 
@@ -536,7 +581,7 @@ export default function BlockEditor({ blocks, onChange, isDiary = false }) {
                         <button
                             onClick={() => {
                                 const newBlocks = processContentToBlocks(clipboardToast.html, clipboardToast.text, null);
-                                appendParsedBlocks(newBlocks);
+                                insertParsedBlocks(newBlocks);
                                 setClipboardToast(null);
                             }}
                             className="w-full py-2.5 bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white rounded-xl text-sm font-bold shadow-md hover:shadow-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2"
