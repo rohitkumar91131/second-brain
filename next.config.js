@@ -11,7 +11,8 @@ const nextConfig = {
             // GitHub avatars
             { protocol: 'https', hostname: 'avatars.githubusercontent.com' },
             // Generic CDN
-            { protocol: 'https', hostname: '*.googleusercontent.com' },
+            // Cloudinary
+            { protocol: 'https', hostname: 'res.cloudinary.com' },
         ],
     },
     experimental: {

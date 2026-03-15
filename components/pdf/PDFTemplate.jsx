@@ -169,6 +169,7 @@ const PDFTemplate = ({ title, blocks, theme = 'bright' }) => {
                         <Image
                             src="https://icon-to-image-convertor.vercel.app/api/generate-icon?library=lucide&iconName=Brain&size=256&color=%23818cf8&format=png"
                             style={{ width: 24, height: 24, marginRight: 10 }}
+                            alt="Logo"
                         />
                         <Text style={s.brand}>SecondBrain</Text>
                     </View>

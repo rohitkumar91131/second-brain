@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 import { useApp } from '@/context/AppContext'
 import { Image as ImageIcon, Video, Music, Plus, Search, ExternalLink } from 'lucide-react'
 import { CldUploadWidget } from 'next-cloudinary'
@@ -89,9 +90,11 @@ export default function MediaBankPage() {
                                 >
                                     <div className={`relative flex items-center justify-center bg-white/5 ${item.type === 'video' ? 'aspect-video' : 'aspect-auto'}`}>
                                         {item.type === 'image' && (
-                                            <img
+                                            <Image
                                                 src={item.content}
                                                 alt={item.noteTitle || 'Media asset'}
+                                                width={500}
+                                                height={500}
                                                 className="w-full h-auto object-contain"
                                             />
                                         )}

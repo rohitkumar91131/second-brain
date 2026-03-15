@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 import { Image as ImageIcon, Minus, Maximize2, X, Download, GripVertical } from 'lucide-react' // GripVertical import kiya
 import { CldUploadWidget } from 'next-cloudinary'
 
@@ -57,9 +58,11 @@ export default function ImageBlock({ block, onUpdate, onDelete, onDragHandleDown
             <div className="flex-1 w-full">
                 {block.content ? (
                     <div className="relative inline-flex w-full justify-center group/img">
-                        <img
+                        <Image
                             src={block.content}
                             alt="Note image"
+                            width={800}
+                            height={600}
                             onClick={() => setIsFullScreen(true)}
                             className="max-w-full h-auto object-contain rounded-lg border border-notion-border cursor-zoom-in hover:brightness-95 transition-all"
                         />
@@ -100,9 +103,11 @@ export default function ImageBlock({ block, onUpdate, onDelete, onDragHandleDown
                                     <Download size={18} className={isDownloading ? 'animate-bounce' : ''} />
                                 </button>
 
-                                <img
+                                <Image
                                     src={block.content}
                                     alt="Full view"
+                                    width={1200}
+                                    height={800}
                                     className="max-w-full max-h-full object-contain rounded-sm shadow-2xl animate-zoom-in"
                                 />
 

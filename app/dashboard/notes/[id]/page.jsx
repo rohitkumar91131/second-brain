@@ -38,7 +38,7 @@ export default function NoteEditorPage() {
         if (id && !note && isInitialized) {
             fetchEntity('Note', id).catch(e => console.error('Fetch note failed', e))
         }
-    }, [id, note?.id, fetchEntity, isInitialized]) // Use note?.id to stabilize dependency
+    }, [id, note, fetchEntity, isInitialized])
     const project = projects?.find(p => note?.projectIds?.includes(p.id))
 
     useEffect(() => {

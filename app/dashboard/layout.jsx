@@ -7,7 +7,7 @@ import { usePathname } from 'next/navigation'
 import { useApp } from '@/context/AppContext'
 
 export default function DashboardLayout({ children }) {
-    const { focusMode } = useApp ? useApp() : { focusMode: false }
+    const { focusMode } = useApp()
     const [mobileOpen, setMobileOpen] = useState(false)
     const pathname = usePathname()
 
