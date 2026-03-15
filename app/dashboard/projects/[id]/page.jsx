@@ -10,6 +10,8 @@ import QuickAddModal from '@/components/ui/QuickAddModal'
 import BlockEditor from '@/components/editor/BlockEditor'
 import Loader from '@/components/ui/Loader'
 import ProjectContextMenu from '@/components/ui/ProjectContextMenu'
+import NoteContextMenu from '@/components/ui/NoteContextMenu'
+import { Pin } from 'lucide-react'
 
 export default function ProjectDetailPage() {
     const params = useParams()
@@ -33,7 +35,9 @@ export default function ProjectDetailPage() {
 
     // Context Menu State
     const [contextMenu, setContextMenu] = useState(null) // { x, y, project, isMobile }
+    const [noteContextMenu, setNoteContextMenu] = useState(null) // { x, y, note, isMobile }
     const longPressTimer = useRef(null)
+    const noteLongPressTimer = useRef(null)
 
     // Ensure projects, tasks and notes are loaded only once
     const { isFetched } = useApp()
@@ -115,6 +119,82 @@ export default function ProjectDetailPage() {
         }
     }
 
+    // Note Context Menu Handlers
+    const handleNoteContextMenu = (e, targetNote) => {
+        e.preventDefault()
+        setNoteContextMenu({
+            x: e.clientX,
+            y: e.clientY,
+            note: targetNote,
+            isMobile: false
+        })
+    }
+
+    const handleNoteTouchStart = (e, targetNote) => {
+        const touch = e.touches[0]
+        const x = touch.clientX
+        const y = touch.clientY
+        noteLongPressTimer.current = setTimeout(() => {
+            setNoteContextMenu({
+                x,
+                y,
+                note: targetNote,
+                isMobile: true
+            })
+        }, 500)
+    }
+
+    const handleNoteTouchEnd = () => {
+        if (noteLongPressTimer.current) {
+            clearTimeout(noteLongPressTimer.current)
+        }
+    }
+
+    const handlePinNote = async (note) => {
+        await updateNote(note.id, { isPinned: !note.isPinned })
+    }
+
+    const handleCopyNoteContent = async (note) => {
+        try {
+            const blocks = note.content || []
+            const textContent = blocks
+                .map(b => b.content)
+                .filter(c => c && typeof c === 'string')
+                .join('\n\n')
+
+            if (textContent) {
+                await navigator.clipboard.writeText(textContent)
+                alert('Note content copied to clipboard!')
+            } else {
+                alert('Note is empty.')
+            }
+        } catch (err) {
+            console.error('Failed to copy', err)
+        }
+    }
+
+    const handleMakePdf = (note) => {
+        window.open(`/api/notes/${note.id}/pdf`, '_blank')
+    }
+
+    const handleShareNote = async (note) => {
+        try {
+            const res = await fetch(`/api/notes/${note.id}/share`, { method: 'POST' })
+            const data = await res.json()
+            if (data.id) {
+                const shareUrl = `${window.location.origin}/share/${data.id}`
+                await navigator.clipboard.writeText(shareUrl)
+                alert('Share link copied to clipboard!')
+            }
+        } catch (err) {
+            console.error('Failed to share', err)
+        }
+    }
+
+    const handleOpenNewWindow = (note) => {
+        window.open(`/dashboard/notes/${note.id}`, '_blank')
+    }
+
     const handleRemoveSubproject = async (subprojectId) => {
         if (confirm('Remove this subproject from the current project?')) {
             await updateProject(subprojectId, { parentProjectId: null })
@@ -149,6 +229,13 @@ export default function ProjectDetailPage() {
 
     // Filter notes for this project
     const projectNotes = notes.filter(n => n.projectIds?.includes(projectId))
+
+    // Sort notes: pinned first, then by date
+    const sortedNotes = [...projectNotes].sort((a, b) => {
+        if (a.isPinned && !b.isPinned) return -1
+        if (!a.isPinned && b.isPinned) return 1
+        return new Date(b.updatedAt || b.createdAt) - new Date(a.updatedAt || a.createdAt)
+    })
 
     // Filter subprojects
     const subprojects = projects.filter(p => p.parentProjectId === projectId)
@@ -365,28 +452,49 @@ export default function ProjectDetailPage() {
                 />
             )}
 
+            {/* Note Context Menu Overlay */}
+            {noteContextMenu && (
+                <NoteContextMenu
+                    x={noteContextMenu.x}
+                    y={noteContextMenu.y}
+                    isMobile={noteContextMenu.isMobile}
+                    isPinned={noteContextMenu.note.isPinned}
+                    onClose={() => setNoteContextMenu(null)}
+                    onPin={() => handlePinNote(noteContextMenu.note)}
+                    onCopy={() => handleCopyNoteContent(noteContextMenu.note)}
+                    onPdf={() => handleMakePdf(noteContextMenu.note)}
+                    onShare={() => handleShareNote(noteContextMenu.note)}
+                    onOpenNew={() => handleOpenNewWindow(noteContextMenu.note)}
+                    onDelete={async () => {
+                        if (confirm('Are you sure you want to delete this note?')) {
+                            await deleteNote(noteContextMenu.note.id)
+                        }
+                    }}
+                />
+            )}
+
             {/* Header */}
-            <div className="flex items-center justify-between px-8 py-6 border-b border-white/5 bg-[#1E293B]/30 backdrop-blur-md">
-                <div className="flex items-center gap-5">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between px-6 md:px-8 py-6 md:py-6 border-b border-white/5 bg-[#1E293B]/30 backdrop-blur-md gap-6">
+                <div className="flex items-center gap-4 md:gap-5 w-full md:w-auto">
                     <button
                         onClick={() => router.back()}
-                        className="p-2.5 hover:bg-white/5 rounded-xl transition-all text-slate-400 hover:text-white"
+                        className="p-2 md:p-2.5 hover:bg-white/5 rounded-xl transition-all text-slate-400 hover:text-white shrink-0"
                     >
-                        <ChevronLeft size={22} />
+                        <ChevronLeft size={20} md:size={22} />
                     </button>
-                    <div>
-                        <div className="flex items-center gap-3">
-                            <h1 className="text-3xl font-black text-white tracking-tight">{project.title}</h1>
-                            <div className={`px-2 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-widest ${project.status === 'Done' ? 'bg-green-500/10 text-green-400' : 'bg-indigo-500/10 text-indigo-400'}`}>
+                    <div className="min-w-0">
+                        <div className="flex items-center gap-2 md:gap-3 flex-wrap">
+                            <h1 className="text-2xl md:text-3xl font-black text-white tracking-tight truncate">{project.title}</h1>
+                            <div className={`px-2 py-0.5 rounded-lg text-[9px] md:text-[10px] font-black uppercase tracking-widest shrink-0 ${project.status === 'Done' ? 'bg-green-500/10 text-green-400' : 'bg-indigo-500/10 text-indigo-400'}`}>
                                 {project.status}
                             </div>
                         </div>
-                        <p className="text-xs font-medium text-slate-500 mt-1.5">{project.description}</p>
+                        <p className="text-[10px] md:text-xs font-medium text-slate-500 mt-1 md:mt-1.5 truncate">{project.description}</p>
                     </div>
                 </div>
 
-                {/* Date Selector - Top Right */}
-                <div className="flex items-center gap-2 bg-white/5 p-1.5 rounded-2xl border border-white/5">
+                {/* Date Selector */}
+                <div className="flex items-center gap-2 bg-white/5 p-1 rounded-2xl border border-white/5 w-full md:w-auto overflow-hidden">
                     <button
                         onClick={handlePrevDay}
                         className="p-2 hover:bg-white/10 rounded-xl transition-all text-slate-400 hover:text-white"
@@ -395,9 +503,9 @@ export default function ProjectDetailPage() {
                         <ChevronLeft size={18} />
                     </button>
 
-                    <div className="flex items-center gap-3 px-4 min-w-[200px] justify-center">
-                        <Calendar size={16} className="text-indigo-400" />
-                        <span className="text-sm font-black text-white uppercase tracking-widest">
+                    <div className="flex items-center gap-3 px-3 md:px-4 flex-1 md:min-w-[200px] justify-center">
+                        <Calendar size={14} md:size={16} className="text-indigo-400" />
+                        <span className="text-[10px] md:text-sm font-black text-white uppercase tracking-widest">
                             {format(selectedDate, 'MMM d, yyyy')}
                         </span>
                     </div>
@@ -414,9 +522,9 @@ export default function ProjectDetailPage() {
 
             {/* Content */}
             <div className="flex-1 overflow-auto bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-500/5 via-transparent to-transparent">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 p-8 max-w-[1600px] mx-auto">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 p-4 md:p-8 max-w-[1600px] mx-auto">
                     {/* Subprojects Section */}
-                    <div className="glass-dark rounded-[2rem] p-8 flex flex-col lg:col-span-2 border-white/5 relative overflow-hidden group">
+                    <div className="glass-dark rounded-[2rem] p-6 md:p-8 flex flex-col lg:col-span-2 border-white/5 relative overflow-hidden group">
                         <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent pointer-events-none" />
                         <div className="flex items-center justify-between mb-8 relative z-10">
                             <div className="flex items-center gap-3">
@@ -466,7 +574,7 @@ export default function ProjectDetailPage() {
                     </div>
 
                     {/* Notes Section */}
-                    <div className="glass-dark rounded-[2rem] p-8 flex flex-col border-white/5 relative overflow-hidden">
+                    <div className="glass-dark rounded-[2rem] p-6 md:p-8 flex flex-col border-white/5 relative overflow-hidden">
                         <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-transparent pointer-events-none" />
                         <div className="flex items-center justify-between mb-8 relative z-10">
                             <div className="flex items-center gap-3">
@@ -492,17 +600,23 @@ export default function ProjectDetailPage() {
                             </div>
                         ) : (
                             <div className="space-y-4 flex-1 overflow-auto pr-2 relative z-10 custom-scrollbar">
-                                {projectNotes.map(note => (
-                                    <Link
+                                {sortedNotes.map(note => (
+                                    <div
                                         key={note.id}
-                                        href={`/dashboard/notes/${note.id}`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="block p-5 bg-white/5 rounded-2xl hover:bg-white/10 transition-all border border-white/5 group/note"
+                                        className="relative block p-5 bg-white/5 rounded-2xl hover:bg-white/10 transition-all border border-white/5 group/note cursor-pointer"
+                                        onContextMenu={(e) => handleNoteContextMenu(e, note)}
+                                        onTouchStart={(e) => handleNoteTouchStart(e, note)}
+                                        onTouchEnd={handleNoteTouchEnd}
+                                        onClick={() => handleSelectNote(note)}
                                     >
-                                        <h3 className="font-bold text-white text-sm group-hover/note:text-green-400 transition-colors">
-                                            {note.title}
-                                        </h3>
+                                        <div className="flex items-start justify-between">
+                                            <h3 className="font-bold text-white text-sm group-hover/note:text-green-400 transition-colors flex-1 min-w-0 truncate pr-2">
+                                                {note.title}
+                                            </h3>
+                                            {note.isPinned && (
+                                                <Pin size={12} className="text-green-400 shrink-0 mt-1" />
+                                            )}
+                                        </div>
                                         <div className="flex items-center justify-between mt-3">
                                             <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
                                                 {note.createdAt ? format(parseISO(note.createdAt), 'MMM d, yyyy') : 'NO DATE'}
@@ -515,14 +629,14 @@ export default function ProjectDetailPage() {
                                                 ))}
                                             </div>
                                         </div>
-                                    </Link>
+                                    </div>
                                 ))}
                             </div>
                         )}
                     </div>
 
                     {/* Tasks Section */}
-                    <div className="glass-dark rounded-[2rem] p-8 flex flex-col border-white/5 relative overflow-hidden">
+                    <div className="glass-dark rounded-[2rem] p-6 md:p-8 flex flex-col border-white/5 relative overflow-hidden">
                         <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent pointer-events-none" />
                         <div className="flex items-center justify-between mb-8 relative z-10">
                             <div className="flex items-center gap-3">
@@ -595,16 +709,16 @@ export default function ProjectDetailPage() {
                     <div className="lg:col-span-2 pt-4">
                         <div className="glass-dark rounded-[2.5rem] p-10 border-white/5 relative overflow-hidden shadow-2xl">
                             <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-transparent pointer-events-none" />
-                            <div className="flex flex-col md:flex-row gap-10 items-center relative z-10">
-                                {/* Progress Circular Chart (Simplified with Stats) */}
-                                <div className="shrink-0 relative w-32 h-32 flex items-center justify-center">
+                            <div className="flex flex-col md:flex-row gap-8 md:gap-10 items-center relative z-10">
+                                {/* Progress Circular Chart */}
+                                <div className="shrink-0 relative w-28 h-28 md:w-32 md:h-32 flex items-center justify-center">
                                     <svg className="w-full h-full -rotate-90">
-                                        <circle cx="64" cy="64" r="58" stroke="currentColor" strokeWidth="8" fill="transparent" className="text-white/5" />
-                                        <circle cx="64" cy="64" r="58" stroke="currentColor" strokeWidth="8" fill="transparent" strokeDasharray={364.4} strokeDashoffset={364.4 - (364.4 * project.progress) / 100} className="text-indigo-500 transition-all duration-1000 ease-out" strokeLinecap="round" />
+                                        <circle cx="50%" cy="50%" r="45%" stroke="currentColor" strokeWidth="8" fill="transparent" className="text-white/5" />
+                                        <circle cx="50%" cy="50%" r="45%" stroke="currentColor" strokeWidth="8" fill="transparent" strokeDasharray="283" strokeDashoffset={283 - (283 * project.progress) / 100} className="text-indigo-500 transition-all duration-1000 ease-out" strokeLinecap="round" />
                                     </svg>
                                     <div className="absolute inset-0 flex flex-col items-center justify-center">
-                                        <span className="text-2xl font-black text-white">{project.progress}%</span>
-                                        <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest">PROGRESS</span>
+                                        <span className="text-xl md:text-2xl font-black text-white">{project.progress}%</span>
+                                        <span className="text-[7px] md:text-[8px] font-black text-slate-500 uppercase tracking-widest">PROGRESS</span>
                                     </div>
                                 </div>
 

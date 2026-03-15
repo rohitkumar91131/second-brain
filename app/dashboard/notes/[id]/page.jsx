@@ -35,10 +35,26 @@ export default function NoteEditorPage() {
     const { isFetched, isInitialized } = useApp()
 
     useEffect(() => {
-        if (id && !note && isInitialized) {
-            fetchEntity('Note', id).catch(e => console.error('Fetch note failed', e))
+        const loadPageData = async () => {
+            if (!id || !isInitialized) return
+
+            setPageLoading(true)
+            try {
+                // Fetch note if not in context
+                if (!note) {
+                    await fetchEntity('Note', id)
+                }
+                // Always fetch blocks for the specific note
+                await fetchBlocks(id, 'Note')
+            } catch (err) {
+                console.error('Failed to load note data', err)
+            } finally {
+                setPageLoading(false)
+            }
         }
-    }, [id, note, fetchEntity, isInitialized])
+
+        loadPageData()
+    }, [id, isInitialized, fetchEntity, fetchBlocks, !!note])
     const project = projects?.find(p => note?.projectIds?.includes(p.id))
 
     useEffect(() => {
@@ -57,6 +73,7 @@ export default function NoteEditorPage() {
     const [ready, setReady] = useState(false)
     const [notFoundDelay, setNotFoundDelay] = useState(false)
     const [initialized, setInitialized] = useState(false)
+    const [pageLoading, setPageLoading] = useState(true)
     const [shareUrl, setShareUrl] = useState('')
     const [pdfModalOpen, setPdfModalOpen] = useState(false)
     const [pdfTheme, setPdfTheme] = useState('bright')
@@ -69,16 +86,10 @@ export default function NoteEditorPage() {
     const [stats, setStats] = useState({ words: 0, chars: 0, readingTime: 0 })
     const [toc, setToc] = useState([])
 
-    const fetchLock = useRef(false)
-    useEffect(() => {
-        if (id && !fetchLock.current) {
-            fetchLock.current = true
-            fetchBlocks(id, 'Note')
-        }
-    }, [id, fetchBlocks])
+    // Blocks are now fetched in the data loading effect above
 
     useEffect(() => {
-        if (!loading && note && !initialized) {
+        if (!pageLoading && note && !initialized) {
             const draftStr = localStorage.getItem(`note_draft_${id}`)
             if (draftStr) {
                 try {
@@ -106,11 +117,11 @@ export default function NoteEditorPage() {
             setInitialized(true)
             setTimeout(() => setReady(true), 100)
             setNotFoundDelay(false)
-        } else if (!loading && !note) {
+        } else if (!pageLoading && !note) {
             const timer = setTimeout(() => { setNotFoundDelay(true) }, 400)
             return () => clearTimeout(timer)
         }
-    }, [note, loading, id, initialized, setActiveBlocks])
+    }, [note, pageLoading, id, initialized, setActiveBlocks])
 
     // Reset Focus Mode on unmount
     useEffect(() => {
@@ -118,7 +129,7 @@ export default function NoteEditorPage() {
     }, [setFocusMode])
 
     useEffect(() => {
-        if (initialized && activeBlocks?.length === 0 && !loading) {
+        if (initialized && activeBlocks?.length === 0 && !pageLoading) {
             setActiveBlocks([{ id: `b-init-${Date.now()}`, type: 'paragraph', content: '', order: 0 }])
         }
         // If we just loaded blocks for the first time and they are the initial blocks,
@@ -126,7 +137,7 @@ export default function NoteEditorPage() {
         if (initialized && activeBlocks?.length > 0 && savedBlocks.length === 0 && lastSaved !== 'Draft (Unsaved)') {
             setSavedBlocks(activeBlocks)
         }
-    }, [initialized, activeBlocks, loading, savedBlocks.length, lastSaved, setActiveBlocks])
+    }, [initialized, activeBlocks, pageLoading, savedBlocks.length, lastSaved, setActiveBlocks])
 
     useEffect(() => {
         if (!ready || !note) return
@@ -252,13 +263,16 @@ export default function NoteEditorPage() {
 
     return (
         <div className={`flex flex-col h-full bg-[#0F172A] text-slate-200 relative overflow-hidden ${typography === 'serif' ? 'font-serif' : 'font-sans'}`}>
-            {loading && (
-                <div className="absolute inset-0 flex items-center justify-center bg-[#0F172A]/50 backdrop-blur-md z-50">
-                    <Loader />
+            {(pageLoading || (loading && !isInitialized)) && (
+                <div className="absolute inset-0 flex items-center justify-center bg-[#0F172A] z-[60]">
+                    <div className="flex flex-col items-center gap-4">
+                        <Loader />
+                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] animate-pulse">Syncing Library</span>
+                    </div>
                 </div>
             )}
 
-            {!loading && note && (
+            {!pageLoading && note && (
                 <div className={`flex flex-col h-full transition-all duration-500 ease-out ${ready ? 'opacity-100' : 'opacity-0'}`}>
 
                     {/* Header: Next-Gen Unified Header */}
@@ -529,7 +543,7 @@ export default function NoteEditorPage() {
             )}
 
             {/* ERROR / NOT FOUND */}
-            {!loading && !note && notFoundDelay && (
+            {!pageLoading && !note && notFoundDelay && (
                 <div className="flex items-center justify-center h-full animate-in fade-in duration-500">
                     <div className="text-center p-12 rounded-[2.5rem] bg-white/5 border border-white/10 backdrop-blur-3xl shadow-2xl">
                         <div className="w-20 h-20 bg-red-500/10 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-red-500/20">
