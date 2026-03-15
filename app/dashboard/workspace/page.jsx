@@ -262,13 +262,13 @@ export default function WorkspacePage() {
         return (
             <div
                 key={note.id}
-                className={`w-full flex items-center justify-between px-2 py-1 text-[13px] focus:outline-none cursor-pointer group transition-colors ${indentClass} ${isActive ? 'bg-[#37373d] text-white' : 'hover:bg-[#2a2d2e] text-[#cccccc]'}`}
+                className={`w-full flex items-center justify-between px-3 py-2 text-xs focus:outline-none cursor-pointer group transition-all rounded-xl mx-1 w-[calc(100%-8px)] ${isActive ? 'bg-indigo-500/10 text-indigo-400 font-bold' : 'hover:bg-white/5 text-slate-400 hover:text-slate-200'}`}
                 onClick={() => !isEditing && openNote(note)}
                 onMouseEnter={() => setHoveredNoteId(note.id)}
                 onMouseLeave={() => setHoveredNoteId(null)}
             >
-                <div className="flex items-center gap-1.5 flex-1 min-w-0">
-                    <FileText size={14} className={isActive ? 'text-[#519aba] flex-shrink-0' : 'text-[#858585] flex-shrink-0'} />
+                <div className="flex items-center gap-2.5 flex-1 min-w-0">
+                    <FileText size={14} className={isActive ? 'text-indigo-400' : 'text-slate-500'} />
                     {isEditing ? (
                         <input
                             autoFocus
@@ -279,21 +279,21 @@ export default function WorkspacePage() {
                                 if (e.key === 'Enter') handleRenameSubmit(note.id)
                                 if (e.key === 'Escape') setEditingNoteId(null)
                             }}
-                            className="bg-[#1e1e1e] text-white border border-[#007acc] px-1 w-full outline-none text-[13px] h-5"
+                            className="bg-white/5 text-white border border-indigo-500/50 px-2 rounded-lg w-full outline-none text-xs h-6"
                             onClick={e => e.stopPropagation()}
                         />
                     ) : (
-                        <span className="truncate flex-1 text-left tabular-nums tracking-wide">{note.title || 'Untitled'}</span>
+                        <span className="truncate flex-1 text-left tracking-wide">{note.title || 'Untitled Note'}</span>
                     )}
                 </div>
 
                 {/* Actions on Hover */}
                 {!isEditing && (isHovered || isActive) && (
-                    <div className="flex items-center gap-1 opacity-100 flex-shrink-0">
-                        <button onClick={(e) => startEditingTitle(e, note)} className="p-0.5 rounded text-[#858585] hover:text-white hover:bg-[#4d4d4d] transition-colors" title="Rename">
+                    <div className="flex items-center gap-1 opacity-100 flex-shrink-0 animate-in fade-in zoom-in-95 duration-200">
+                        <button onClick={(e) => startEditingTitle(e, note)} className="p-1 px-1.5 rounded-lg text-slate-500 hover:text-white hover:bg-white/10 transition-all" title="Rename">
                             <Edit2 size={12} />
                         </button>
-                        <button onClick={(e) => handleDeleteNote(e, note.id)} className="p-0.5 rounded text-[#858585] hover:text-[#f48771] hover:bg-[#4d4d4d] transition-colors" title="Delete">
+                        <button onClick={(e) => handleDeleteNote(e, note.id)} className="p-1 px-1.5 rounded-lg text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-all" title="Delete">
                             <Trash2 size={12} />
                         </button>
                     </div>
@@ -315,26 +315,26 @@ export default function WorkspacePage() {
         })
 
     return (
-        <div className="flex h-screen bg-[#F8FAFC] dark:bg-[#0F172A] text-[#1E293B] dark:text-[#E5E7EB] font-sans selection:bg-[#4F46E5]/30 overflow-hidden relative">
+        <div className="flex h-screen bg-[#0F172A] text-slate-200 font-sans selection:bg-indigo-500/30 overflow-hidden relative">
 
             {/* Quick Open Modal overlay */}
             {isSearchOpen && (
-                <div className="fixed inset-0 z-50 flex justify-center items-start pt-[15vh] bg-black/20 dark:bg-black/50 backdrop-blur-sm"
+                <div className="fixed inset-0 z-50 flex justify-center items-start pt-[15vh] bg-black/50 backdrop-blur-sm"
                     onClick={() => setIsSearchOpen(false)}>
-                    <div className="bg-[#FFFFFF] dark:bg-[#1E293B] w-full max-w-2xl rounded-xl shadow-2xl border border-[#E2E8F0] dark:border-[#334155] overflow-hidden flex flex-col max-h-[60vh] animate-in fade-in slide-in-from-top-4 duration-200"
+                    <div className="bg-[#1E293B] w-full max-w-2xl rounded-2xl shadow-2xl border border-white/10 overflow-hidden flex flex-col max-h-[60vh] animate-in fade-in slide-in-from-top-4 duration-200"
                         onClick={e => e.stopPropagation()}>
                         {/* Search Input */}
-                        <div className="flex items-center px-4 py-3 border-b border-[#E2E8F0] dark:border-[#334155]">
-                            <Search size={18} className="text-[#64748B] dark:text-[#9CA3AF] mr-3" />
+                        <div className="flex items-center px-5 py-4 border-b border-white/5">
+                            <Search size={18} className="text-slate-500 mr-3" />
                             <input
                                 autoFocus
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                placeholder="Search notes by title or tag..."
-                                className="flex-1 bg-transparent text-[#0F172A] dark:text-[#F8FAFC] placeholder-[#94A3B8] dark:placeholder-[#64748B] outline-none text-[15px]"
+                                placeholder="Quick search notes, tags, ideas..."
+                                className="flex-1 bg-transparent text-white placeholder-slate-600 outline-none text-[15px] font-medium"
                             />
-                            <div className="flex items-center gap-2 text-xs text-[#94A3B8] dark:text-[#64748B] font-mono select-none">
-                                <kbd className="bg-[#F1F5F9] dark:bg-[#0F172A] px-1.5 py-0.5 rounded border border-[#E2E8F0] dark:border-[#1E293B]">ESC</kbd> to close
+                            <div className="flex items-center gap-2 text-[10px] text-slate-600 font-bold uppercase tracking-widest select-none">
+                                <kbd className="bg-white/5 px-2 py-0.5 rounded border border-white/10">ESC</kbd> to close
                             </div>
                         </div>
 
@@ -395,11 +395,11 @@ export default function WorkspacePage() {
             )}
 
             {/* Sidebar (File Explorer) */}
-            <div className={`bg-[#F1F5F9] dark:bg-[#111827] flex flex-col border-r border-[#E2E8F0] dark:border-[#1F2937] flex-shrink-0 z-10 transition-all duration-300 ease-in-out ${isSidebarOpen ? 'w-[280px]' : 'w-0 border-r-0 overflow-hidden'}`}>
-                <div className="px-4 py-4 text-[12px] font-medium tracking-wider text-[#64748B] dark:text-[#9CA3AF] uppercase flex items-center justify-between shrink-0">
+            <div className={`bg-[#1E293B] flex flex-col border-r border-white/5 flex-shrink-0 z-10 transition-all duration-300 ease-in-out ${isSidebarOpen ? 'w-[280px]' : 'w-0 border-r-0 overflow-hidden'}`}>
+                <div className="px-5 py-5 text-[10px] font-black tracking-[0.2em] text-slate-500 uppercase flex items-center justify-between shrink-0">
                     <span className="opacity-80">Explorer</span>
-                    <button onClick={() => handleCreateNote(null)} className="p-1 rounded text-[#94A3B8] dark:text-[#6B7280] hover:text-[#0F172A] dark:hover:text-[#E5E7EB] hover:bg-[#E2E8F0] dark:hover:bg-[#1F2937] transition-all duration-120" title="New Note">
-                        <Plus size={14} strokeWidth={1.5} />
+                    <button onClick={() => handleCreateNote(null)} className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-all" title="New Note">
+                        <Plus size={14} strokeWidth={3} />
                     </button>
                 </div>
 
@@ -478,24 +478,24 @@ export default function WorkspacePage() {
             </div>
 
             {/* Main Editor Area */}
-            <div className="flex-1 flex flex-col min-w-0 bg-[#FFFFFF] dark:bg-[#0F172A] relative overflow-hidden">
+            <div className="flex-1 flex flex-col min-w-0 bg-[#0F172A] relative overflow-hidden">
                 {/* Tabs Bar */}
-                <div className="flex items-center gap-2 bg-[#F1F5F9] dark:bg-[#111827] border-b border-[#E2E8F0] dark:border-[#1F2937] px-2 pt-2 shrink-0">
+                <div className="flex items-center gap-2 bg-[#1E293B] border-b border-white/5 px-2 pt-2 shrink-0">
                     <button
                         onClick={toggleSidebar}
-                        className="p-1.5 rounded-md hover:bg-[#E2E8F0] dark:hover:bg-[#374151] text-[#64748B] dark:text-[#9CA3AF] hover:text-[#0F172A] dark:hover:text-[#E2E8F0] transition-colors mb-1 mr-1 shrink-0"
+                        className="p-1.5 rounded-lg hover:bg-white/5 text-slate-500 hover:text-white transition-colors mb-1 mr-1 shrink-0"
                         title={isSidebarOpen ? "Collapse Sidebar" : "Expand Sidebar"}
                     >
-                        {isSidebarOpen ? <PanelLeftClose size={18} strokeWidth={1.5} /> : <PanelLeftOpen size={18} strokeWidth={1.5} />}
+                        {isSidebarOpen ? <PanelLeftClose size={18} /> : <PanelLeftOpen size={18} />}
                     </button>
 
                     <button
                         onClick={() => setIsSearchOpen(true)}
-                        className="p-1.5 rounded-md hover:bg-[#E2E8F0] dark:hover:bg-[#374151] text-[#64748B] dark:text-[#9CA3AF] hover:text-[#0F172A] dark:hover:text-[#E2E8F0] transition-colors mb-1 mr-2 shrink-0 flex items-center gap-2 text-xs font-medium"
+                        className="p-1.5 rounded-lg hover:bg-white/5 text-slate-500 hover:text-white transition-colors mb-1 mr-2 shrink-0 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest"
                         title="Search Notes (Ctrl+P)"
                     >
-                        <Search size={16} strokeWidth={1.5} />
-                        <span className="hidden sm:inline-block border border-[#CBD5E1] dark:border-[#334155] rounded px-1 text-[10px] uppercase font-mono tracking-widest">Ctrl+P</span>
+                        <Search size={16} />
+                        <span className="hidden sm:inline-block border border-white/5 rounded px-1.5 py-0.5 bg-white/5">⌘P</span>
                     </button>
 
                     <div className="flex-1 flex items-center overflow-x-auto scrollbar-hide">
@@ -506,16 +506,16 @@ export default function WorkspacePage() {
                                     key={tab.id}
                                     onClick={() => setActiveTabId(tab.id)}
                                     className={`
-                                        group flex items-center gap-2 px-4 py-2 min-w-[120px] max-w-[200px] cursor-pointer relative transition-colors duration-100 rounded-t-lg
-                                        ${isActive ? 'bg-[#FFFFFF] dark:bg-[#1F2937] text-[#0F172A] dark:text-[#FFFFFF]' : 'text-[#64748B] dark:text-[#9CA3AF] hover:text-[#0F172A] dark:hover:text-[#E5E7EB] hover:bg-[#E2E8F0] dark:hover:bg-[#1F2937]/50'}
+                                        group flex items-center gap-2 px-4 py-2 min-w-[120px] max-w-[200px] cursor-pointer relative transition-all duration-150 rounded-t-xl
+                                        ${isActive ? 'bg-[#0F172A] text-white' : 'text-slate-500 hover:text-slate-300 hover:bg-white/5'}
                                     `}
                                 >
-                                    <span className="truncate text-[13px] font-medium select-none flex-1 tracking-wide">{tab.title || 'Untitled'}</span>
+                                    <span className="truncate text-xs font-bold select-none flex-1 tracking-tight">{tab.title || 'Untitled'}</span>
                                     <button
                                         onClick={(e) => closeTab(e, tab.id)}
-                                        className={`p-1 rounded-md hover:bg-[#CBD5E1] dark:hover:bg-[#374151] hover:text-[#0F172A] dark:hover:text-white transition-all ${isActive ? 'opacity-100 text-[#64748B] dark:text-[#9CA3AF]' : 'opacity-0 group-hover:opacity-100 text-[#94A3B8] dark:text-[#6B7280]'}`}
+                                        className={`p-1 rounded-md hover:bg-white/10 hover:text-white transition-all ${isActive ? 'opacity-100 text-slate-600' : 'opacity-0 group-hover:opacity-100 text-slate-600'}`}
                                     >
-                                        <X size={14} strokeWidth={1.5} />
+                                        <X size={12} strokeWidth={3} />
                                     </button>
                                 </div>
                             )
@@ -524,18 +524,28 @@ export default function WorkspacePage() {
                 </div>
 
                 {!activeTabId ? (
-                    <div className="flex-1 flex items-center justify-center bg-[#FFFFFF] dark:bg-[#0B1220]">
-                        <div className="text-center animate-in fade-in duration-700">
-                            <h2 className="text-[#64748B] dark:text-[#9CA3AF] text-2xl font-medium mb-8 tracking-tight select-none">Select a note to start writing</h2>
-                            <div className="flex flex-col gap-4 text-[#475569] dark:text-[#6B7280] text-sm max-w-xs mx-auto select-none border border-[#E2E8F0] dark:border-[#1F2937] rounded-xl p-6 bg-[#F8FAFC]/50 dark:bg-[#111827]/50">
-                                <div className="flex justify-between items-center">
-                                    <span className="flex items-center gap-2"><Plus size={16} strokeWidth={1.5} /> New Note</span>
-                                    <kbd className="font-mono bg-[#E2E8F0] dark:bg-[#1F2937] px-2 py-0.5 rounded text-xs text-[#64748B] dark:text-[#9CA3AF]">Sidebar</kbd>
+                    <div className="flex-1 flex items-center justify-center bg-[#0F172A]">
+                        <div className="text-center animate-in fade-in slide-in-from-bottom-4 duration-1000">
+                            <div className="w-24 h-24 rounded-3xl premium-gradient flex items-center justify-center mx-auto mb-8 shadow-2xl shadow-indigo-500/20">
+                                <FileText size={48} className="text-white opacity-90" />
+                            </div>
+                            <h2 className="text-white text-3xl font-bold mb-4 tracking-tight select-none">Start creating something great</h2>
+                            <p className="text-slate-500 mb-10 max-w-sm mx-auto">Select a note from the explorer or create a new one to begin your journey.</p>
+
+                            <div className="flex flex-col gap-4 text-slate-400 text-xs font-bold uppercase tracking-widest max-w-xs mx-auto select-none border border-white/5 rounded-3xl p-8 glass-dark">
+                                <div className="flex justify-between items-center group cursor-pointer hover:text-white transition-colors" onClick={() => handleCreateNote(null)}>
+                                    <span className="flex items-center gap-3"><Plus size={16} strokeWidth={3} className="text-indigo-400" /> New Entry</span>
+                                    <kbd className="font-mono bg-white/5 px-2.5 py-1 rounded-lg border border-white/5 text-slate-500 group-hover:text-white transition-colors">Sidebar</kbd>
                                 </div>
-                                <div className="h-px bg-[#E2E8F0] dark:bg-[#1F2937] w-full" />
-                                <div className="flex justify-between items-center">
-                                    <span className="flex items-center gap-2">Save File</span>
-                                    <kbd className="font-mono bg-[#E2E8F0] dark:bg-[#1F2937] px-2 py-0.5 rounded text-xs text-[#64748B] dark:text-[#9CA3AF]">Ctrl+S</kbd>
+                                <div className="h-px bg-white/5 w-full" />
+                                <div className="flex justify-between items-center group cursor-pointer hover:text-white transition-colors" onClick={() => handleSave()}>
+                                    <span className="flex items-center gap-3"><Edit2 size={16} strokeWidth={3} className="text-indigo-400" /> Save Draft</span>
+                                    <kbd className="font-mono bg-white/5 px-2.5 py-1 rounded-lg border border-white/5 text-slate-500 group-hover:text-white transition-colors">⌘S</kbd>
+                                </div>
+                                <div className="h-px bg-white/5 w-full" />
+                                <div className="flex justify-between items-center group cursor-pointer hover:text-white transition-colors" onClick={() => setIsSearchOpen(true)}>
+                                    <span className="flex items-center gap-3"><Search size={16} strokeWidth={3} className="text-indigo-400" /> Quick Find</span>
+                                    <kbd className="font-mono bg-white/5 px-2.5 py-1 rounded-lg border border-white/5 text-slate-500 group-hover:text-white transition-colors">⌘P</kbd>
                                 </div>
                             </div>
                         </div>

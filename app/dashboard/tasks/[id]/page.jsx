@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useApp } from '@/context/AppContext'
 import { format, subDays, eachDayOfInterval, parseISO, differenceInCalendarDays } from 'date-fns'
-import { ChevronLeft, Loader2 } from 'lucide-react'
+import { ChevronLeft } from 'lucide-react'
 import Loader from '@/components/ui/Loader'
 
 function formatDate(d) {
@@ -99,11 +99,7 @@ export default function TaskDetailPage() {
     const longestStreak = useMemo(() => computeLongestStreak(history), [history])
 
     if (loading) {
-        return (
-            <div className="flex items-center justify-center h-full w-full relative overflow-hidden bg-notion-bg/50 backdrop-blur-sm z-50">
-                <Loader />
-            </div>
-        )
+        return <Loader />
     }
 
     if (!task && notFoundDelay) {
@@ -115,11 +111,7 @@ export default function TaskDetailPage() {
     }
 
     if (!task && !notFoundDelay) {
-        return (
-            <div className="flex items-center justify-center h-full">
-                <Loader />
-            </div>
-        )
+        return <Loader />
     }
 
     const toggleDate = async (date) => {

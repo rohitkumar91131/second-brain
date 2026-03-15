@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useSession } from 'next-auth/react'
 import {
     Brain, Monitor, Apple, Terminal, Smartphone, Tablet,
-    Download, ArrowRight, CheckCircle2, Menu, X, Loader2
+    Download, ArrowRight, CheckCircle2, Menu, X, Loader
 } from 'lucide-react'
 import { gsap } from 'gsap'
 
@@ -121,7 +121,7 @@ export default function DownloadsPage() {
                         <Link href="/downloads" className="text-notion-accent font-semibold">Downloads</Link>
 
                         {status === 'loading' ? (
-                            <Loader2 size={18} className="animate-spin text-notion-muted" />
+                            <Loader size={18} className="animate-spin text-notion-muted" />
                         ) : status === 'authenticated' ? (
                             <Link href="/dashboard" className="px-5 py-2.5 bg-[#37352f] text-white rounded-full hover:bg-black transition-all shadow-md">
                                 Dashboard

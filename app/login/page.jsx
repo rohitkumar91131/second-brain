@@ -5,7 +5,7 @@ import { signIn, useSession } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { toast } from 'sonner'
-import { Brain, ArrowRight, Loader2 } from 'lucide-react'
+import { Brain, ArrowRight, Loader } from 'lucide-react'
 
 function LoginContent() {
     const router = useRouter()
@@ -91,7 +91,7 @@ function LoginContent() {
                         className="w-full h-12 flex items-center justify-center gap-3 px-6 py-3 bg-notion-bg border border-notion-border rounded-xl text-sm font-bold text-notion-text hover:bg-notion-sidebar hover:shadow-md active:scale-95 transition-all disabled:opacity-50"
                     >
                         {loading ? (
-                            <Loader2 size={18} className="animate-spin text-notion-accent" />
+                            <Loader size={18} className="animate-spin text-notion-accent" />
                         ) : (
                             <svg width="20" height="20" viewBox="0 0 24 24">
                                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -127,7 +127,7 @@ export default function LoginPage() {
     return (
         <Suspense fallback={
             <div className="min-h-screen bg-notion-sidebar flex items-center justify-center">
-                <Loader2 size={24} className="animate-spin text-notion-text" />
+                <Loader size={24} className="animate-spin text-notion-text" />
             </div>
         }>
             <LoginContent />

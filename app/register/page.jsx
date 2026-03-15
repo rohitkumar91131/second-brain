@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { signIn, useSession } from 'next-auth/react'
 import Link from 'next/link'
-import { Brain, Eye, EyeOff, Loader2, Check, X } from 'lucide-react'
+import { Brain, Eye, EyeOff, Loader, Check, X } from 'lucide-react'
 
 function PasswordRule({ met, label }) {
     return (
@@ -163,7 +163,7 @@ export default function RegisterPage() {
                             disabled={loading}
                             className="w-full flex items-center justify-center gap-2 py-2.5 bg-[#37352f] text-white text-sm font-medium rounded-lg hover:bg-[#2f2d28] transition-colors disabled:opacity-60"
                         >
-                            {loading && <Loader2 size={14} className="animate-spin" />}
+                            {loading && <Loader size={14} className="animate-spin" />}
                             Create account
                         </button>
                     </form>

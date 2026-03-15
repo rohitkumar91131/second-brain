@@ -79,37 +79,46 @@ export default function NotesPage() {
     }
 
     return (
-        <div className="flex flex-col h-full">
-
-            <div className="flex items-center gap-3 px-6 py-3 border-b border-notion-border">
-                <div className="flex-1 flex items-center gap-2 px-3 py-1.5 border border-notion-border rounded-md bg-notion-sidebar">
-                    <Search size={13} className="text-notion-muted" />
+        <div className="flex flex-col h-full bg-transparent">
+            {/* Search & Actions */}
+            <div className="flex items-center gap-4 px-6 py-4 glass-dark border-white/5 rounded-3xl mb-8 m-2">
+                <div className="flex-1 flex items-center gap-3 px-4 py-2 border border-white/5 rounded-xl bg-white/5 focus-within:bg-white/10 focus-within:ring-2 focus-within:ring-indigo-500/50 transition-all group">
+                    <Search size={16} className="text-slate-500 group-focus-within:text-white transition-colors" />
                     <input
                         type="text"
-                        placeholder="Search notes..."
+                        placeholder="Search your notes, ideas, tags..."
                         value={search}
                         onChange={e => setSearch(e.target.value)}
-                        className="flex-1 text-sm bg-transparent focus:outline-none text-notion-text"
+                        className="flex-1 text-sm bg-transparent focus:outline-none text-white placeholder:text-slate-500 font-medium"
                     />
                 </div>
 
                 <button
                     onClick={() => setShowAdd(true)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-[#37352f] text-white text-xs font-medium rounded-md hover:bg-[#2f2d28]"
+                    className="flex items-center gap-2 px-6 py-2.5 premium-gradient text-white text-sm font-bold rounded-xl hover:scale-105 active:scale-95 transition-all shadow-lg shadow-indigo-500/20"
                 >
-                    <Plus size={13} />
-                    New Note
+                    <Plus size={18} strokeWidth={3} />
+                    <span>New Note</span>
                 </button>
             </div>
 
-            <div className="flex-1 overflow-auto p-6">
+            <div className="flex-1 overflow-auto px-6">
                 {filtered.length === 0 ? (
-                    <div className="text-center py-16 text-notion-muted">
-                        <FileText size={40} className="mx-auto mb-3 opacity-30" />
-                        <p className="text-sm">No notes yet.</p>
+                    <div className="flex flex-col items-center justify-center py-32 glass rounded-3xl border-dashed border-white/10 border-2">
+                        <div className="w-20 h-20 rounded-3xl bg-white/5 flex items-center justify-center mb-6 shadow-xl">
+                            <FileText size={40} className="text-slate-600 opacity-50" />
+                        </div>
+                        <h3 className="text-xl font-bold text-white mb-2">No notes found</h3>
+                        <p className="text-slate-500 max-w-xs text-center">Capture your thoughts, ideas, and knowledge. Start by creating a new note.</p>
+                        <button
+                            onClick={() => setShowAdd(true)}
+                            className="mt-8 px-8 py-3 bg-white/5 hover:bg-white/10 text-white font-bold rounded-2xl transition-all border border-white/5 active:scale-95"
+                        >
+                            Create First Note
+                        </button>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                         {filtered.map(note => (
                             <ContextNoteCard
                                 key={note.id}

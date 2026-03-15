@@ -416,14 +416,6 @@ export default function BlockEditor({ blocks, onChange, isDiary = false }) {
                     <button onClick={handleRedo} title="Redo (Ctrl+Y)" className="p-1.5 text-notion-muted hover:text-notion-text hover:bg-notion-hover rounded transition-colors disabled:opacity-30 mr-2" disabled={historyIndexRef.current >= historyRef.current.length - 1}>
                         <Redo size={16} />
                     </button>
-                    <button
-                        onClick={handleSave}
-                        disabled={isSaving}
-                        className="flex items-center gap-2 px-3 py-1.5 bg-[#f1f1ef] dark:bg-[#202020] hover:bg-notion-border transition-all text-notion-text text-sm rounded"
-                    >
-                        <Save size={14} />
-                        {isSaving ? 'Saving...' : 'Save Order'}
-                    </button>
                 </div>
             </div>
 

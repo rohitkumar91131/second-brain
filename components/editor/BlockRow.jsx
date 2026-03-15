@@ -271,11 +271,11 @@ export default function BlockRow({
     const getStyles = () => {
         const diaryBase = isDiary ? 'leading-relaxed' : ''
         switch (block.type) {
-            case 'heading1': return `${isDiary ? 'text-4xl' : 'text-2xl'} font-bold text-notion-text mt-10 mb-4 ${diaryBase}`
-            case 'heading2': return `${isDiary ? 'text-3xl' : 'text-xl'} font-semibold text-notion-text mt-8 mb-3 ${diaryBase}`
-            case 'heading3': return `${isDiary ? 'text-2xl' : 'text-base'} font-semibold text-notion-text mt-6 mb-2 ${diaryBase}`
-            case 'bullet': return `${isDiary ? 'text-lg' : 'text-sm'} text-notion-text ${diaryBase}`
-            default: return `${isDiary ? 'text-lg' : 'text-sm'} text-notion-text ${diaryBase}`
+            case 'heading1': return `${isDiary ? 'text-4xl' : 'text-2xl'} font-bold text-white mt-10 mb-4 ${diaryBase}`
+            case 'heading2': return `${isDiary ? 'text-3xl' : 'text-xl'} font-semibold text-white mt-8 mb-3 ${diaryBase}`
+            case 'heading3': return `${isDiary ? 'text-2xl' : 'text-base'} font-semibold text-white mt-6 mb-2 ${diaryBase}`
+            case 'bullet': return `${isDiary ? 'text-lg' : 'text-sm'} text-slate-300 ${diaryBase}`
+            default: return `${isDiary ? 'text-lg' : 'text-sm'} text-slate-300 ${diaryBase}`
         }
     }
 
@@ -307,7 +307,7 @@ export default function BlockRow({
 
             <div className="flex-1 relative">
                 <textarea
-                    id={`block-${block.id}`}
+                    id={block.id}
                     ref={inputRef}
                     value={block.content}
                     onChange={e => onUpdate({ content: e.target.value })}

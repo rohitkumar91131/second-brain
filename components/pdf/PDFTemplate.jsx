@@ -166,13 +166,10 @@ const PDFTemplate = ({ title, blocks, theme = 'bright' }) => {
                 {/* Header Branded Section */}
                 <View style={s.header} fixed>
                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                        <View style={s.brandIcon}>
-                            <Svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                <Path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .52 5.862 3 3 0 1 0 5.232 2.243c.414.004.83.004 1.25 0a3 3 0 1 0 5.232-2.243 4 4 0 0 0 .52-5.862 4 4 0 0 0-2.526-5.77A3 3 0 1 0 12 5Z" />
-                                <Path d="M9 14c1.5-1 4-1 5 0" />
-                                <Path d="M12 9v4" />
-                            </Svg>
-                        </View>
+                        <Image
+                            src="https://icon-to-image-convertor.vercel.app/api/generate-icon?library=lucide&iconName=Brain&size=256&color=%23818cf8&format=png"
+                            style={{ width: 24, height: 24, marginRight: 10 }}
+                        />
                         <Text style={s.brand}>SecondBrain</Text>
                     </View>
                     <View>

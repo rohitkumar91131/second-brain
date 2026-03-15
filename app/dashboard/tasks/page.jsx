@@ -66,49 +66,61 @@ export default function TasksPage() {
     }
 
     return (
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col h-full bg-transparent">
             {/* Toolbar */}
-            <div className="flex items-center gap-3 px-6 py-3 border-b border-notion-border flex-wrap">
+            <div className="flex items-center gap-4 px-6 py-4 glass-dark border-b-0 border-white/5 rounded-3xl mb-6 flex-wrap m-2">
                 <ViewSwitcher activeView={view} onViewChange={setView} tabName="Tasks" />
 
-                {/* Combined filter dropdown (All / Active / Completed / Status) */}
-                <div className="ml-2">
+                {/* Combined filter dropdown */}
+                <div className="ml-2 relative group">
                     <select
                         value={filter}
                         onChange={(e) => setFilter(e.target.value)}
-                        className="px-3 py-1 text-sm border border-notion-border rounded-md bg-notion-bg text-notion-text"
+                        className="appearance-none px-4 py-2 pr-10 text-xs font-bold uppercase tracking-wider border border-white/5 rounded-xl bg-white/5 text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all cursor-pointer hover:bg-white/10"
                     >
-                        <option value="all">All</option>
-                        <option value="active">Active</option>
-                        <option value="completed">Completed</option>
-                        <option value="Not Started">Not Started</option>
-                        <option value="In Progress">In Progress</option>
-                        <option value="Done">Done</option>
-                        <option value="Blocked">Blocked</option>
-                        <option value="On Hold">On Hold</option>
+                        <option value="all">Filter: All</option>
+                        <option value="active">Filter: Active</option>
+                        <option value="completed">Filter: Completed</option>
+                        <option value="Not Started">Status: Not Started</option>
+                        <option value="In Progress">Status: In Progress</option>
+                        <option value="Done">Status: Done</option>
+                        <option value="Blocked">Status: Blocked</option>
+                        <option value="On Hold">Status: On Hold</option>
                     </select>
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">
+                        <Filter size={12} />
+                    </div>
                 </div>
 
                 <div className="ml-auto">
                     <button
                         onClick={() => setShowAdd(true)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-[#37352f] text-white text-xs font-medium rounded-md hover:bg-[#2f2d28] transition-colors"
+                        className="flex items-center gap-2 px-5 py-2.5 premium-gradient text-white text-sm font-bold rounded-xl hover:scale-105 active:scale-95 transition-all shadow-lg shadow-indigo-500/20"
                     >
-                        <Plus size={13} />
+                        <Plus size={16} strokeWidth={3} />
                         New Task
                     </button>
                 </div>
             </div>
 
             {/* Stats */}
-            <div className="flex gap-4 px-6 py-2 border-b border-notion-border text-xs text-notion-muted">
-                <span>{tasks.filter(t => !t.completed).length} active</span>
-                <span>{tasks.filter(t => t.completed).length} completed</span>
-                <span>{tasks.length} total</span>
+            <div className="flex gap-6 px-8 mb-6 text-xs font-bold uppercase tracking-widest text-slate-500">
+                <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-indigo-500" />
+                    <span>{tasks.filter(t => !t.completed).length} Tasks Active</span>
+                </div>
+                <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-green-500" />
+                    <span>{tasks.filter(t => t.completed).length} Tasks Done</span>
+                </div>
+                <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-white/20" />
+                    <span>{tasks.length} Total</span>
+                </div>
             </div>
 
             {/* View */}
-            <div className="flex-1 overflow-auto">
+            <div className="flex-1 overflow-auto px-2">
                 {view === 'table' && (
                     <TableView
                         items={filteredTasks}

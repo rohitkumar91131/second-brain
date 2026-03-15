@@ -6,6 +6,7 @@ import { Image as ImageIcon, Video, Music, Plus, Search, ExternalLink } from 'lu
 import { CldUploadWidget } from 'next-cloudinary'
 import Link from 'next/link'
 import Loader from '@/components/ui/Loader'
+import { format } from 'date-fns'
 
 export default function MediaBankPage() {
     const { media, fetchMedia, addNote, loading } = useApp()
@@ -29,17 +30,17 @@ export default function MediaBankPage() {
     }
 
     return (
-        <div className="flex flex-col h-full bg-[#fcfaf7]">
-
-            <div className="flex items-center gap-3 px-6 py-4 bg-notion-bg border-b border-notion-border sticky top-0 z-10">
-                <div className="flex-1 flex items-center gap-2 px-3 py-1.5 border border-notion-border rounded-md bg-notion-sidebar">
-                    <Search size={14} className="text-notion-muted" />
+        <div className="flex flex-col h-full bg-transparent">
+            {/* Toolbar */}
+            <div className="flex items-center gap-4 px-6 py-4 glass-dark border-white/5 rounded-3xl mb-8 sticky top-0 z-30 m-2">
+                <div className="flex-1 flex items-center gap-3 px-4 py-2 border border-white/5 rounded-xl bg-white/5 focus-within:bg-white/10 focus-within:ring-2 focus-within:ring-indigo-500/50 transition-all group">
+                    <Search size={16} className="text-slate-500 group-focus-within:text-white transition-colors" />
                     <input
                         type="text"
-                        placeholder="Search media..."
+                        placeholder="Search your media bank, images, videos..."
                         value={search}
                         onChange={e => setSearch(e.target.value)}
-                        className="flex-1 text-sm bg-transparent focus:outline-none text-notion-text"
+                        className="flex-1 text-sm bg-transparent focus:outline-none text-white placeholder:text-slate-500 font-medium"
                     />
                 </div>
 
@@ -60,30 +61,33 @@ export default function MediaBankPage() {
                     {({ open }) => (
                         <button
                             onClick={() => open()}
-                            className="flex items-center gap-1.5 px-4 py-2 bg-[#37352f] text-white text-xs font-bold rounded-md hover:bg-[#2f2d28] transition-all shadow-sm active:scale-95"
+                            className="flex items-center gap-2 px-6 py-2.5 premium-gradient text-white text-sm font-bold rounded-xl hover:scale-105 active:scale-95 transition-all shadow-lg shadow-indigo-500/20"
                         >
-                            <Plus size={14} />
+                            <Plus size={18} strokeWidth={3} />
                             Upload Media
                         </button>
                     )}
                 </CldUploadWidget>
             </div>
 
-            <div className="flex-1 overflow-auto p-6">
-                <div className="max-w-6xl mx-auto">
+            <div className="flex-1 overflow-auto p-4 md:p-6 lg:p-8">
+                <div className="max-w-7xl mx-auto">
                     {filteredMedia.length === 0 ? (
-                        <div className="text-center py-32 bg-notion-bg rounded-2xl border border-dashed border-notion-border">
-                            <ImageIcon size={48} className="mx-auto mb-4 text-[#d3d1cb]" />
-                            <p className="text-sm font-medium text-notion-muted">No media found. Upload your first item!</p>
+                        <div className="flex flex-col items-center justify-center py-48 glass rounded-3xl border-dashed border-white/10 border-2">
+                            <div className="w-20 h-20 rounded-3xl bg-white/5 flex items-center justify-center mb-6 shadow-xl">
+                                <ImageIcon size={40} className="text-slate-600 opacity-50" />
+                            </div>
+                            <h3 className="text-xl font-bold text-white mb-2">Media Bank Empty</h3>
+                            <p className="text-slate-500 max-w-xs text-center">Organize all your visuals and assets in one place.</p>
                         </div>
                     ) : (
-                        <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-4 space-y-4">
+                        <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-6 space-y-6">
                             {filteredMedia.map((item, idx) => (
                                 <div
                                     key={`${item.id}-${idx}`}
-                                    className="group bg-notion-bg rounded-xl border border-notion-border overflow-hidden hover:shadow-lg transition-all flex flex-col break-inside-avoid"
+                                    className="group glass-dark rounded-3xl border border-white/5 overflow-hidden transition-all hover:-translate-y-2 hover:shadow-2xl hover:shadow-indigo-500/10 flex flex-col break-inside-avoid"
                                 >
-                                    <div className={`relative flex items-center justify-center bg-notion-sidebar ${item.type === 'video' ? 'aspect-video' : 'aspect-auto'}`}>
+                                    <div className={`relative flex items-center justify-center bg-white/5 ${item.type === 'video' ? 'aspect-video' : 'aspect-auto'}`}>
                                         {item.type === 'image' && (
                                             <img
                                                 src={item.content}
@@ -93,46 +97,51 @@ export default function MediaBankPage() {
                                         )}
 
                                         {item.type === 'video' && (
-                                            <div className="w-full h-full flex flex-col items-center justify-center gap-2">
-                                                <Video size={40} className="text-notion-muted" />
-                                                <span className="text-[10px] font-bold text-notion-muted uppercase">
-                                                    Video Embed
+                                            <div className="w-full h-full flex flex-col items-center justify-center gap-3 p-12">
+                                                <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center shadow-2xl">
+                                                    <Video size={32} className="text-indigo-400 ml-1" />
+                                                </div>
+                                                <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                                                    Video Preview
                                                 </span>
                                             </div>
                                         )}
 
                                         {item.type === 'audio' && (
-                                            <div className="w-full h-24 flex flex-col items-center justify-center gap-2">
-                                                <Music size={40} className="text-notion-muted" />
-                                                <span className="text-[10px] font-bold text-notion-muted uppercase">
-                                                    Audio Embed
+                                            <div className="w-full h-32 flex flex-col items-center justify-center gap-3">
+                                                <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center">
+                                                    <Music size={32} className="text-green-400" />
+                                                </div>
+                                                <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                                                    Audio Track
                                                 </span>
                                             </div>
                                         )}
 
-                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                        <div className="absolute inset-0 bg-indigo-900/40 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center gap-3">
                                             <Link
                                                 href={`/dashboard/notes/${item.entityId}`}
-                                                className="p-2 bg-notion-bg rounded-full hover:scale-110 transition-transform text-notion-text"
+                                                className="p-3 bg-white text-indigo-600 rounded-2xl hover:scale-110 transition-transform shadow-xl"
+                                                title="View in Note"
                                             >
-                                                <ExternalLink size={16} />
+                                                <ExternalLink size={20} />
                                             </Link>
                                         </div>
                                     </div>
 
-                                    <div className="p-3 bg-notion-bg">
-                                        <p className="text-xs font-semibold text-notion-text truncate mb-1">
+                                    <div className="p-5">
+                                        <p className="text-sm font-bold text-white truncate mb-2">
                                             {item.noteTitle}
                                         </p>
                                         <div className="flex items-center justify-between">
-                                            <span className="flex items-center gap-1 text-[10px] font-bold text-notion-muted uppercase tracking-widest">
-                                                {item.type === 'image' && <ImageIcon size={10} />}
-                                                {item.type === 'video' && <Video size={10} />}
-                                                {item.type === 'audio' && <Music size={10} />}
+                                            <span className="flex items-center gap-2 text-[10px] font-black text-slate-500 uppercase tracking-widest bg-white/5 px-2 py-1 rounded-lg">
+                                                {item.type === 'image' && <ImageIcon size={12} className="text-blue-400" />}
+                                                {item.type === 'video' && <Video size={12} className="text-indigo-400" />}
+                                                {item.type === 'audio' && <Music size={12} className="text-green-400" />}
                                                 {item.type}
                                             </span>
-                                            <span className="text-[10px] text-[#d3d1cb]">
-                                                {new Date(item.updatedAt).toLocaleDateString()}
+                                            <span className="text-[10px] font-bold text-slate-600">
+                                                {format(new Date(item.updatedAt), 'MMM d, yyyy')}
                                             </span>
                                         </div>
                                     </div>

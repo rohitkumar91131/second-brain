@@ -53,6 +53,7 @@ function AppContextInner({ children }) {
     const [viewPreferences, setViewPreferences] = useState({})
     const [activeBlocks, setActiveBlocks] = useState([])
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+    const [focusMode, setFocusMode] = useState(false)
 
     useEffect(() => {
         const stored = safeGetStorage('sidebarCollapsed');
@@ -435,7 +436,7 @@ function AppContextInner({ children }) {
         loading,
         session,
         isAuthenticated,
-
+        isInitialized,
         addTask: taskCRUD.add,
         updateTask: taskCRUD.update,
         deleteTask: taskCRUD.delete,
@@ -472,6 +473,8 @@ function AppContextInner({ children }) {
 
         activeBlocks,
         setActiveBlocks,
+        focusMode,
+        setFocusMode,
         fetchEntity,
         fetchBlocks,
         addBlock,
@@ -486,8 +489,8 @@ function AppContextInner({ children }) {
         viewPreferences, sidebarCollapsed, loading, session, isAuthenticated,
         taskCRUD, projectCRUD, goalCRUD, noteCRUD, journalCRUD, resourceCRUD,
         fetchEndpoint, fetchMedia, archiveNote, recycleNote, restoreNote, deleteNotePermanently,
-        archivedNotes, deletedNotes, activeBlocks, fetchEntity, fetchBlocks,
-        addBlock, updateBlock, deleteBlock, bulkUpdateBlocks, media, fetchedEndpoints
+        archivedNotes, deletedNotes, activeBlocks, focusMode, fetchEntity, fetchBlocks,
+        addBlock, updateBlock, deleteBlock, bulkUpdateBlocks, media, fetchedEndpoints, isInitialized
     ])
 
     return <AppContext.Provider value={value}>{children}</AppContext.Provider>

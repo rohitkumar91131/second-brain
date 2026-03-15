@@ -200,7 +200,7 @@ export default function QuickAddModal({ onClose, defaultType = 'task', prefilled
                         >
                             {isLoading ? (
                                 <>
-                                    <Loader size={13} className="animate-spin" />
+                                    <Loader size={13} className="animate-spin text-indigo-500" />
                                     Creating...
                                 </>
                             ) : (

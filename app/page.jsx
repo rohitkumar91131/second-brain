@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { useSession, signIn } from 'next-auth/react'
 import {
     Brain, ArrowRight, CheckCircle2, Zap, Shield, Sparkles,
-    Loader2, Download, Monitor, Apple, Terminal, Smartphone,
+    Loader, Download, Monitor, Apple, Terminal, Smartphone,
     Tablet, Menu, X, Layout, Star
 } from 'lucide-react'
 import { gsap } from 'gsap'
@@ -126,7 +126,7 @@ export default function LandingPage() {
 
                         {status === 'loading' ? (
                             <div className="w-20 flex justify-center">
-                                <Loader2 size={18} className="animate-spin text-notion-muted" />
+                                <Loader size={18} className="animate-spin text-notion-muted" />
                             </div>
                         ) : status === 'authenticated' ? (
                             <Link href="/dashboard" className="px-5 py-2.5 bg-[#37352f] text-white rounded-full hover:bg-black transition-all shadow-md">Dashboard</Link>
@@ -166,7 +166,7 @@ export default function LandingPage() {
 
                     {status === 'loading' ? (
                         <div className="flex justify-center" ref={el => menuLinksRef.current[4] = el}>
-                            <Loader2 size={24} className="animate-spin text-notion-text" />
+                            <Loader size={24} className="animate-spin text-notion-text" />
                         </div>
                     ) : status === 'authenticated' ? (
                         <Link href="/dashboard" ref={el => menuLinksRef.current[4] = el} className="text-center py-4 bg-[#37352f] text-white rounded-2xl shadow-lg" onClick={closeMenu}>Dashboard</Link>
@@ -269,6 +269,11 @@ export default function LandingPage() {
                             icon={<Shield className="text-purple-500" />}
                             title="Private Notes"
                             description="Write in a block-based editor. Your knowledge is stored securely and remains private."
+                        />
+                        <FeatureCard
+                            icon={<Sparkles className="text-indigo-500" />}
+                            title="AI Roadmap"
+                            description="AI-powered insights and a dynamic roadmap for your personal growth are coming soon."
                         />
                     </div>
                 </div>

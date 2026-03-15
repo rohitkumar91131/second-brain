@@ -43,39 +43,39 @@ export default function Header({ onMobileMenuClick }) {
 
     return (
         <>
-            <header className="flex items-center h-12 px-4 border-b border-notion-border bg-notion-bg flex-shrink-0">
+            <header className="flex items-center h-16 px-6 bg-[#0F172A]/80 backdrop-blur-md border-b border-white/5 flex-shrink-0 sticky top-0 z-30">
                 {/* Mobile menu button */}
                 <button
                     onClick={onMobileMenuClick}
-                    className="md:hidden p-1.5 rounded hover:bg-notion-hover text-notion-muted mr-3"
+                    className="md:hidden p-2 rounded-xl hover:bg-white/5 text-slate-400 mr-4"
                 >
-                    <Menu size={18} />
+                    <Menu size={20} />
                 </button>
 
                 {/* Page title */}
-                <h1 className="text-sm font-medium text-notion-text flex-1">{title}</h1>
+                <h1 className="text-lg font-bold text-white tracking-tight flex-1">{title}</h1>
 
                 {/* Actions */}
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-3">
                     {/* Search button */}
                     <button
                         onClick={() => setShowSearch(true)}
-                        className="flex items-center gap-2 px-2.5 py-1.5 rounded-md border border-notion-border text-notion-muted hover:text-notion-text hover:border-notion-border transition-colors text-xs"
+                        className="flex items-center gap-3 px-4 py-2 rounded-xl bg-white/5 border border-white/5 text-slate-400 hover:text-white hover:bg-white/10 transition-all text-sm group"
                         title="Search (Ctrl+K)"
                     >
-                        <Search size={13} />
-                        <span className="hidden sm:inline">Search</span>
-                        <kbd className="hidden sm:inline-flex items-center px-1 py-0.5 text-[10px] bg-notion-sidebar border border-notion-border rounded">
+                        <Search size={16} className="group-hover:scale-110 transition-transform" />
+                        <span className="hidden sm:inline font-medium">Search anything...</span>
+                        <kbd className="hidden sm:inline-flex items-center px-1.5 py-0.5 text-[10px] bg-white/5 border border-white/10 rounded-md font-mono">
                             ⌘K
                         </kbd>
                     </button>
 
                     <button
                         onClick={() => setShowQuickAdd(true)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-[#37352f] text-white text-xs font-medium rounded-md hover:bg-[#2f2d28] transition-colors ml-1"
+                        className="flex items-center gap-2 px-5 py-2 premium-gradient text-white text-sm font-bold rounded-xl hover:scale-105 active:scale-95 transition-all shadow-lg shadow-indigo-500/20 ml-1"
                     >
-                        <Plus size={14} />
-                        <span className="hidden sm:inline">New</span>
+                        <Plus size={18} strokeWidth={3} />
+                        <span className="hidden sm:inline">Create New</span>
                     </button>
                 </div>
             </header>

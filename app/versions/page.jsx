@@ -9,14 +9,14 @@ const VERSIONS = [
     {
         id: '7.0.0',
         title: 'Version 7.0.0',
-        date: 'March 14, 2026',
+        date: 'March 15, 2026',
         icon: <Sparkles size={20} className="text-emerald-500" />,
         features: [
-            'VS Code-Style Workspace: A full-screen, IDE-like file exploration and note editing environment.',
-            'Tabbed Interface: Seamlessly switch between multiple open notes with persistent session state.',
-            'File Explorer: A custom sidebar with expandable project folders and an "Unassigned Notes" section.',
-            'Dynamic Light/Dark Themes: Premium minimal redesign with soft neutral colors for light mode, and deep navy/charcoal for dark mode.',
-            'Journal Makeover: The Journal now contextually adapts from a crisp white paper look to a sleek dark charcoal aesthetic.'
+            'Global Focus Mode: A completely distraction-free Writing environment that hides all UI elements.',
+            'Centered Loader Standardization: Unified all loading indicators across the app using Lucide-React Loader.',
+            'Database & Cloudinary Cleanup: Implemented a robust maintenance system to reset all project data and assets.',
+            'Dynamic Table of Contents: Auto-generated TOC for notes with smooth scroll navigation.',
+            'Real-time Writing Stats: Instant word count, character count, and reading time tracking.'
         ]
     },
     {
@@ -163,9 +163,8 @@ export default function VersionsPage() {
                         <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-4 
                             ${activeVersion.id === '7.0.0' ? 'bg-emerald-50 text-emerald-700' :
                                 activeVersion.id === '6.0.0' ? 'bg-pink-50 text-pink-700' :
-                                    activeVersion.id === '5.0.0' ? 'bg-indigo-50 text-indigo-700' :
-                                        activeVersion.id === '4.0.0' ? 'bg-blue-50 text-blue-700' :
-                                            activeVersion.id === '3.0.0' ? 'bg-yellow-50 dark:bg-yellow-900/50 text-yellow-700 dark:text-yellow-400' : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300'
+                                    activeVersion.id === '4.0.0' ? 'bg-blue-50 text-blue-700' :
+                                        activeVersion.id === '3.0.0' ? 'bg-yellow-50 dark:bg-yellow-900/50 text-yellow-700 dark:text-yellow-400' : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300'
                             }`}>
                             {activeVersion.date}
                         </div>
@@ -174,7 +173,7 @@ export default function VersionsPage() {
                         </h1>
                         <p className="text-notion-muted text-lg">
                             {activeVersion.id === '7.0.0'
-                                ? 'The Workspace & Theming Update: A completely new VS Code-style workspace with dynamic Dark/Light modes.'
+                                ? 'The Focus & Clarity Update: Introducing Zen Mode, standardized load states, and a fresh data reset mechanism.'
                                 : activeVersion.id === '6.0.0'
                                     ? 'The Connectivity & Sharing Update: Premium Google Auth, Sonner notifications, and high-fidelity public sharing.'
                                     : activeVersion.id === '5.0.0'

@@ -18,8 +18,8 @@ export default function JournalPage() {
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center h-full w-full relative overflow-hidden bg-notion-bg/50 backdrop-blur-sm z-50">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+            <div className="flex items-center justify-center h-full w-full bg-[#0F172A]/50 backdrop-blur-md z-50">
+                <Loader size={32} />
             </div>
         )
     }

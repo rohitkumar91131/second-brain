@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useApp } from '@/context/AppContext'
 import { format, parseISO } from 'date-fns'
-import { Calendar, FileText, CheckSquare, ChevronLeft, ChevronRight, Plus, Save, Trash2, LoaderIcon, FolderOpen } from 'lucide-react'
+import { Calendar, FileText, CheckSquare, ChevronLeft, ChevronRight, Plus, Save, Trash2, LoaderIcon, FolderOpen, Check } from 'lucide-react'
 import Link from 'next/link'
 import QuickAddModal from '@/components/ui/QuickAddModal'
 import BlockEditor from '@/components/editor/BlockEditor'
@@ -36,21 +36,20 @@ export default function ProjectDetailPage() {
     const longPressTimer = useRef(null)
 
     // Ensure projects, tasks and notes are loaded only once
+    const { isFetched } = useApp()
+
     useEffect(() => {
         let mounted = true
 
         const loadData = async () => {
             try {
-                if (!projects || projects.length === 0) {
-                    await fetchEndpoint('projects')
-                }
+                const fetchRequirements = []
+                if (!isFetched('projects')) fetchRequirements.push(fetchEndpoint('projects'))
+                if (!isFetched('tasks')) fetchRequirements.push(fetchEndpoint('tasks'))
+                if (!isFetched('notes')) fetchRequirements.push(fetchEndpoint('notes'))
 
-                if (!tasks || tasks.length === 0) {
-                    await fetchEndpoint('tasks')
-                }
-
-                if (!notes || notes.length === 0) {
-                    await fetchEndpoint('notes')
+                if (fetchRequirements.length > 0) {
+                    await Promise.all(fetchRequirements)
                 }
 
                 if (mounted) {
@@ -66,7 +65,7 @@ export default function ProjectDetailPage() {
         return () => {
             mounted = false
         }
-    }, [fetchEndpoint, notes, projects, tasks])
+    }, [fetchEndpoint, isFetched]) // Removed projects, tasks, notes from dependencies
 
 
 
@@ -246,7 +245,7 @@ export default function ProjectDetailPage() {
 
     if (loading || !projectsLoaded) {
         return (
-            <div className="flex items-center justify-center h-full w-full relative overflow-hidden bg-notion-bg/50 backdrop-blur-sm z-50">
+            <div className="flex items-center justify-center h-full w-full bg-[#0F172A]">
                 <Loader />
             </div>
         )
@@ -254,9 +253,10 @@ export default function ProjectDetailPage() {
 
     if (!project && notFoundDelay) {
         return (
-            <div className="flex flex-col items-center justify-center h-full">
-                <div className="text-notion-muted mb-4">Project not found</div>
-                <Link href="/dashboard/projects" className="text-blue-600 hover:text-blue-700 text-sm">
+            <div className="flex flex-col items-center justify-center h-full bg-[#0F172A] text-slate-400">
+                <FolderOpen size={48} className="text-slate-700 mb-6" />
+                <div className="text-xl font-bold mb-2">Project not found</div>
+                <Link href="/dashboard/projects" className="text-indigo-400 hover:text-indigo-300 text-sm font-semibold hover:underline">
                     Back to Projects
                 </Link>
             </div>
@@ -274,29 +274,30 @@ export default function ProjectDetailPage() {
     // If a note is selected, show the note editor
     if (selectedNote) {
         return (
-            <div className="flex flex-col h-full bg-notion-bg">
-                <div className="flex items-center gap-3 px-6 py-3 border-b border-notion-border bg-notion-bg/80 backdrop-blur-md z-10">
+            <div className="flex flex-col h-full bg-[#0F172A]">
+                <div className="flex items-center gap-3 px-6 py-4 border-b border-white/5 bg-[#1E293B]/80 backdrop-blur-md z-10">
                     <button
                         onClick={handleCloseNote}
-                        className="p-1.5 rounded-lg hover:bg-notion-hover text-notion-muted hover:text-notion-text transition-all"
+                        className="p-2 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-all"
                     >
-                        <ChevronLeft size={16} />
+                        <ChevronLeft size={18} />
                     </button>
 
-                    <div className="flex-1 flex items-center gap-2">
-                        <span className="text-xs font-semibold text-notion-muted uppercase tracking-wider">Notes</span>
-                        <span className="text-xs text-[#d3d1cb]">/</span>
+                    <div className="flex-1 flex items-center gap-3 min-w-0">
+                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] hidden sm:inline">Project Note</span>
+                        <span className="text-slate-700 hidden sm:inline">/</span>
                         <input
                             value={noteTitle}
                             onChange={(e) => setNoteTitle(e.target.value)}
-                            className="text-sm font-bold text-notion-text bg-transparent focus:outline-none flex-1 truncate"
+                            className="text-base font-bold text-white bg-transparent focus:outline-none flex-1 truncate placeholder-slate-600"
+                            placeholder="Note Title"
                         />
                     </div>
 
                     <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-1.5">
-                            <div className={`w-1.5 h-1.5 rounded-full ${isSaving ? 'bg-yellow-500 animate-pulse' : 'bg-[#2eaadc]'}`} />
-                            <span className="text-[10px] font-bold text-notion-muted uppercase tracking-tighter">
+                        <div className="flex items-center gap-2">
+                            <div className={`w-2 h-2 rounded-full ${isSaving ? 'bg-amber-500 animate-pulse' : 'bg-green-500 shadow-lg shadow-green-500/20'}`} />
+                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest hidden md:inline">
                                 {isSaving
                                     ? 'Saving...'
                                     : lastSaved
@@ -308,39 +309,41 @@ export default function ProjectDetailPage() {
                         <button
                             onClick={handleSaveNote}
                             disabled={isSaving}
-                            className="p-1.5 rounded-lg hover:bg-notion-hover text-notion-muted hover:text-notion-text transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="p-2 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-all disabled:opacity-50"
                         >
-                            <Save size={15} />
+                            <Save size={18} />
                         </button>
 
                         <button
                             onClick={handleDeleteNote}
-                            className="p-1.5 rounded-lg hover:bg-red-50 text-notion-muted hover:text-red-500 transition-all"
+                            className="p-2 rounded-xl hover:bg-red-500/10 text-slate-400 hover:text-red-400 transition-all"
                         >
-                            <Trash2 size={15} />
+                            <Trash2 size={18} />
                         </button>
                     </div>
                 </div>
 
-                <div className="flex-1 overflow-auto py-12 px-6 bg-notion-card">
-                    <div className="max-w-3xl mx-auto">
-                        <div className="mb-10">
+                <div className="flex-1 overflow-auto py-12 px-6">
+                    <div className="max-w-4xl mx-auto">
+                        <div className="mb-12">
                             <input
                                 value={noteTitle}
                                 onChange={(e) => setNoteTitle(e.target.value)}
                                 placeholder="Untitled Note"
-                                className="w-full text-5xl font-extrabold text-notion-text bg-transparent focus:outline-none placeholder-[#d3d1cb] tracking-tight leading-tight"
+                                className="w-full text-5xl font-black text-white bg-transparent focus:outline-none placeholder-slate-700 tracking-tight leading-tight mb-6"
                             />
 
-                            <div className="flex flex-wrap items-center gap-2 mt-6">
-                                <div className="flex items-center gap-1.5 px-2.5 py-1 bg-[#f1f1ef] text-notion-muted text-xs font-bold rounded-lg border border-notion-border/50 uppercase tracking-wider">
-                                    <FileText size={12} />
-                                    Note
+                            <div className="flex flex-wrap items-center gap-3">
+                                <div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 text-slate-400 text-[10px] font-bold rounded-xl border border-white/5 uppercase tracking-widest">
+                                    <FileText size={14} className="text-indigo-400" />
+                                    Internal Document
                                 </div>
                             </div>
                         </div>
 
-                        <BlockEditor blocks={noteBlocks} setBlocks={setNoteBlocks} />
+                        <div className="glass-dark p-8 border-white/5 min-h-[60vh]">
+                            <BlockEditor blocks={noteBlocks} onChange={setNoteBlocks} />
+                        </div>
                     </div>
                 </div>
             </div>
@@ -348,7 +351,7 @@ export default function ProjectDetailPage() {
     }
 
     return (
-        <div className="flex flex-col h-full bg-notion-bg">
+        <div className="flex flex-col h-full bg-[#0F172A]">
             {/* Context Menu Overlay */}
             {contextMenu && (
                 <ProjectContextMenu
@@ -363,84 +366,98 @@ export default function ProjectDetailPage() {
             )}
 
             {/* Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-notion-border">
-                <div className="flex items-center gap-3">
+            <div className="flex items-center justify-between px-8 py-6 border-b border-white/5 bg-[#1E293B]/30 backdrop-blur-md">
+                <div className="flex items-center gap-5">
                     <button
                         onClick={() => router.back()}
-                        className="p-1.5 hover:bg-notion-hover rounded-md transition-colors"
+                        className="p-2.5 hover:bg-white/5 rounded-xl transition-all text-slate-400 hover:text-white"
                     >
-                        <ChevronLeft size={20} className="text-notion-text" />
+                        <ChevronLeft size={22} />
                     </button>
                     <div>
-                        <h1 className="text-2xl font-bold text-notion-text">{project.title}</h1>
-                        <p className="text-xs text-notion-muted mt-1">{project.description}</p>
+                        <div className="flex items-center gap-3">
+                            <h1 className="text-3xl font-black text-white tracking-tight">{project.title}</h1>
+                            <div className={`px-2 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-widest ${project.status === 'Done' ? 'bg-green-500/10 text-green-400' : 'bg-indigo-500/10 text-indigo-400'}`}>
+                                {project.status}
+                            </div>
+                        </div>
+                        <p className="text-xs font-medium text-slate-500 mt-1.5">{project.description}</p>
                     </div>
                 </div>
 
                 {/* Date Selector - Top Right */}
-                <div className="flex items-center gap-2 bg-notion-sidebar p-2 rounded-lg">
+                <div className="flex items-center gap-2 bg-white/5 p-1.5 rounded-2xl border border-white/5">
                     <button
                         onClick={handlePrevDay}
-                        className="p-1.5 hover:bg-notion-border rounded transition-colors"
+                        className="p-2 hover:bg-white/10 rounded-xl transition-all text-slate-400 hover:text-white"
                         title="Previous day"
                     >
-                        <ChevronLeft size={16} className="text-notion-text" />
+                        <ChevronLeft size={18} />
                     </button>
 
-                    <div className="flex items-center gap-2 px-2 min-w-[180px] justify-center">
-                        <Calendar size={14} className="text-notion-muted" />
-                        <span className="text-sm font-medium text-notion-text min-w-fit">
+                    <div className="flex items-center gap-3 px-4 min-w-[200px] justify-center">
+                        <Calendar size={16} className="text-indigo-400" />
+                        <span className="text-sm font-black text-white uppercase tracking-widest">
                             {format(selectedDate, 'MMM d, yyyy')}
                         </span>
                     </div>
 
                     <button
                         onClick={handleNextDay}
-                        className="p-1.5 hover:bg-notion-border rounded transition-colors"
+                        className="p-2 hover:bg-white/10 rounded-xl transition-all text-slate-400 hover:text-white"
                         title="Next day"
                     >
-                        <ChevronRight size={16} className="text-notion-text" />
+                        <ChevronRight size={18} />
                     </button>
                 </div>
             </div>
 
             {/* Content */}
-            <div className="flex-1 overflow-auto">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6">
+            <div className="flex-1 overflow-auto bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-500/5 via-transparent to-transparent">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 p-8 max-w-[1600px] mx-auto">
                     {/* Subprojects Section */}
-                    <div className="bg-notion-sidebar rounded-xl p-6 flex flex-col lg:col-span-2">
-                        <div className="flex items-center justify-between mb-4">
-                            <div className="flex items-center gap-2">
-                                <FolderOpen size={18} className="text-blue-600" />
-                                <h2 className="text-lg font-bold text-notion-text">Subprojects ({subprojects.length})</h2>
+                    <div className="glass-dark rounded-[2rem] p-8 flex flex-col lg:col-span-2 border-white/5 relative overflow-hidden group">
+                        <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent pointer-events-none" />
+                        <div className="flex items-center justify-between mb-8 relative z-10">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2.5 bg-blue-500/10 rounded-2xl text-blue-400">
+                                    <FolderOpen size={20} />
+                                </div>
+                                <div>
+                                    <h2 className="text-xl font-bold text-white tracking-tight">Subprojects</h2>
+                                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-0.5">{subprojects.length} child modules</p>
+                                </div>
                             </div>
                             <button
                                 onClick={() => setShowAddSubproject(true)}
-                                className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium bg-[#37352f] text-white rounded hover:bg-[#2f2d28] transition-colors"
+                                className="flex items-center gap-2 px-4 py-2 text-xs font-bold bg-[#1E293B] text-white rounded-xl hover:bg-[#2D3748] transition-all border border-white/5 shadow-xl"
                             >
-                                <Plus size={13} /> Add Subproject
+                                <Plus size={14} /> NEW MODULE
                             </button>
                         </div>
 
                         {subprojects.length === 0 ? (
-                            <div className="py-2 text-center">
-                                <p className="text-sm text-notion-muted italic">No subprojects</p>
+                            <div className="py-12 text-center relative z-10">
+                                <p className="text-sm text-slate-500 font-medium">No subprojects defined for this module</p>
                             </div>
                         ) : (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 relative z-10">
                                 {subprojects.map(p => (
                                     <div
                                         key={p.id}
-                                        className="relative block p-4 bg-notion-bg rounded-lg hover:bg-notion-hover transition-colors border border-notion-border group cursor-pointer"
+                                        className="relative block p-6 bg-white/5 rounded-2xl hover:bg-white/10 transition-all border border-white/5 group/card cursor-pointer"
                                         onContextMenu={(e) => handleContextMenu(e, p)}
                                         onTouchStart={(e) => handleTouchStart(e, p)}
                                         onTouchEnd={handleTouchEnd}
                                         onClick={() => router.push(`/dashboard/projects/${p.id}`)}
                                     >
-                                        <h3 className="font-semibold text-sm text-notion-text group-hover:text-blue-600 truncate">{p.title}</h3>
-                                        <div className="flex justify-between items-center mt-2 text-xs text-notion-muted">
-                                            <span>{p.status}</span>
-                                            <span className="font-medium text-notion-text">{p.progress}%</span>
+                                        <h3 className="font-bold text-base text-white group-hover/card:text-indigo-400 transition-colors truncate">{p.title}</h3>
+                                        <div className="flex justify-between items-center mt-4">
+                                            <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{p.status}</span>
+                                            <span className="text-xs font-black text-white">{p.progress}%</span>
+                                        </div>
+                                        <div className="mt-3 w-full bg-white/5 h-1 rounded-full overflow-hidden">
+                                            <div className="bg-indigo-500 h-full rounded-full transition-all duration-1000" style={{ width: `${p.progress}%` }} />
                                         </div>
                                     </div>
                                 ))}
@@ -449,62 +466,55 @@ export default function ProjectDetailPage() {
                     </div>
 
                     {/* Notes Section */}
-                    <div className="bg-notion-sidebar rounded-xl p-6 flex flex-col">
-                        <div className="flex items-center justify-between mb-4">
-                            <div className="flex items-center gap-2">
-                                <FileText size={18} className="text-green-600" />
-                                <h2 className="text-lg font-bold text-notion-text">
-                                    All Notes ({projectNotes.length})
-                                </h2>
+                    <div className="glass-dark rounded-[2rem] p-8 flex flex-col border-white/5 relative overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-transparent pointer-events-none" />
+                        <div className="flex items-center justify-between mb-8 relative z-10">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2.5 bg-green-500/10 rounded-2xl text-green-400">
+                                    <FileText size={20} />
+                                </div>
+                                <div>
+                                    <h2 className="text-xl font-bold text-white tracking-tight">Technical Notes</h2>
+                                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-0.5">{projectNotes.length} documents</p>
+                                </div>
                             </div>
                             <button
                                 onClick={() => setShowAddNote(true)}
-                                className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium bg-[#37352f] text-white rounded hover:bg-[#2f2d28] transition-colors"
+                                className="flex items-center gap-2 px-4 py-2 text-xs font-bold bg-[#1E293B] text-white rounded-xl hover:bg-[#2D3748] transition-all border border-white/5 shadow-xl"
                             >
-                                <Plus size={13} />
-                                Add Note
+                                <Plus size={14} /> ADD NOTE
                             </button>
                         </div>
 
                         {projectNotes.length === 0 ? (
-                            <div className="py-8 text-center flex-1 flex items-center justify-center">
-                                <p className="text-sm text-notion-muted italic">
-                                    No notes for this project
-                                </p>
+                            <div className="py-20 text-center flex-1 flex items-center justify-center relative z-10">
+                                <p className="text-sm text-slate-500 font-medium">No documentation found</p>
                             </div>
                         ) : (
-                            <div className="space-y-3 flex-1 overflow-auto">
+                            <div className="space-y-4 flex-1 overflow-auto pr-2 relative z-10 custom-scrollbar">
                                 {projectNotes.map(note => (
                                     <Link
                                         key={note.id}
                                         href={`/dashboard/notes/${note.id}`}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="block p-4 bg-notion-bg rounded-lg hover:bg-notion-hover transition-colors border border-notion-border hover:border-[#d0ccc7] group"
+                                        className="block p-5 bg-white/5 rounded-2xl hover:bg-white/10 transition-all border border-white/5 group/note"
                                     >
-                                        <h3 className="font-semibold text-notion-text text-sm group-hover:text-blue-600 transition-colors">
+                                        <h3 className="font-bold text-white text-sm group-hover/note:text-green-400 transition-colors">
                                             {note.title}
                                         </h3>
-                                        <p className="text-xs text-notion-muted mt-1">
-                                            {note.createdAt ? format(parseISO(note.createdAt), 'MMM d, yyyy') : 'No date'}
-                                        </p>
-                                        {note.tags && note.tags.length > 0 && (
-                                            <div className="flex gap-1 mt-2">
-                                                {note.tags.slice(0, 3).map(tag => (
-                                                    <span
-                                                        key={tag}
-                                                        className="text-xs px-2 py-1 bg-[#f1f1ef] dark:bg-notion-sidebar text-notion-muted rounded"
-                                                    >
+                                        <div className="flex items-center justify-between mt-3">
+                                            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                                                {note.createdAt ? format(parseISO(note.createdAt), 'MMM d, yyyy') : 'NO DATE'}
+                                            </p>
+                                            <div className="flex gap-1">
+                                                {note.tags?.slice(0, 2).map(tag => (
+                                                    <span key={tag} className="text-[9px] px-2 py-0.5 bg-white/5 text-slate-400 rounded-lg border border-white/5 font-bold uppercase tracking-widest">
                                                         {tag}
                                                     </span>
                                                 ))}
-                                                {note.tags.length > 3 && (
-                                                    <span className="text-xs px-2 py-1 text-notion-muted">
-                                                        +{note.tags.length - 3}
-                                                    </span>
-                                                )}
                                             </div>
-                                        )}
+                                        </div>
                                     </Link>
                                 ))}
                             </div>
@@ -512,177 +522,130 @@ export default function ProjectDetailPage() {
                     </div>
 
                     {/* Tasks Section */}
-                    <div className="bg-notion-sidebar rounded-xl p-6 flex flex-col">
-                        <div className="flex items-center justify-between mb-4">
-                            <div className="flex items-center gap-2">
-                                <CheckSquare size={18} className="text-blue-600" />
-                                <h2 className="text-lg font-bold text-notion-text">
-                                    Tasks ({completedTasks}/{totalTasks})
-                                </h2>
+                    <div className="glass-dark rounded-[2rem] p-8 flex flex-col border-white/5 relative overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent pointer-events-none" />
+                        <div className="flex items-center justify-between mb-8 relative z-10">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2.5 bg-blue-500/10 rounded-2xl text-blue-400">
+                                    <CheckSquare size={20} />
+                                </div>
+                                <div>
+                                    <h2 className="text-xl font-bold text-white tracking-tight">Active Tasks</h2>
+                                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-0.5">{completedTasks}/{totalTasks} COMPLETED</p>
+                                </div>
                             </div>
                             <button
                                 onClick={() => setShowAddTask(true)}
-                                className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium bg-[#37352f] text-white rounded hover:bg-[#2f2d28] transition-colors"
+                                className="flex items-center gap-2 px-4 py-2 text-xs font-bold bg-[#1E293B] text-white rounded-xl hover:bg-[#2D3748] transition-all border border-white/5 shadow-xl"
                             >
-                                <Plus size={13} />
-                                Add Task
+                                <Plus size={14} /> NEW TASK
                             </button>
                         </div>
 
-                        {/* Combined filter: show All/Active/Completed or specific status */}
-                        <div className="flex gap-1 mb-4">
-                            <select
-                                value={filter}
-                                onChange={(e) => setFilter(e.target.value)}
-                                className="px-3 py-1 text-sm border border-notion-border rounded-md bg-notion-bg text-notion-text"
-                            >
-                                <option value="all">All</option>
-                                <option value="active">Active</option>
-                                <option value="completed">Completed</option>
-                                <option value="Not Started">Not Started</option>
-                                <option value="In Progress">In Progress</option>
-                                <option value="Done">Done</option>
-                                <option value="Blocked">Blocked</option>
-                                <option value="On Hold">On Hold</option>
-                            </select>
+                        <div className="flex gap-2 mb-6 relative z-10">
+                            {['all', 'active', 'completed'].map(f => (
+                                <button
+                                    key={f}
+                                    onClick={() => setFilter(f)}
+                                    className={`px-3 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-xl border transition-all ${filter === f ? 'bg-indigo-500/10 border-indigo-500/50 text-indigo-400 shadow-lg shadow-indigo-500/10' : 'bg-white/5 border-white/5 text-slate-500 hover:text-slate-300'}`}
+                                >
+                                    {f}
+                                </button>
+                            ))}
                         </div>
 
                         {tasksForDate.length === 0 ? (
-                            <div className="py-8 text-center flex-1 flex items-center justify-center">
-                                <p className="text-sm text-notion-muted italic">
-                                    No tasks scheduled for this date
-                                </p>
-                            </div>
-                        ) : filteredTasks.length === 0 ? (
-                            <div className="py-8 text-center flex-1 flex items-center justify-center">
-                                <p className="text-sm text-notion-muted italic">
-                                    No {filterLabel}
-                                </p>
+                            <div className="py-20 text-center flex-1 flex items-center justify-center relative z-10">
+                                <p className="text-sm text-slate-500 font-medium">No tasks for this schedule</p>
                             </div>
                         ) : (
-                            <div className="space-y-2 flex-1 overflow-auto">
+                            <div className="space-y-3 flex-1 overflow-auto pr-2 relative z-10 custom-scrollbar">
                                 {filteredTasks.map(task => (
                                     <div
                                         key={task.id}
-                                        className="flex items-center gap-3 p-3 bg-notion-bg rounded-lg border border-notion-border hover:bg-notion-hover transition-colors group"
+                                        className="flex items-center gap-4 p-4 bg-white/5 rounded-2xl border border-white/5 hover:bg-white/10 transition-all group/task"
                                     >
                                         <button
                                             onClick={() => handleTaskToggle(task.id, task.completed)}
-                                            className={`w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-all ${task.completed
+                                            className={`w-6 h-6 rounded-xl border-2 flex items-center justify-center flex-shrink-0 transition-all ${task.completed
                                                 ? 'bg-green-500 border-green-500'
-                                                : 'border-notion-border group-hover:border-[#37352f]'
+                                                : 'border-white/10 group-hover/task:border-indigo-500'
                                                 }`}
                                         >
-                                            {task.completed && (
-                                                <svg
-                                                    className="w-3 h-3 text-white"
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    viewBox="0 0 24 24"
-                                                >
-                                                    <path
-                                                        strokeLinecap="round"
-                                                        strokeLinejoin="round"
-                                                        strokeWidth={3}
-                                                        d="M5 13l4 4L19 7"
-                                                    />
-                                                </svg>
-                                            )}
+                                            {task.completed && <Check size={14} className="text-white" strokeWidth={4} />}
                                         </button>
                                         <div className="flex-1 min-w-0">
-                                            <p
-                                                className={`text-sm font-medium truncate ${task.completed
-                                                    ? 'line-through text-notion-muted'
-                                                    : 'text-notion-text'
-                                                    }`}
-                                            >
+                                            <p className={`text-sm font-bold truncate transition-all ${task.completed ? 'line-through text-slate-600' : 'text-slate-200'}`}>
                                                 {task.title}
                                             </p>
-                                            {task.priority && (
-                                                <span
-                                                    className={`text-xs font-medium mt-1 inline-block px-2 py-0.5 rounded ${task.priority === 'High'
-                                                        ? 'bg-red-100 text-red-700'
-                                                        : task.priority === 'Medium'
-                                                            ? 'bg-yellow-100 text-yellow-700'
-                                                            : 'bg-green-100 text-green-700'
-                                                        }`}
-                                                >
-                                                    {task.priority}
+                                            <div className="flex items-center gap-2 mt-1.5">
+                                                <span className={`text-[9px] font-black uppercase tracking-tighter px-2 py-0.5 rounded-lg border ${task.priority === 'High' ? 'bg-red-500/10 border-red-500/20 text-red-500' : task.priority === 'Medium' ? 'bg-amber-500/10 border-amber-500/20 text-amber-500' : 'bg-green-500/10 border-green-500/20 text-green-500'}`}>
+                                                    {task.priority || 'NORMAL'}
                                                 </span>
-                                            )}
+                                                <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">{task.status}</span>
+                                            </div>
                                         </div>
                                     </div>
                                 ))}
                             </div>
                         )}
                     </div>
-                </div>
 
-                {/* Project Stats */}
-                <div className="px-6 pb-6">
-                    <div className="bg-notion-sidebar rounded-xl p-6 border border-notion-border">
-                        <h3 className="font-bold text-notion-text mb-4">Project Overview</h3>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <div className="bg-notion-bg rounded-lg p-4">
-                                <p className="text-notion-muted text-xs font-medium uppercase tracking-wide mb-2">
-                                    Status
-                                </p>
-                                <p className="text-lg font-bold text-notion-text">{project.status}</p>
-                            </div>
-                            <div className="bg-notion-bg rounded-lg p-4">
-                                <p className="text-notion-muted text-xs font-medium uppercase tracking-wide mb-2">
-                                    Progress
-                                </p>
-                                <p className="text-lg font-bold text-notion-text">{project.progress}%</p>
-                            </div>
-                            <div className="bg-notion-bg rounded-lg p-4">
-                                <p className="text-notion-muted text-xs font-medium uppercase tracking-wide mb-2">
-                                    Due Date
-                                </p>
-                                <p className="text-lg font-bold text-notion-text">
-                                    {project.dueDate
-                                        ? format(parseISO(project.dueDate), 'MMM d')
-                                        : 'No date'}
-                                </p>
-                            </div>
-                            <div className="bg-notion-bg rounded-lg p-4">
-                                <p className="text-notion-muted text-xs font-medium uppercase tracking-wide mb-2">
-                                    Tags
-                                </p>
-                                <p className="text-lg font-bold text-notion-text">{project.tags?.length || 0}</p>
-                            </div>
-                        </div>
+                    {/* Project Stats */}
+                    <div className="lg:col-span-2 pt-4">
+                        <div className="glass-dark rounded-[2.5rem] p-10 border-white/5 relative overflow-hidden shadow-2xl">
+                            <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-transparent pointer-events-none" />
+                            <div className="flex flex-col md:flex-row gap-10 items-center relative z-10">
+                                {/* Progress Circular Chart (Simplified with Stats) */}
+                                <div className="shrink-0 relative w-32 h-32 flex items-center justify-center">
+                                    <svg className="w-full h-full -rotate-90">
+                                        <circle cx="64" cy="64" r="58" stroke="currentColor" strokeWidth="8" fill="transparent" className="text-white/5" />
+                                        <circle cx="64" cy="64" r="58" stroke="currentColor" strokeWidth="8" fill="transparent" strokeDasharray={364.4} strokeDashoffset={364.4 - (364.4 * project.progress) / 100} className="text-indigo-500 transition-all duration-1000 ease-out" strokeLinecap="round" />
+                                    </svg>
+                                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                                        <span className="text-2xl font-black text-white">{project.progress}%</span>
+                                        <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest">PROGRESS</span>
+                                    </div>
+                                </div>
 
-                        {/* Progress Bar */}
-                        <div className="mt-6">
-                            <div className="flex items-center justify-between mb-2">
-                                <span className="text-sm font-medium text-notion-text">Progress</span>
-                                <span className="text-sm font-bold text-notion-muted">{project.progress}%</span>
-                            </div>
-                            <div className="w-full bg-notion-border rounded-full h-2 overflow-hidden">
-                                <div
-                                    className="bg-gradient-to-r from-blue-500 to-purple-500 h-full rounded-full transition-all"
-                                    style={{ width: `${project.progress}%` }}
-                                />
-                            </div>
-                        </div>
-
-                        {/* Tags */}
-                        {project.tags && project.tags.length > 0 && (
-                            <div className="mt-6">
-                                <p className="text-sm font-medium text-notion-text mb-2">Tags</p>
-                                <div className="flex flex-wrap gap-2">
-                                    {project.tags.map(tag => (
-                                        <span
-                                            key={tag}
-                                            className="text-xs px-3 py-1.5 bg-notion-border text-notion-text rounded-full font-medium"
-                                        >
-                                            {tag}
-                                        </span>
-                                    ))}
+                                <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-8">
+                                    <div className="flex flex-col gap-1.5">
+                                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Current Status</p>
+                                        <p className="text-xl font-black text-white truncate">{project.status}</p>
+                                    </div>
+                                    <div className="flex flex-col gap-1.5">
+                                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Target Date</p>
+                                        <p className="text-xl font-black text-white truncate">
+                                            {project.dueDate ? format(parseISO(project.dueDate), 'MMM d, yyyy') : 'NOT SET'}
+                                        </p>
+                                    </div>
+                                    <div className="flex flex-col gap-1.5">
+                                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Sub-Modules</p>
+                                        <p className="text-xl font-black text-white truncate">{subprojects.length} ACTIVE</p>
+                                    </div>
+                                    <div className="flex flex-col gap-1.5">
+                                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Team Space</p>
+                                        <p className="text-xl font-black text-white truncate">PRIVATE</p>
+                                    </div>
                                 </div>
                             </div>
-                        )}
+
+                            {/* Tags */}
+                            {project.tags && project.tags.length > 0 && (
+                                <div className="mt-12 pt-8 border-t border-white/5 relative z-10">
+                                    <div className="flex flex-wrap gap-2">
+                                        {project.tags.map(tag => (
+                                            <span
+                                                key={tag}
+                                                className="px-4 py-1.5 bg-white/5 text-slate-300 border border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-white/10 transition-colors"
+                                            >
+                                                #{tag}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
