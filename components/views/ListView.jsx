@@ -119,7 +119,7 @@ function ListRow({ item, columns, onUpdate, onDelete, entityType, onRowClick }) 
         <div
             ref={setNodeRef}
             style={style}
-            className="flex items-center gap-3 px-4 py-2.5 hover:bg-[#fafafa] group cursor-pointer transition-colors relative"
+            className="flex items-center gap-3 px-4 py-2.5 hover:bg-white/5 group cursor-pointer transition-colors relative"
             onClick={onRowClick}
         >
             {/* Drag Handle */}

@@ -36,7 +36,7 @@ export default function ArchivePage() {
                 ) : (
                     <div className="divide-y divide-[#e9e9e7] border border-notion-border rounded-xl overflow-hidden">
                         {archivedNotes.map(item => (
-                            <div key={item.id} className="flex items-center gap-3 px-4 py-3 bg-notion-bg hover:bg-[#fafafa] group">
+                            <div key={item.id} className="flex items-center gap-3 px-4 py-3 bg-notion-bg hover:bg-white/5 group">
                                 <FileText size={16} className="text-notion-muted" />
                                 <div className="flex-1 min-w-0">
                                     <p className="text-sm text-notion-text truncate font-medium">{item.title}</p>

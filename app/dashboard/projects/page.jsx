@@ -21,6 +21,7 @@ const COLUMNS = [
 
 export default function ProjectsPage() {
     const { projects, addProject, updateProject, deleteProject, viewPreferences, fetchEndpoint, isFetched } = useApp()
+    const topLevelProjects = projects.filter(p => !p.parentProjectId)
     const [view, setView] = useState(viewPreferences['Projects'] || 'list')
     const [showAdd, setShowAdd] = useState(false)
     const [isLoading, setIsLoading] = useState(!projects || projects.length === 0)
@@ -59,24 +60,24 @@ export default function ProjectsPage() {
             <div className="flex gap-6 px-8 mb-6 text-xs font-bold uppercase tracking-widest text-slate-500">
                 <div className="flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-green-500" />
-                    <span>{projects.filter(p => p.status === 'Active').length} Active Projects</span>
+                    <span>{topLevelProjects.filter(p => p.status === 'Active').length} Active Projects</span>
                 </div>
                 <div className="flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-white/20" />
-                    <span>{projects.length} Total Projects</span>
+                    <span>{topLevelProjects.length} Total Projects</span>
                 </div>
             </div>
 
             <div className="flex-1 overflow-auto px-2">
                 {view === 'table' && (
-                    <TableView items={projects} columns={COLUMNS} onUpdate={updateProject} onDelete={deleteProject} onAdd={() => setShowAdd(true)} entityType="project" />
+                    <TableView items={topLevelProjects} columns={COLUMNS} onUpdate={updateProject} onDelete={deleteProject} onAdd={() => setShowAdd(true)} entityType="project" />
                 )}
                 {view === 'board' && (
-                    <BoardView items={projects} onUpdate={updateProject} onDelete={deleteProject} onAdd={(status) => addProject({ title: 'New Project', status: status || 'Not Started', tags: [], dueDate: '', progress: 0, areaId: null, description: '' })} entityType="project" />
+                    <BoardView items={topLevelProjects} onUpdate={updateProject} onDelete={deleteProject} onAdd={(status) => addProject({ title: 'New Project', status: status || 'Not Started', tags: [], dueDate: '', progress: 0, areaId: null, description: '' })} entityType="project" />
                 )}
-                {view === 'calendar' && <CalendarView items={projects} onUpdate={updateProject} />}
+                {view === 'calendar' && <CalendarView items={topLevelProjects} onUpdate={updateProject} />}
                 {view === 'list' && (
-                    <ListView items={projects} columns={COLUMNS} onUpdate={updateProject} onDelete={deleteProject} onAdd={() => setShowAdd(true)} entityType="project" />
+                    <ListView items={topLevelProjects} columns={COLUMNS} onUpdate={updateProject} onDelete={deleteProject} onAdd={() => setShowAdd(true)} entityType="project" />
                 )}
             </div>
 

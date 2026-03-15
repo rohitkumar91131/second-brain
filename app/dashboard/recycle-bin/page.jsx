@@ -38,7 +38,7 @@ export default function RecycleBinPage() {
                 ) : (
                     <div className="space-y-3">
                         {deletedNotes.map(item => (
-                            <div key={item.id} className="flex items-center gap-3 px-4 py-3 bg-notion-bg border border-notion-border rounded-xl hover:bg-[#fafafa] group shadow-sm transition-all hover:shadow-md">
+                            <div key={item.id} className="flex items-center gap-3 px-4 py-3 bg-notion-bg border border-notion-border rounded-xl hover:bg-white/5 group shadow-sm transition-all hover:shadow-md">
                                 <FileText size={16} className="text-notion-muted" />
                                 <div className="flex-1 min-w-0">
                                     <p className="text-sm text-notion-text truncate font-medium">{item.title}</p>
