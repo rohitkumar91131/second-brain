@@ -86,6 +86,11 @@ export default function NoteEditorPage() {
     const [stats, setStats] = useState({ words: 0, chars: 0, readingTime: 0 })
     const [toc, setToc] = useState([])
 
+    const stateRef = useRef({ title, activeBlocks, projectIds })
+    useEffect(() => {
+        stateRef.current = { title, activeBlocks, projectIds }
+    }, [title, activeBlocks, projectIds])
+
     // Blocks are now fetched in the data loading effect above
 
     useEffect(() => {
@@ -188,23 +193,26 @@ export default function NoteEditorPage() {
         setToc(headings)
     }, [activeBlocks, title])
 
-    const handleSave = useCallback(async () => {
+    const handleSave = useCallback(async (blocksOverride) => {
         if (!note) return
         setIsSaving(true)
+        const { title: latestTitle, projectIds: latestProjectIds, activeBlocks: latestBlocks } = stateRef.current;
+        const finalBlocks = Array.isArray(blocksOverride) ? blocksOverride : latestBlocks;
+
         try {
             await Promise.all([
-                updateNote(id, { title, projectIds }),
-                bulkUpdateBlocks(id, 'Note', activeBlocks)
+                updateNote(id, { title: latestTitle, projectIds: latestProjectIds }),
+                bulkUpdateBlocks(id, 'Note', finalBlocks)
             ])
             localStorage.removeItem(`note_draft_${id}`)
-            setSavedBlocks(activeBlocks)
+            setSavedBlocks(finalBlocks)
             setLastSaved(new Date())
         } catch (err) {
             console.error('Save failed', err)
         } finally {
             setIsSaving(false)
         }
-    }, [note, id, title, activeBlocks, updateNote, bulkUpdateBlocks, projectIds])
+    }, [note, id, updateNote, bulkUpdateBlocks])
 
     useEffect(() => {
         const onKey = (e) => {
@@ -263,7 +271,7 @@ export default function NoteEditorPage() {
 
     return (
         <div className={`flex flex-col h-full bg-[#0F172A] text-slate-200 relative overflow-hidden ${typography === 'serif' ? 'font-serif' : 'font-sans'}`}>
-            {(pageLoading || (loading && !isInitialized)) && (
+            {(pageLoading || (loading && !isInitialized) || (!note && !notFoundDelay)) && (
                 <div className="absolute inset-0 flex items-center justify-center bg-[#0F172A] z-[60]">
                     <div className="flex flex-col items-center gap-4">
                         <Loader />
@@ -427,6 +435,7 @@ export default function NoteEditorPage() {
                                     blocks={activeBlocks}
                                     onChange={setActiveBlocks}
                                     isDiary={false}
+                                    onSave={handleSave}
                                 />
 
                                 <div className="h-64" /> {/* Breathing room at bottom */}

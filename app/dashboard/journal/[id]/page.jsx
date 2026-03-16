@@ -57,6 +57,11 @@ export default function JournalEntryPage() {
     const [pdfGenerating, setPdfGenerating] = useState(false)
     const [sharing, setSharing] = useState(false)
 
+    const stateRef = useRef({ activeBlocks })
+    useEffect(() => {
+        stateRef.current = { activeBlocks }
+    }, [activeBlocks])
+
     useEffect(() => {
         if (id) fetchBlocks(id, 'JournalEntry')
     }, [id, fetchBlocks])
@@ -115,13 +120,16 @@ export default function JournalEntryPage() {
         }
     }, [initialized, activeBlocks?.length, loading, setActiveBlocks])
 
-    const handleSave = useCallback(async () => {
+    const handleSave = useCallback(async (blocksOverride) => {
         if (!entry) return
         setIsSaving(true)
+        const { activeBlocks: latestBlocks } = stateRef.current;
+        const finalBlocks = Array.isArray(blocksOverride) ? blocksOverride : latestBlocks;
+
         try {
             await Promise.all([
                 updateJournalEntry(id, {}),
-                bulkUpdateBlocks(id, 'JournalEntry', activeBlocks)
+                bulkUpdateBlocks(id, 'JournalEntry', finalBlocks)
             ])
             setLastSaved(new Date())
         } catch (err) {
@@ -129,7 +137,7 @@ export default function JournalEntryPage() {
         } finally {
             setIsSaving(false)
         }
-    }, [entry, id, activeBlocks, updateJournalEntry, bulkUpdateBlocks])
+    }, [entry, id, updateJournalEntry, bulkUpdateBlocks])
 
     // Save on Ctrl/Cmd+S
     useEffect(() => {
@@ -325,6 +333,7 @@ export default function JournalEntryPage() {
                                     blocks={activeBlocks}
                                     onChange={setActiveBlocks}
                                     isDiary={true}
+                                    onSave={handleSave}
                                 />
 
                             </div>

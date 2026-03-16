@@ -50,6 +50,17 @@ export const PATCH = withErrorHandler(async (request, { params }) => {
     const entry = await JournalEntry.findOne({ _id: entryId, userId }).lean()
     if (!entry) return err('Journal entry not found or access denied for update', 404)
 
+    const incomingBlockIds = validation.data
+        .filter(item => mongoose.Types.ObjectId.isValid(item.id))
+        .map(item => item.id)
+
+    // Delete blocks that are no longer present
+    await Block.deleteMany({
+        entityId: entryId,
+        entityType: 'JournalEntry',
+        _id: { $nin: incomingBlockIds }
+    })
+
     const operations = validation.data.map((item, index) => {
         const isExisting = mongoose.Types.ObjectId.isValid(item.id)
         const order = typeof item.order === 'number' ? item.order : index

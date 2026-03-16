@@ -2,16 +2,27 @@
 
 import { useState, useCallback, useRef, useEffect, useMemo } from 'react'
 import { Plus, Image as ImageIcon, Video, Music, Save, Clipboard, Undo, Redo, X } from 'lucide-react'
+import { toast } from 'sonner'
 import BlockRow from './BlockRow'
 import { polyfill } from "mobile-drag-drop"
 import "mobile-drag-drop/default.css"
 
-export default function BlockEditor({ blocks, onChange, isDiary = false }) {
+export default function BlockEditor({ blocks, onChange, isDiary = false, onSave }) {
     const [showMenu, setShowMenu] = useState(null)
+    const blocksRef = useRef(blocks);
+
+    useEffect(() => {
+        blocksRef.current = blocks;
+    }, [blocks]);
     const [toggleOpen, setToggleOpen] = useState({})
     const [isSaving, setIsSaving] = useState(false)
     const [activeDragId, setActiveDragId] = useState(null)
     const [isExternalDrag, setIsExternalDrag] = useState(false)
+    const onSaveRef = useRef(onSave);
+
+    useEffect(() => {
+        onSaveRef.current = onSave;
+    }, [onSave]);
 
     const [clipboardToast, setClipboardToast] = useState(null)
     const [lastCopiedTextState, setLastCopiedTextState] = useState("")
@@ -54,6 +65,7 @@ export default function BlockEditor({ blocks, onChange, isDiary = false }) {
     }, []);
 
     const handleBlockChange = useCallback((newBlocks, isTyping = false) => {
+        blocksRef.current = newBlocks;
         onChange(newBlocks);
         isUndoingRef.current = false;
 
@@ -194,7 +206,7 @@ export default function BlockEditor({ blocks, onChange, isDiary = false }) {
         if (content && (lowerContent.includes('youtube.com') || lowerContent.includes('youtu.be') || lowerContent.includes('vimeo.com'))) {
             newBlocksToAdd.push({ type: 'video', content });
         }
-        else if (content && lowerContent.match(/\.(jpeg|jpg|gif|png|webp)(\?.*)?$/i)) {
+        else if (content && (lowerContent.match(/\.(jpeg|jpg|gif|png|webp|svg|avif)(\?.*)?$/i) || lowerContent.includes('oaiusercontent.com') || lowerContent.includes('chatgpt.com/backend-api/files'))) {
             newBlocksToAdd.push({ type: 'image', content });
         }
         else if (htmlData) {
@@ -263,7 +275,7 @@ export default function BlockEditor({ blocks, onChange, isDiary = false }) {
 
     const insertParsedBlocks = (newBlocksToAdd, atIndex = null) => {
         if (newBlocksToAdd.length > 0) {
-            const currentBlocks = [...blocks];
+            const currentBlocks = [...blocksRef.current];
             const insertedBlockIds = [];
 
             // If atIndex is provided, we insert there, otherwise append
@@ -285,30 +297,6 @@ export default function BlockEditor({ blocks, onChange, isDiary = false }) {
         return [];
     };
 
-    const uploadFile = async (file, blockId) => {
-        try {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onloadend = async () => {
-                const base64data = reader.result;
-                try {
-                    const res = await fetch('/api/upload', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ file: base64data })
-                    });
-                    const data = await res.json();
-                    if (data.url) {
-                        updateBlock(blockId, { content: data.url }, false);
-                    }
-                } catch (err) {
-                    console.error("Upload error:", err);
-                }
-            };
-        } catch (err) {
-            console.error("File reading error:", err);
-        }
-    };
 
     const handleContainerDragOver = (e) => {
         e.preventDefault();
@@ -363,16 +351,20 @@ export default function BlockEditor({ blocks, onChange, isDiary = false }) {
 
     const handleSave = async () => { /* Tumhara save logic yahan aayega */ }
 
-    const updateBlock = useCallback((id, updates, isTyping = true) => {
-        const block = blocks.find(b => b.id === id);
-        if (!block) return;
-
-        const hasChange = Object.keys(updates).some(key => updates[key] !== block[key]);
-        if (!hasChange) return;
-
-        const newBlocks = blocks.map(b => b.id === id ? { ...b, ...updates } : b);
-        handleBlockChange(newBlocks, isTyping);
-    }, [blocks, handleBlockChange])
+    const updateBlock = useCallback((id, updates, focus = true, autoSave = false) => {
+        const newBlocks = blocksRef.current.map(b => b.id === id ? { ...b, ...updates } : b)
+        handleBlockChange(newBlocks, focus)
+        if (focus) {
+            setTimeout(() => {
+                const el = document.getElementById(id) || document.getElementById(`block-${id}`)
+                if (el) el.focus()
+            }, 0)
+        }
+        if (autoSave && onSaveRef.current) {
+            onSaveRef.current(newBlocks);
+        }
+        return newBlocks
+    }, [handleBlockChange])
 
     const addBlock = useCallback((afterId, type = 'paragraph') => {
         const idx = blocks.findIndex(b => b.id === afterId)
@@ -399,6 +391,40 @@ export default function BlockEditor({ blocks, onChange, isDiary = false }) {
         const filteredBlocks = blocks.filter(b => b.id !== id).map((b, i) => ({ ...b, order: i }));
         handleBlockChange(filteredBlocks, false);
     }, [blocks, handleBlockChange])
+
+    const uploadFile = async (file, blockId) => {
+        try {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onloadend = async () => {
+                const base64data = reader.result;
+                try {
+                    const res = await fetch('/api/upload', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ file: base64data })
+                    });
+
+                    if (!res.ok) throw new Error('Upload failed');
+
+                    const data = await res.json();
+                    if (data.url) {
+                        updateBlock(blockId, { content: data.url }, false, true);
+                    } else {
+                        throw new Error('Upload failed');
+                    }
+                } catch (err) {
+                    console.error("Upload error:", err);
+                    deleteBlock(blockId);
+                    toast.error("image upload failed");
+                }
+            };
+        } catch (err) {
+            console.error("File reading error:", err);
+            deleteBlock(blockId);
+            toast.error("image upload failed");
+        }
+    };
 
     const changeType = useCallback((id, type) => {
         updateBlock(id, { type }, false)
@@ -490,7 +516,7 @@ export default function BlockEditor({ blocks, onChange, isDiary = false }) {
                             showMenu={showMenu === block.id}
                             toggleOpen={toggleOpen[block.id]}
                             onToggleOpen={() => setToggleOpen(prev => ({ ...prev, [block.id]: !prev[block.id] }))}
-                            onUpdate={(updates) => updateBlock(block.id, updates, true)}
+                            onUpdate={(updates) => updateBlock(block.id, updates, true, (block.type === 'image' && !!updates.content))}
                             onAddAfter={(type) => addBlock(block.id, type)}
                             onDelete={() => deleteBlock(block.id)}
                             onShowMenu={() => setShowMenu(showMenu === block.id ? null : block.id)}

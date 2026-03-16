@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { Image as ImageIcon, Minus, Maximize2, X, Download, GripVertical } from 'lucide-react' // GripVertical import kiya
 import { CldUploadWidget } from 'next-cloudinary'
+import { toast } from 'sonner'
 
 // Naye props onDragHandleDown aur onDragHandleUp receive kiye
 export default function ImageBlock({ block, onUpdate, onDelete, onDragHandleDown, onDragHandleUp }) {
@@ -124,7 +125,14 @@ export default function ImageBlock({ block, onUpdate, onDelete, onDragHandleDown
                         onSuccess={(result) => {
                             if (result.info?.secure_url) {
                                 onUpdate({ content: result.info.secure_url });
+                            } else {
+                                toast.error("image upload failed");
+                                onDelete();
                             }
+                        }}
+                        onError={() => {
+                            toast.error("image upload failed");
+                            onDelete();
                         }}
                         options={{
                             multiple: false,

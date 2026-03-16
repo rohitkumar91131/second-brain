@@ -46,8 +46,16 @@ export const PATCH = withErrorHandler(async (request, { params }) => {
     const noteId = new mongoose.Types.ObjectId(params.id)
     const userId = new mongoose.Types.ObjectId(session.user.id)
 
-    const note = await Note.findOne({ _id: noteId, userId }).lean()
-    if (!note) return err('Note not found or access denied for update', 404)
+    const incomingBlockIds = validation.data
+        .filter(item => mongoose.Types.ObjectId.isValid(item.id))
+        .map(item => item.id)
+
+    // Delete blocks that are no longer present
+    await Block.deleteMany({
+        entityId: noteId,
+        entityType: 'Note',
+        _id: { $nin: incomingBlockIds }
+    })
 
     const operations = validation.data.map((item, index) => {
         const isExisting = mongoose.Types.ObjectId.isValid(item.id)

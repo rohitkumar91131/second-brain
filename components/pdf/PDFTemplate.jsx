@@ -157,7 +157,7 @@ const styles = (theme) => StyleSheet.create({
     }
 });
 
-const PDFTemplate = ({ title, blocks, theme = 'bright' }) => {
+const PDFTemplate = ({ title, blocks, theme = 'bright', logo }) => {
     const s = styles(theme);
 
     return (
@@ -167,7 +167,7 @@ const PDFTemplate = ({ title, blocks, theme = 'bright' }) => {
                 <View style={s.header} fixed>
                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                         <Image
-                            src="https://icon-to-image-convertor.vercel.app/api/generate-icon?library=lucide&iconName=Brain&size=256&color=%23818cf8&format=png"
+                            src={logo || "https://icon-to-image-convertor.vercel.app/api/generate-icon?library=lucide&iconName=Brain&size=256&color=%23818cf8&format=png"}
                             style={{ width: 24, height: 24, marginRight: 10 }}
                             alt="Logo"
                         />
@@ -255,63 +255,11 @@ const PDFTemplate = ({ title, blocks, theme = 'bright' }) => {
                         if (!block.content) return null;
 
                         // Handle potential JSON content or direct URL
-                        let imageUrl = block.content;
-                        try {
-                            if (block.content.startsWith('{')) {
-                                const parsed = JSON.parse(block.content);
-                                imageUrl = parsed.url || parsed.src || imageUrl;
-                            }
-                        } catch (e) { }
-
-                        // @react-pdf is very strict about extensions.
-                        // We need to ensure the URL ends with a known extension.
-                        const validExts = ['jpg', 'jpeg', 'png', 'webp'];
-                        const urlParts = imageUrl.split('?');
-                        const urlWithoutQuery = urlParts[0].toLowerCase();
-                        const hasValidExt = validExts.some(ext => urlWithoutQuery.endsWith(`.${ext}`));
-
-                        if (imageUrl.includes('cloudinary.com')) {
-                            // Cloudinary handles extensions at the end of the public ID path.
-                            // We force PNG to ensure @react-pdf can render it correctly.
-
-                            // 1. Remove existing query params temporarily
-                            const [baseUrl, query] = imageUrl.split('?');
-
-                            // 2. Clear out any existing common image extensions at the end of the path
-                            let cleanUrl = baseUrl.replace(/\.(jpg|jpeg|png|webp|gif|avif)$/i, '');
-
-                            // 3. Append .png and re-add query params
-                            imageUrl = query ? `${cleanUrl}.png?${query}` : `${cleanUrl}.png`;
-                        } else {
-                            // Non-Cloudinary: Check for valid extension
-                            const validExts = ['jpg', 'jpeg', 'png', 'webp'];
-                            const urlParts = imageUrl.split('?');
-                            const urlWithoutQuery = urlParts[0].toLowerCase();
-                            const hasValidExt = validExts.some(ext => urlWithoutQuery.endsWith(`.${ext}`));
-
-                            if (!hasValidExt) {
-                                // If no valid extension and not Cloudinary, skip to avoid "Not valid image extension" crash
-                                return (
-                                    <View key={block.id || idx} style={[s.callout, { backgroundColor: theme === 'dark' ? '#222222' : '#f9f9f9', py: 10, px: 15, borderStyle: 'dashed', borderWidth: 1 }]}>
-                                        <Text style={[s.calloutText, { color: '#888888', fontSize: 10 }]}>[ Image requires .jpg/.png extension to export ]</Text>
-                                    </View>
-                                );
-                            }
-                        }
-
-                        // Skip GIFs as they are still unsupported and crash rendering
-                        if (urlWithoutQuery.endsWith('.gif')) {
-                            return (
-                                <View key={block.id || idx} style={[s.callout, { backgroundColor: theme === 'dark' ? '#222222' : '#f9f9f9', borderStyle: 'dashed', borderWidth: 1 }]}>
-                                    <Text style={s.calloutText}>[ GIF Preview: {block.caption || 'Animated Content'} ]</Text>
-                                </View>
-                            );
-                        }
-
+                        // Content is now pre-processed (likely base64) by processBlocksForPDF
                         return (
                             <View key={block.id || idx} break={false}>
                                 <Image
-                                    src={imageUrl}
+                                    src={block.content}
                                     style={s.image}
                                     alt=""
                                 />

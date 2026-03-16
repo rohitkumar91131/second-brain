@@ -5,6 +5,7 @@ import JournalEntry from '@/lib/models/JournalEntry';
 import Block from '@/lib/models/Block';
 import { requireAuth, err, withErrorHandler } from '@/lib/apiHelpers';
 import PDFTemplate from '@/components/pdf/PDFTemplate';
+import { processBlocksForPDF, getLogoBase64 } from '@/lib/pdfHelpers';
 
 export const GET = withErrorHandler(async (request, { params }) => {
     const { session, error } = await requireAuth();
@@ -24,13 +25,18 @@ export const GET = withErrorHandler(async (request, { params }) => {
         .sort({ order: 1 })
         .lean();
 
-    // 3. Render PDF to Stream
+    // 3. Process Blocks for PDF (Pre-fetch images)
+    const processedBlocks = await processBlocksForPDF(blocks);
+    const logoBase64 = await getLogoBase64();
+
+    // 4. Render PDF to Stream
     try {
         const stream = await renderToStream(
             React.createElement(PDFTemplate, {
                 title: entry.title || 'Untitled Entry',
-                blocks: blocks,
-                theme: theme
+                blocks: processedBlocks,
+                theme: theme,
+                logo: logoBase64
             })
         );
 
