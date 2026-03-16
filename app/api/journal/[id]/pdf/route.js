@@ -1,3 +1,6 @@
+export const runtime = "nodejs"
+export const maxDuration = 300
+
 import React from 'react';
 import { renderToStream } from '@react-pdf/renderer';
 import connectDB from '@/lib/mongodb';
