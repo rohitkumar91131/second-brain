@@ -2,12 +2,13 @@
 
 import { useApp } from '@/context/AppContext'
 import { useParams, useRouter } from 'next/navigation'
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import BlockEditor from '@/components/editor/BlockEditor'
 import { ArrowLeft, Trash2, Save, Share2, FileText, X } from 'lucide-react'
 import Link from 'next/link'
 import { format, parseISO } from 'date-fns'
 import { toast } from 'sonner'
+import Loader from '@/components/ui/Loader'
 import {
     WhatsappShareButton, WhatsappIcon,
     TwitterShareButton, TwitterIcon,
