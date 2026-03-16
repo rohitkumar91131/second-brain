@@ -272,7 +272,7 @@ export default function NoteEditorPage() {
     return (
         <div className={`flex flex-col h-full bg-[#0F172A] text-slate-200 relative overflow-hidden ${typography === 'serif' ? 'font-serif' : 'font-sans'}`}>
             {(pageLoading || (loading && !isInitialized) || (!note && !notFoundDelay)) && (
-                <div className="absolute inset-0 flex items-center justify-center bg-[#0F172A] z-[60]">
+                <div className="fixed inset-0 flex items-center justify-center bg-[#0F172A] z-[70]">
                     <div className="flex flex-col items-center gap-4">
                         <Loader />
                         <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] animate-pulse">Syncing Library</span>

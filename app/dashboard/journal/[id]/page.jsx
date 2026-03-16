@@ -159,44 +159,14 @@ export default function JournalEntryPage() {
     return (
         <div className="flex flex-col h-full bg-[#fcfaf7] overflow-hidden relative">
 
-            {/* PREMIUM SKELETON */}
-            <div
-                className={`absolute inset-0 transition-opacity duration-300 ${loading ? 'opacity-100' : 'opacity-0 pointer-events-none'
-                    }`}
-            >
-                <div className="flex flex-col h-full bg-[#fcfaf7] animate-pulse">
-
-                    <div className="h-14 border-b border-notion-border bg-notion-bg" />
-
-                    <div className="flex-1 overflow-hidden py-12 px-6">
-                        <div className="max-w-3xl mx-auto bg-notion-bg rounded-sm min-h-[80vh] border border-notion-border/50 relative">
-
-                            <div className="absolute left-0 top-0 bottom-0 w-8 border-r border-[#f1f1ef] bg-[#fdfdfd]" />
-
-                            <div className="pl-16 pr-12 pt-16 pb-24 space-y-8">
-
-                                <div className="flex items-start gap-5">
-                                    <div className="w-14 h-14 rounded-full bg-gray-200" />
-                                    <div className="flex-1 space-y-3">
-                                        <div className="h-10 bg-gray-200 rounded w-2/3" />
-                                        <div className="h-4 bg-gray-200 rounded w-1/3" />
-                                    </div>
-                                </div>
-
-                                <div className="space-y-4">
-                                    <div className="h-4 bg-gray-200 rounded w-full" />
-                                    <div className="h-4 bg-gray-200 rounded w-5/6" />
-                                    <div className="h-4 bg-gray-200 rounded w-4/6" />
-                                    <div className="h-4 bg-gray-200 rounded w-full" />
-                                    <div className="h-4 bg-gray-200 rounded w-3/4" />
-                                    <div className="h-4 bg-gray-200 rounded w-5/6" />
-                                </div>
-
-                            </div>
-                        </div>
+            {((loading && !isInitialized) || (initialized && !visible && !entry) || (!entry && initialized === false)) && (
+                <div className="fixed inset-0 flex items-center justify-center bg-[#fcfaf7] z-[70]">
+                    <div className="flex flex-col items-center gap-4">
+                        <Loader />
+                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] animate-pulse">Opening Diary</span>
                     </div>
                 </div>
-            </div>
+            )}
 
             {/* NOT FOUND */}
             {!loading && !entry && (

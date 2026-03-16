@@ -364,30 +364,40 @@ function AppContextInner({ children }) {
     }, [noteCRUD])
 
     const fetchEntity = useCallback(async (entityType, entityId) => {
-        const endpoint = entityType === 'Note' ? 'notes' : 'journal'
-        const item = await apiCall('GET', `/api/${endpoint}/${entityId}`)
-        if (entityType === 'Note') {
-            setNotes(prev => {
-                const exists = prev.find(n => n.id === entityId)
-                if (exists) return prev.map(n => n.id === entityId ? item : n)
-                return [item, ...prev]
-            })
-        } else {
-            setJournal(prev => {
-                const exists = prev.find(j => j.id === entityId)
-                if (exists) return prev.map(j => j.id === entityId ? item : j)
-                return [item, ...prev]
-            })
+        startFetch()
+        try {
+            const endpoint = entityType === 'Note' ? 'notes' : 'journal'
+            const item = await apiCall('GET', `/api/${endpoint}/${entityId}`)
+            if (entityType === 'Note') {
+                setNotes(prev => {
+                    const exists = prev.find(n => n.id === entityId)
+                    if (exists) return prev.map(n => n.id === entityId ? item : n)
+                    return [item, ...prev]
+                })
+            } else {
+                setJournal(prev => {
+                    const exists = prev.find(j => j.id === entityId)
+                    if (exists) return prev.map(j => j.id === entityId ? item : j)
+                    return [item, ...prev]
+                })
+            }
+            return item
+        } finally {
+            endFetch()
         }
-        return item
-    }, [apiCall])
+    }, [apiCall, startFetch, endFetch])
 
     const fetchBlocks = useCallback(async (entityId, entityType = 'Note') => {
-        const endpoint = entityType === 'Note' ? 'notes' : 'journal'
-        const blocks = await apiCall('GET', `/api/${endpoint}/${entityId}/blocks`)
-        setActiveBlocks(blocks)
-        return blocks
-    }, [apiCall])
+        startFetch()
+        try {
+            const endpoint = entityType === 'Note' ? 'notes' : 'journal'
+            const blocks = await apiCall('GET', `/api/${endpoint}/${entityId}/blocks`)
+            setActiveBlocks(blocks)
+            return blocks
+        } finally {
+            endFetch()
+        }
+    }, [apiCall, startFetch, endFetch])
 
     const addBlock = useCallback(async (entityId, entityType, blockData) => {
         const block = await apiCall('POST', '/api/blocks', { ...blockData, entityId, entityType })
