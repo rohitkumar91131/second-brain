@@ -277,7 +277,7 @@ export default function GoalDetailPage() {
                                                 />
                                             ) : (
                                                 <p className="text-sm text-slate-300 font-medium leading-relaxed italic whitespace-pre-wrap">
-                                                    "{log.text}"
+                                                    &ldquo;{log.text}&rdquo;
                                                 </p>
                                             )}
                                         </div>
@@ -294,7 +294,7 @@ export default function GoalDetailPage() {
                                     <div className="p-2.5 bg-blue-500/10 rounded-2xl text-blue-400">
                                         <CheckSquare size={20} />
                                     </div>
-                                    <h2 className="text-xl font-bold text-white tracking-tight">Today's Tasks</h2>
+                                    <h2 className="text-xl font-bold text-white tracking-tight">Today&apos;s Tasks</h2>
                                 </div>
                                 <button
                                     onClick={() => setShowAddTask(true)}
@@ -367,7 +367,7 @@ function MonthCurveGraph({ history, month }) {
                 isToday: isSameDay(day, today)
             }
         })
-    }, [history, days])
+    }, [history, days, today])
 
     if (dataPoints.length === 0) return null
 
