@@ -157,7 +157,12 @@ function KanbanCard({ item, onUpdate, onDelete, isDragging }) {
         <div
             ref={setNodeRef}
             style={style}
-            className={`bg-notion-bg rounded-md p-3 shadow-sm border border-notion-border group cursor-default ${isDragging ? 'shadow-lg rotate-1' : ''}`}
+            onClick={() => {
+                if (entityType === 'goal') window.location.href = `/dashboard/goals/${item.id}`
+                else if (entityType === 'project') window.location.href = `/dashboard/projects/${item.id}`
+                else if (entityType === 'task') window.location.href = `/dashboard/tasks/${item.id}`
+            }}
+            className={`bg-notion-bg rounded-md p-3 shadow-sm border border-notion-border group cursor-pointer hover:shadow-md transition-all ${isDragging ? 'shadow-lg rotate-1' : ''}`}
         >
             <div className="flex items-start gap-2">
                 <button

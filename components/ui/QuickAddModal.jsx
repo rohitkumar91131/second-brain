@@ -48,7 +48,7 @@ export default function QuickAddModal({ onClose, defaultType = 'task', prefilled
 
         try {
             let created
-            if (type === 'task') created = await addTask({ ...base, completed: false, priority: 'Medium', projectId: prefilledData.projectId || null, notes: '' })
+            if (type === 'task') created = await addTask({ ...base, completed: false, priority: 'Medium', projectId: prefilledData.projectId || null, goalId: prefilledData.goalId || null, notes: '' })
             if (type === 'note') {
                 created = await addNote({ ...base, projectIds: prefilledData.projectId ? [prefilledData.projectId] : [] })
                 if (created?.id) {

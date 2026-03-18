@@ -56,6 +56,8 @@ export default function ListView({ items, columns, onUpdate, onDelete, onAdd, en
             router.push(`/dashboard/notes/${item.id}`)
         } else if (entityType === 'task') {
             router.push(`/dashboard/tasks/${item.id}`)
+        } else if (entityType === 'goal') {
+            router.push(`/dashboard/goals/${item.id}`)
         }
     }
 

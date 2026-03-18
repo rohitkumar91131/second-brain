@@ -23,6 +23,8 @@ export default function TableView({ items, columns, onUpdate, onDelete, onAdd, e
             router.push(`/dashboard/notes/${item.id}`)
         } else if (entityType === 'task') {
             router.push(`/dashboard/tasks/${item.id}`)
+        } else if (entityType === 'goal') {
+            router.push(`/dashboard/goals/${item.id}`)
         }
     }
 
