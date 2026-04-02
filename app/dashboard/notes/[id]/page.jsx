@@ -128,6 +128,13 @@ export default function NoteEditorPage() {
         }
     }, [note, pageLoading, id, initialized, setActiveBlocks])
 
+    // Set page title to note title
+    useEffect(() => {
+        if (title) {
+            document.title = `${title} | Second Brain`
+        }
+    }, [title])
+
     // Reset Focus Mode on unmount
     useEffect(() => {
         return () => setFocusMode(false)
