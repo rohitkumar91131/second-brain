@@ -1,15 +1,37 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Sidebar from '@/components/layout/Sidebar'
 import Header from '@/components/layout/Header'
 import { usePathname } from 'next/navigation'
 import { useApp } from '@/context/AppContext'
 
+const sectionTitles = [
+    { href: '/dashboard/tasks', label: 'Tasks' },
+    { href: '/dashboard/media', label: 'Media Bank' },
+    { href: '/dashboard/projects', label: 'Projects' },
+    { href: '/dashboard/goals', label: 'Goals' },
+    { href: '/dashboard/areas', label: 'Areas' },
+    { href: '/dashboard/resources', label: 'Resources' },
+    { href: '/dashboard/notes', label: 'Notes' },
+    { href: '/dashboard/journal', label: 'Journal' },
+    { href: '/dashboard/archive', label: 'Archive' },
+    { href: '/dashboard/recycle-bin', label: 'Recycle Bin' },
+    { href: '/dashboard/settings', label: 'Settings' },
+    { href: '/dashboard/workspace', label: 'Workspace' },
+    { href: '/dashboard', label: 'Overview' },
+]
+
 export default function DashboardLayout({ children }) {
     const { focusMode } = useApp()
     const [mobileOpen, setMobileOpen] = useState(false)
     const pathname = usePathname()
+
+    useEffect(() => {
+        const section = sectionTitles.find(item => pathname.startsWith(item.href))
+        const label = section?.label || 'Dashboard'
+        document.title = `${label} | Second Brain`
+    }, [pathname])
 
     // Skip full layout wrap for workspace to behave like an IDE
     if (pathname === '/dashboard/workspace') {

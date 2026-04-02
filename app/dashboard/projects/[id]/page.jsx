@@ -88,6 +88,13 @@ export default function ProjectDetailPage() {
         }
     }, [projects, projectId, projectsLoaded])
 
+    // Set page title to project title
+    useEffect(() => {
+        if (project?.title) {
+            document.title = `${project.title} | Second Brain`
+        }
+    }, [project?.title])
+
     // Context Menu Handlers
     const handleContextMenu = (e, targetProject) => {
         e.preventDefault()
