@@ -28,6 +28,12 @@ export default function DashboardLayout({ children }) {
     const pathname = usePathname()
 
     useEffect(() => {
+        // Skip detail pages (notes/[id], projects/[id]) — child pages set their own title
+        const isDetailPage = sectionTitles.some(
+            item => item.href !== '/dashboard' && pathname.startsWith(item.href + '/')
+        )
+        if (isDetailPage) return
+
         const section = sectionTitles.find(item => pathname.startsWith(item.href))
         const label = section?.label || 'Dashboard'
         document.title = `${label} | Second Brain`
