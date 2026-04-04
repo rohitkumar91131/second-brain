@@ -23,18 +23,10 @@ export async function POST(request) {
 
         const token = crypto.randomBytes(32).toString('hex')
         const expiresAt = new Date(Date.now() + TOKEN_TTL_MS)
-        
-        let userId
-        try {
-            userId = new mongoose.Types.ObjectId(session.user.id)
-        } catch (e) {
-            console.error('Invalid userId:', session.user.id)
-            userId = session.user.id
-        }
 
         const deviceToken = new DeviceToken({
             token,
-            userId,
+            userId: new mongoose.Types.ObjectId(session.user.id),
             userName: session.user.name,
             userEmail: session.user.email,
             expiresAt,
