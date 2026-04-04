@@ -80,6 +80,7 @@ Scan the QR code in the Expo Go app (iOS/Android) to run on your phone.
 
 ```bash
 npm install -g eas-cli
+npm install              # install dependencies first (required before eas build)
 eas login
 eas build:configure      # first time setup
 eas build --platform android --profile preview
