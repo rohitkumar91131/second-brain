@@ -35,6 +35,11 @@
           "cameraPermission": "Allow Second Brain to access your camera to scan QR codes."
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "edb0078d-2154-4bd7-a0c7-4173e76e10fb"
+      }
+    }
   }
 }
