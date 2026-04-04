@@ -1,7 +1,7 @@
+import { NextResponse } from 'next/server'
 import connectDB from '@/lib/mongodb'
 import Device from '@/lib/models/Device'
 import DeviceToken from '@/lib/models/DeviceToken'
-import { ok, err, withErrorHandler } from '@/lib/apiHelpers'
 import { sign } from 'jsonwebtoken'
 import { z } from 'zod'
 
@@ -13,73 +13,94 @@ const VerifySchema = z.object({
     fcmToken: z.string().optional().nullable(),
 })
 
-export const POST = withErrorHandler(async (request) => {
-    const body = await request.json()
-    const parsed = VerifySchema.safeParse(body)
-    if (!parsed.success) {
-        return err('Validation failed', 422, parsed.error.flatten())
+export async function POST(request) {
+    try {
+        const body = await request.json()
+        const parsed = VerifySchema.safeParse(body)
+        
+        if (!parsed.success) {
+            return NextResponse.json(
+                { error: 'Validation failed', details: parsed.error.flatten() },
+                { status: 422 }
+            )
+        }
+
+        const { token, deviceName, platform, deviceId, fcmToken } = parsed.data
+
+        await connectDB()
+
+        // Find the device token
+        const deviceToken = await DeviceToken.findOne({ token, isUsed: false }).populate('userId', '_id email name image')
+        
+        if (!deviceToken) {
+            return NextResponse.json(
+                { error: 'Invalid or expired token' },
+                { status: 401 }
+            )
+        }
+
+        // Check expiration
+        if (Date.now() > new Date(deviceToken.expiresAt).getTime()) {
+            return NextResponse.json(
+                { error: 'Token has expired' },
+                { status: 401 }
+            )
+        }
+
+        // Get user data from populated reference
+        const userData = deviceToken.userId
+        
+        if (!userData) {
+            return NextResponse.json(
+                { error: 'User not found' },
+                { status: 404 }
+            )
+        }
+
+        // Mark token as used
+        await DeviceToken.findByIdAndUpdate(deviceToken._id, { isUsed: true })
+
+        // Upsert device
+        await Device.findOneAndUpdate(
+            { deviceId },
+            {
+                userId: userData._id,
+                name: deviceName,
+                platform: platform || 'unknown',
+                fcmToken: fcmToken || null,
+                lastSeen: new Date(),
+                isActive: true,
+            },
+            { upsert: true, new: true }
+        )
+
+        // Generate JWT
+        const accessToken = sign(
+            {
+                id: userData._id.toString(),
+                email: userData.email,
+                name: userData.name,
+                provider: 'device',
+                deviceId,
+            },
+            process.env.NEXTAUTH_SECRET,
+            { expiresIn: '30d' }
+        )
+
+        return NextResponse.json({
+            accessToken,
+            user: {
+                id: userData._id.toString(),
+                name: userData.name,
+                email: userData.email,
+                image: userData.image || null,
+            },
+        })
+    } catch (error) {
+        console.error('Device verify error:', error)
+        return NextResponse.json(
+            { error: 'Internal server error' },
+            { status: 500 }
+        )
     }
-
-    const { token, deviceName, platform, deviceId, fcmToken } = parsed.data
-
-    await connectDB()
-
-    // Find the device token
-    const deviceToken = await DeviceToken.findOne({ token, isUsed: false }).populate('userId', '_id email name image')
-    
-    if (!deviceToken) {
-        return err('Invalid or expired token', 401)
-    }
-
-    // Check expiration
-    if (Date.now() > new Date(deviceToken.expiresAt).getTime()) {
-        return err('Token has expired', 401)
-    }
-
-    // Get user data from populated reference
-    const userData = deviceToken.userId
-    
-    if (!userData) {
-        return err('User not found', 404)
-    }
-
-    // Mark token as used
-    await DeviceToken.findByIdAndUpdate(deviceToken._id, { isUsed: true })
-
-    // Upsert device
-    await Device.findOneAndUpdate(
-        { deviceId },
-        {
-            userId: userData._id,
-            name: deviceName,
-            platform: platform || 'unknown',
-            fcmToken: fcmToken || null,
-            lastSeen: new Date(),
-            isActive: true,
-        },
-        { upsert: true, new: true }
-    )
-
-    // Generate JWT
-    const accessToken = sign(
-        {
-            id: userData._id.toString(),
-            email: userData.email,
-            name: userData.name,
-            provider: 'device',
-            deviceId,
-        },
-        process.env.NEXTAUTH_SECRET,
-        { expiresIn: '30d' }
-    )
-
-    return ok({
-        accessToken,
-        user: {
-            id: userData._id.toString(),
-            name: userData.name,
-            email: userData.email,
-            image: userData.image || null,
-        },
-    })
-})
+}
