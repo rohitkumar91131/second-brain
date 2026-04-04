@@ -1,0 +1,40 @@
+{
+  "expo": {
+    "name": "Second Brain",
+    "slug": "second-brain-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0F172A"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.secondbrain.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0F172A"
+      },
+      "package": "com.secondbrain.app",
+      "permissions": ["CAMERA"]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "scheme": "secondbrain",
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow Second Brain to access your camera to scan QR codes."
+        }
+      ]
+    ]
+  }
+}
