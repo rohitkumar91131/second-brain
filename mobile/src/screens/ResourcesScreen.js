@@ -1,12 +1,12 @@
 import React, { useState, useCallback } from 'react'
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, RefreshControl, TextInput, Alert } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
-import { resourcesAPI } from '../../services/api'
-import { StatusBadge } from '../../components/StatusBadge'
-import EmptyState from '../../components/EmptyState'
-import LoadingScreen from '../../components/LoadingScreen'
+import { resourcesAPI } from '../services/api'
+import { StatusBadge } from '../components/StatusBadge'
+import EmptyState from '../components/EmptyState'
+import LoadingScreen from '../components/LoadingScreen'
 import { useFocusEffect } from '@react-navigation/native'
-import { COLORS, FONT_SIZE, RADIUS, SPACING } from '../../constants/theme'
+import { COLORS, FONT_SIZE, RADIUS, SPACING } from '../constants/theme'
 
 const TYPE_ICONS = {
   book: 'book-outline', article: 'document-text-outline', website: 'globe-outline',

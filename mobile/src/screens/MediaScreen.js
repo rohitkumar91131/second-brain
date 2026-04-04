@@ -1,11 +1,11 @@
 import React, { useState, useCallback } from 'react'
 import { View, Text, FlatList, Image, StyleSheet, RefreshControl, TouchableOpacity, Dimensions } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
-import { mediaAPI } from '../../services/api'
-import EmptyState from '../../components/EmptyState'
-import LoadingScreen from '../../components/LoadingScreen'
+import { mediaAPI } from '../services/api'
+import EmptyState from '../components/EmptyState'
+import LoadingScreen from '../components/LoadingScreen'
 import { useFocusEffect } from '@react-navigation/native'
-import { COLORS, FONT_SIZE, RADIUS, SPACING } from '../../constants/theme'
+import { COLORS, FONT_SIZE, RADIUS, SPACING } from '../constants/theme'
 
 const { width } = Dimensions.get('window')
 const ITEM_SIZE = (width - SPACING.lg * 2 - SPACING.sm) / 2

@@ -1,8 +1,15 @@
 import { requireAuth, ok, withErrorHandler } from '@/lib/apiHelpers'
 import crypto from 'crypto'
 
-// In-memory store for connect tokens (TTL: 5 minutes).
-// For production you can move this to Redis / MongoDB.
+/**
+ * In-memory store for one-time QR pairing tokens (TTL: 5 minutes).
+ *
+ * ⚠️  PRODUCTION WARNING: In-memory storage does NOT work reliably in
+ * serverless / edge environments (e.g. Vercel, AWS Lambda) because each
+ * request may be handled by a different function instance.
+ * For production, replace this Map with a short-lived Redis key-value store
+ * (e.g. Upstash Redis) or a MongoDB document with a TTL index.
+ */
 const connectTokens = new Map()
 
 const TOKEN_TTL_MS = 5 * 60 * 1000 // 5 minutes

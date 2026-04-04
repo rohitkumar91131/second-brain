@@ -84,7 +84,7 @@ export default function ConnectPage() {
     useEffect(() => {
         fetchDevices()
         generateToken()
-    }, []) // eslint-disable-line react-hooks/exhaustive-deps
+    }, [fetchDevices, generateToken])
 
     const removeDevice = async (deviceId) => {
         try {
