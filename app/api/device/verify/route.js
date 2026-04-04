@@ -39,13 +39,13 @@ export const POST = withErrorHandler(async (request) => {
         return err('Token has expired', 401)
     }
 
-    // Consume token (one-time use)
-    await DeviceToken.findByIdAndUpdate(entry._id, { isUsed: true })
-
     // Verify user still exists - userId is already populated from ref
     if (!entry.userId) return err('User not found', 404)
     
     const user = entry.userId
+
+    // Consume token (one-time use) - ONLY after all validations pass
+    await DeviceToken.findByIdAndUpdate(entry._id, { isUsed: true })
 
     // Register / update device
     await Device.findOneAndUpdate(
