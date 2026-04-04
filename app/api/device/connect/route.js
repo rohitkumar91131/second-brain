@@ -6,8 +6,8 @@ import crypto from 'crypto'
 const TOKEN_TTL_MS = 5 * 60 * 1000 // 5 minutes
 
 // POST /api/device/connect — generate a QR token for mobile pairing
-export const POST = withErrorHandler(async () => {
-    const { session, error } = await requireAuth()
+export const POST = withErrorHandler(async (request) => {
+    const { session, error } = await requireAuth(request)
     if (error) return error
 
     await connectDB()

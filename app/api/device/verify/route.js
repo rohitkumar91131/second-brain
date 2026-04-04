@@ -24,8 +24,14 @@ export const POST = withErrorHandler(async (request) => {
 
     await connectDB()
 
-    // Find token in database
-    const entry = await DeviceToken.findOne({ token, isUsed: false }).populate('userId', 'email name image')
+    // Find token in database with user details populated
+    let entry
+    try {
+        entry = await DeviceToken.findOne({ token, isUsed: false }).populate('userId', 'email name image')
+    } catch (e) {
+        return err('Database error', 500, { error: e.message })
+    }
+
     if (!entry) return err('Invalid or expired token', 401)
 
     // Check if token has expired
@@ -45,7 +51,7 @@ export const POST = withErrorHandler(async (request) => {
     await Device.findOneAndUpdate(
         { deviceId },
         {
-            userId: entry.userId._id,
+            userId: user._id,
             name: deviceName,
             platform,
             fcmToken: fcmToken ?? null,
