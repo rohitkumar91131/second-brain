@@ -4,7 +4,6 @@ import DeviceToken from '@/lib/models/DeviceToken'
 import User from '@/lib/models/User'
 import { ok, err, withErrorHandler } from '@/lib/apiHelpers'
 import { sign } from 'jsonwebtoken'
-import mongoose from 'mongoose'
 import { z } from 'zod'
 
 const VerifySchema = z.object({
@@ -26,7 +25,7 @@ export const POST = withErrorHandler(async (request) => {
     await connectDB()
 
     // Find token in database
-    const entry = await DeviceToken.findOne({ token, isUsed: false })
+    const entry = await DeviceToken.findOne({ token, isUsed: false }).populate('userId', 'email name image')
     if (!entry) return err('Invalid or expired token', 401)
 
     // Check if token has expired
@@ -37,16 +36,16 @@ export const POST = withErrorHandler(async (request) => {
     // Consume token (one-time use)
     await DeviceToken.findByIdAndUpdate(entry._id, { isUsed: true })
 
-    // Verify user still exists
-    const userId = new mongoose.Types.ObjectId(entry.userId)
-    const user = await User.findById(userId).lean()
-    if (!user) return err('User not found', 404)
+    // Verify user still exists - userId is already populated from ref
+    if (!entry.userId) return err('User not found', 404)
+    
+    const user = entry.userId
 
     // Register / update device
     await Device.findOneAndUpdate(
         { deviceId },
         {
-            userId: entry.userId,
+            userId: entry.userId._id,
             name: deviceName,
             platform,
             fcmToken: fcmToken ?? null,
@@ -73,9 +72,9 @@ export const POST = withErrorHandler(async (request) => {
     return ok({
         accessToken,
         user: {
-            id: entry.userId.toString(),
-            name: entry.userName,
-            email: entry.userEmail,
+            id: user._id.toString(),
+            name: user.name,
+            email: user.email,
             image: user.image ?? null,
         },
     })
