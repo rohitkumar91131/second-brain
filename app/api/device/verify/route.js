@@ -31,7 +31,7 @@ export async function POST(request) {
         await connectDB()
 
         // Find the device token
-        const deviceToken = await DeviceToken.findOne({ token, isUsed: false }).populate('userId', '_id email name image')
+        const deviceToken = await DeviceToken.findOne({ token, isUsed: false })
         
         if (!deviceToken) {
             return NextResponse.json(
@@ -48,8 +48,8 @@ export async function POST(request) {
             )
         }
 
-        // Get user data from populated reference
-        const userData = deviceToken.userId
+        // Fetch user data separately
+        const userData = await User.findById(deviceToken.userId).select('_id email name image')
         
         if (!userData) {
             return NextResponse.json(
