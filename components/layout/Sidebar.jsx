@@ -10,7 +10,7 @@ import {
     BookOpen, FileText, BookMarked, Archive, ChevronLeft,
     ChevronRight, Brain, LogOut, User, Settings, Trash2,
     Image as ImageIcon,
-    ExternalLink
+    ExternalLink, Smartphone
 } from 'lucide-react'
 
 const navItems = [
@@ -23,6 +23,7 @@ const navItems = [
     { href: '/dashboard/resources', label: 'Resources', icon: BookOpen },
     { href: '/dashboard/notes', label: 'Notes', icon: FileText },
     { href: '/dashboard/journal', label: 'Journal', icon: BookMarked },
+    { href: '/dashboard/connect', label: 'Connect', icon: Smartphone },
     { href: '/dashboard/archive', label: 'Archive', icon: Archive },
     { href: '/dashboard/recycle-bin', label: 'Recycle Bin', icon: Trash2 },
     { href: '/dashboard/settings', label: 'Settings', icon: Settings },
