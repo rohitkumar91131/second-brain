@@ -59,9 +59,9 @@ export const POST = withErrorHandler(async (request) => {
     const jwtSecret = process.env.NEXTAUTH_SECRET
     const accessToken = sign(
         {
-            id: entry.userId.toString(),
-            email: entry.userEmail,
-            name: entry.userName,
+            id: user._id.toString(),
+            email: user.email,
+            name: user.name,
             provider: 'device',
             deviceId,
         },
