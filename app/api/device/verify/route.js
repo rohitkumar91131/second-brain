@@ -29,7 +29,8 @@ export const POST = withErrorHandler(async (request) => {
     try {
         entry = await DeviceToken.findOne({ token, isUsed: false }).populate('userId', 'email name image')
     } catch (e) {
-        return err('Database error', 500, { error: e.message })
+        console.error('Populate error:', e)
+        return err('Database error', 500)
     }
 
     if (!entry) return err('Invalid or expired token', 401)
@@ -40,9 +41,18 @@ export const POST = withErrorHandler(async (request) => {
     }
 
     // Verify user still exists - userId is already populated from ref
-    if (!entry.userId) return err('User not found', 404)
+    let user = entry.userId
     
-    const user = entry.userId
+    // Fallback: if populate failed, query user directly
+    if (!user) {
+        try {
+            user = await User.findById(entry.userId).lean()
+        } catch (e) {
+            console.error('User lookup error:', e)
+        }
+    }
+    
+    if (!user) return err('User not found', 404)
 
     // Consume token (one-time use) - ONLY after all validations pass
     await DeviceToken.findByIdAndUpdate(entry._id, { isUsed: true })

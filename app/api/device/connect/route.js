@@ -1,6 +1,7 @@
 import { requireAuth, ok, withErrorHandler } from '@/lib/apiHelpers'
 import connectDB from '@/lib/mongodb'
 import DeviceToken from '@/lib/models/DeviceToken'
+import mongoose from 'mongoose'
 import crypto from 'crypto'
 
 const TOKEN_TTL_MS = 5 * 60 * 1000 // 5 minutes
@@ -15,10 +16,19 @@ export const POST = withErrorHandler(async (request) => {
     const token = crypto.randomBytes(32).toString('hex')
     const expiresAt = new Date(Date.now() + TOKEN_TTL_MS)
 
+    // Convert userId to ObjectId if it's a string
+    let userId
+    try {
+        userId = new mongoose.Types.ObjectId(session.user.id)
+    } catch (e) {
+        console.error('Invalid userId format:', session.user.id)
+        return ok({ error: 'Invalid user ID' }, 400)
+    }
+
     // Save token to MongoDB
     const deviceToken = new DeviceToken({
         token,
-        userId: session.user.id,
+        userId,
         userName: session.user.name,
         userEmail: session.user.email,
         expiresAt,
