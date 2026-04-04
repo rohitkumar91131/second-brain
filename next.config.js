@@ -6,9 +6,6 @@ const nextConfig = {
             { protocol: 'https', hostname: '**' },
         ],
     },
-    experimental: {
-        serverComponentsExternalPackages: ['@react-pdf/renderer'],
-    },
 }
 
 module.exports = nextConfig
