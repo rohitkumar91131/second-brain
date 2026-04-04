@@ -1,7 +1,6 @@
 import connectDB from '@/lib/mongodb'
 import Device from '@/lib/models/Device'
 import DeviceToken from '@/lib/models/DeviceToken'
-import User from '@/lib/models/User'
 import { ok, err, withErrorHandler } from '@/lib/apiHelpers'
 import { sign } from 'jsonwebtoken'
 import { z } from 'zod'
@@ -37,7 +36,7 @@ export const POST = withErrorHandler(async (request) => {
         return err('Token has expired', 401)
     }
 
-    // Get user data
+    // Get user data from populated reference
     const userData = deviceToken.userId
     
     if (!userData) {
