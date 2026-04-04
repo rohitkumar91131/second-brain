@@ -40,13 +40,15 @@ npm install
 
 ### 2. Configure the API URL
 
-Edit `src/constants/config.js`:
+The production URL is already set in `src/constants/config.js`:
 
 ```js
-// For local dev (Android emulator uses 10.0.2.2, iOS simulator uses localhost)
-export const API_BASE_URL = 'http://10.0.2.2:3000'   // Android emulator
-// export const API_BASE_URL = 'http://localhost:3000'  // iOS simulator
-// export const API_BASE_URL = 'https://your-app.vercel.app' // Production
+// Production (default — already configured)
+export const API_BASE_URL = 'https://secondbrain.rohits.online'
+
+// For local dev only:
+// export const API_BASE_URL = 'http://10.0.2.2:3000'   // Android emulator
+// export const API_BASE_URL = 'http://localhost:3000'   // iOS simulator
 ```
 
 > **Note:** When using QR code pairing, the server URL is automatically read from the QR code — no manual config needed.
