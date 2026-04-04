@@ -1,8 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter, useSearchParams, useSession, signIn } from 'next-auth/react'
-import { useLayoutEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useSession, signIn } from 'next-auth/react'
 import Link from 'next/link'
 
 export default function AddDevicePage() {
