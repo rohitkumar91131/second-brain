@@ -15,6 +15,7 @@ const VerifySchema = z.object({
 })
 
 // POST /api/device/verify — called by mobile app after scanning QR code
+// Verifies the QR token and issues JWT for device
 export const POST = withErrorHandler(async (request) => {
     const body = await request.json()
     const parsed = VerifySchema.safeParse(body)
