@@ -4,6 +4,7 @@ import DeviceToken from '@/lib/models/DeviceToken'
 import User from '@/lib/models/User'
 import { ok, err, withErrorHandler } from '@/lib/apiHelpers'
 import { sign } from 'jsonwebtoken'
+import mongoose from 'mongoose'
 import { z } from 'zod'
 
 const VerifySchema = z.object({
@@ -37,7 +38,8 @@ export const POST = withErrorHandler(async (request) => {
     await DeviceToken.findByIdAndUpdate(entry._id, { isUsed: true })
 
     // Verify user still exists
-    const user = await User.findById(entry.userId).lean()
+    const userId = new mongoose.Types.ObjectId(entry.userId)
+    const user = await User.findById(userId).lean()
     if (!user) return err('User not found', 404)
 
     // Register / update device
