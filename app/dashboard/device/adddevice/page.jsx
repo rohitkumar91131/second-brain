@@ -1,11 +1,14 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useSession, signIn } from 'next-auth/react'
 import Link from 'next/link'
 
-export default function AddDevicePage() {
+// Mark page as dynamic since it uses search params
+export const dynamic = 'force-dynamic'
+
+function AddDeviceContent() {
     const router = useRouter()
     const searchParams = useSearchParams()
     const { data: session, status } = useSession()
@@ -218,5 +221,20 @@ export default function AddDevicePage() {
                 )}
             </div>
         </div>
+    )
+}
+
+export default function AddDevicePage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+                <div className="bg-white rounded-lg shadow-lg p-8 max-w-md w-full">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
+                    <p className="mt-4 text-center text-gray-600">Loading verification...</p>
+                </div>
+            </div>
+        }>
+            <AddDeviceContent />
+        </Suspense>
     )
 }
