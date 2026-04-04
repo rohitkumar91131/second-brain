@@ -156,13 +156,24 @@ export default function ConnectPage() {
 
                 {/* Connected Devices */}
                 <div className="glass rounded-3xl p-8 border border-white/5">
-                    <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                        <CheckCircle2 size={18} className="text-green-400" />
-                        Connected Devices
-                        <span className="ml-auto text-xs font-normal text-slate-500 bg-white/5 px-2 py-0.5 rounded-full">
-                            {devices.length}
-                        </span>
-                    </h2>
+                    <div className="flex items-center justify-between mb-4">
+                        <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                            <CheckCircle2 size={18} className="text-green-400" />
+                            Connected Devices
+                            <span className="ml-auto text-xs font-normal text-slate-500 bg-white/5 px-2 py-0.5 rounded-full">
+                                {devices.length}
+                            </span>
+                        </h2>
+                        <button
+                            onClick={fetchDevices}
+                            disabled={devicesLoading}
+                            className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 text-xs font-semibold transition-all disabled:opacity-50"
+                            title="Manually fetch connected devices"
+                        >
+                            <RefreshCw size={12} className={devicesLoading ? 'animate-spin' : ''} />
+                            Fetch
+                        </button>
+                    </div>
 
                     {devicesLoading && (
                         <div className="space-y-3">
