@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import connectDB from '@/lib/mongodb'
 import Device from '@/lib/models/Device'
 import DeviceToken from '@/lib/models/DeviceToken'
+import User from '@/lib/models/User'
 import { sign } from 'jsonwebtoken'
 import { z } from 'zod'
 
