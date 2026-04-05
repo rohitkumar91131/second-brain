@@ -59,8 +59,8 @@ function BlockItem({ block }) {
     case 'divider':
       return <View style={styles.divider} />
     case 'image':
-      return block.url ? (
-        <Image source={{ uri: block.url }} style={styles.image} resizeMode="cover" />
+      return block.content ? (
+        <Image source={{ uri: block.content }} style={styles.image} resizeMode="cover" />
       ) : null
     default:
       if (content) return <Text style={styles.paragraph}>{content}</Text>

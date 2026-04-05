@@ -60,8 +60,8 @@ export default function MediaScreen() {
         ListEmptyComponent={<EmptyState icon="images-outline" title="No media yet" subtitle="Add images, videos, or audio to your notes to see them here" />}
         renderItem={({ item }) => (
           <View style={styles.mediaCard}>
-            {item.type === 'image' && item.url
-              ? <Image source={{ uri: item.url }} style={styles.mediaImage} resizeMode="cover" />
+            {item.type === 'image' && item.content
+              ? <Image source={{ uri: item.content }} style={styles.mediaImage} resizeMode="cover" />
               : (
                 <View style={styles.mediaPlaceholder}>
                   <Ionicons
