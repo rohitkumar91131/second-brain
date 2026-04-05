@@ -3,24 +3,40 @@
 # This hook runs before the build starts to fix incompatible gradle properties
 # Remove enableBundleCompression from generated build.gradle as it's not supported in Gradle 8.13+
 
-echo "EAS Build Hook: Removing enableBundleCompression from build.gradle..."
+echo "EAS Build Hook started."
 
-if [ -f "$EXPO_ANDROID_APP_BUILD_GRADLE_PATH" ]; then
-    echo "Found build.gradle at: $EXPO_ANDROID_APP_BUILD_GRADLE_PATH"
-    # Remove lines containing enableBundleCompression
-    sed -i '/enableBundleCompression/d' "$EXPO_ANDROID_APP_BUILD_GRADLE_PATH"
-    echo "✓ Removed enableBundleCompression"
-else
-    echo "Warning: build.gradle not found at: $EXPO_ANDROID_APP_BUILD_GRADLE_PATH"
-fi
+# Set project root if not set
+PROJECT_ROOT="${EXPO_PROJECT_ROOT:-$(pwd)}"
+echo "Project root: $PROJECT_ROOT"
 
-# Also ensure the project-level gradle.properties has the right setting
-GRADLE_PROPS="/home/expo/workingdir/build/android/gradle.properties"
+# Find all build.gradle files and remove enableBundleCompression
+echo "Searching for build.gradle files to patch..."
+find "$PROJECT_ROOT" -name "build.gradle" -type f | while read -r file; do
+    if grep -q "enableBundleCompression" "$file"; then
+        echo "Patching $file..."
+        sed -i '/enableBundleCompression/d' "$file"
+    fi
+done
+
+# Check gradle.properties in the android folder
+# Path on EAS is typically $PROJECT_ROOT/android/gradle.properties
+GRADLE_PROPS="$PROJECT_ROOT/android/gradle.properties"
 if [ -f "$GRADLE_PROPS" ]; then
-    echo "Checking project gradle.properties..."
+    echo "Found gradle.properties at: $GRADLE_PROPS"
+    # Ensure react.disableBundleCompression=true is present
     if ! grep -q "react.disableBundleCompression" "$GRADLE_PROPS"; then
         echo "react.disableBundleCompression=true" >> "$GRADLE_PROPS"
-        echo "✓ Added react.disableBundleCompression=true to gradle.properties"
+        echo "✓ Added react.disableBundleCompression=true"
+    fi
+else
+    echo "Warning: gradle.properties not found at: $GRADLE_PROPS"
+    # Try to find it if path is different
+    ALT_PROPS=$(find "$PROJECT_ROOT" -name "gradle.properties" -path "*/android/*" -type f | head -n 1)
+    if [ -n "$ALT_PROPS" ]; then
+        echo "Found alternative gradle.properties at: $ALT_PROPS"
+        if ! grep -q "react.disableBundleCompression" "$ALT_PROPS"; then
+            echo "react.disableBundleCompression=true" >> "$ALT_PROPS"
+        fi
     fi
 fi
 
