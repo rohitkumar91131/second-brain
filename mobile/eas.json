@@ -5,8 +5,14 @@
   "build": {
     "preview": {
       "distribution": "internal",
+      "env": {
+        "NPM_CONFIG_LEGACY_PEER_DEPS": "true"
+      },
       "android": {
         "withoutCredentials": true
+      },
+      "hooks": {
+        "preInstall": "bash eas/hooks/eas-build-pre-install.sh"
       }
     },
     "production": {}
@@ -15,4 +21,3 @@
     "production": {}
   }
 }
-
