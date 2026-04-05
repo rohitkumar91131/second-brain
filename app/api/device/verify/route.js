@@ -18,7 +18,7 @@ export async function POST(request) {
     try {
         const body = await request.json()
         const parsed = VerifySchema.safeParse(body)
-        
+
         if (!parsed.success) {
             return NextResponse.json(
                 { error: 'Validation failed', details: parsed.error.flatten() },
@@ -32,7 +32,7 @@ export async function POST(request) {
 
         // Find the device token
         const deviceToken = await DeviceToken.findOne({ token, isUsed: false })
-        
+
         if (!deviceToken) {
             return NextResponse.json(
                 { error: 'Invalid or expired token' },
@@ -48,9 +48,10 @@ export async function POST(request) {
             )
         }
 
-        // Fetch user data separately
-        const userData = await User.findById(deviceToken.userId).select('_id email name image')
-        
+        // Fetch user data separately (finding by ObjectId, or fallback to email)
+        const userData = await User.findById(deviceToken.userId).select('_id email name image') ||
+            await User.findOne({ email: deviceToken.userEmail }).select('_id email name image')
+
         if (!userData) {
             return NextResponse.json(
                 { error: 'User not found' },
