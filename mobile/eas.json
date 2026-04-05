@@ -10,9 +10,6 @@
       },
       "android": {
         "withoutCredentials": true
-      },
-      "hooks": {
-        "preInstall": "bash eas/hooks/eas-build-pre-install.sh"
       }
     },
     "production": {}
