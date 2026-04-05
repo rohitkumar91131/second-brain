@@ -1,0 +1,9 @@
+eas.json is not valid.
+- "build.preview.android.withoutNativeBuild" is not allowed
+- "build.preview.hooks" is not allowed
+- "build.production.hooks" is not allowed
+    Error: build command failed.
+eas.json is not valid.
+- "build.preview.preInstallHooks" is not allowed
+- "build.production.preInstallHooks" is not allowed
+    Error: build command failed.
