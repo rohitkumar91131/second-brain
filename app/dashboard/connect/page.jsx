@@ -156,7 +156,7 @@ export default function ConnectPage() {
 
                     {/* OTP alternative */}
                     <div className="w-full border-t border-white/5 pt-4 mt-2">
-                        <p className="text-xs text-slate-500 text-center mb-3">Can't scan? Use OTP instead</p>
+                        <p className="text-xs text-slate-500 text-center mb-3">Can&apos;t scan? Use OTP instead</p>
                         <Link
                             href="/dashboard/connect/otp"
                             className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-2xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 text-sm font-semibold transition-all border border-indigo-500/20"
