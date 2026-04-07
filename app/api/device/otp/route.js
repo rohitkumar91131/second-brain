@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import connectDB from '@/lib/mongodb'
 import DeviceOtp from '@/lib/models/DeviceOtp'
+import crypto from 'crypto'
 
 const OTP_TTL_MS = 10 * 60 * 1000 // 10 minutes
 
@@ -16,8 +17,8 @@ export async function POST(request) {
 
         await connectDB()
 
-        // Generate 6-digit OTP
-        const otp = Math.floor(100000 + Math.random() * 900000).toString()
+        // Generate cryptographically secure 6-digit OTP
+        const otp = crypto.randomInt(100000, 1000000).toString()
         const expiresAt = new Date(Date.now() + OTP_TTL_MS)
 
         const otpRecord = new DeviceOtp({

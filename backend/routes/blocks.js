@@ -93,9 +93,21 @@ router.get('/media', requireAuth, async (req, res) => {
 router.put('/bulk', requireAuth, async (req, res) => {
   try {
     const updates = req.body
-    if (!Array.isArray(updates)) return res.status(400).json({ error: 'Body must be an array of block updates' })
+    if (!Array.isArray(updates) || updates.length === 0) return res.status(400).json({ error: 'Body must be a non-empty array of block updates' })
 
     await connectDB()
+    const userId = new mongoose.Types.ObjectId(req.user.id)
+
+    // Verify that all blocks belong to the user
+    const blockIds = updates.map(u => u.id).filter(id => mongoose.Types.ObjectId.isValid(id))
+    const blocks = await Block.find({ _id: { $in: blockIds } }).lean()
+
+    for (const block of blocks) {
+      const owned = block.entityType === 'Note'
+        ? await Note.exists({ _id: block.entityId, userId })
+        : await JournalEntry.exists({ _id: block.entityId, userId })
+      if (!owned) return res.status(403).json({ error: 'Forbidden' })
+    }
 
     const ops = updates.map(u => ({
       updateOne: {
@@ -124,6 +136,14 @@ router.get('/:id', requireAuth, async (req, res) => {
     await connectDB()
     const block = await Block.findById(req.params.id).lean()
     if (!block) return res.status(404).json({ error: 'Block not found' })
+
+    // Verify ownership via entity
+    const userId = new mongoose.Types.ObjectId(req.user.id)
+    const owned = block.entityType === 'Note'
+      ? await Note.exists({ _id: block.entityId, userId })
+      : await JournalEntry.exists({ _id: block.entityId, userId })
+    if (!owned) return res.status(403).json({ error: 'Forbidden' })
+
     return res.json({ ...block, id: block._id.toString(), _id: undefined })
   } catch (e) {
     console.error(e)
@@ -136,16 +156,25 @@ router.patch('/:id', requireAuth, async (req, res) => {
   try {
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) return res.status(400).json({ error: 'Invalid ID' })
     await connectDB()
-    const block = await Block.findByIdAndUpdate(
+    const block = await Block.findById(req.params.id).lean()
+    if (!block) return res.status(404).json({ error: 'Block not found' })
+
+    // Verify ownership via entity
+    const userId = new mongoose.Types.ObjectId(req.user.id)
+    const owned = block.entityType === 'Note'
+      ? await Note.exists({ _id: block.entityId, userId })
+      : await JournalEntry.exists({ _id: block.entityId, userId })
+    if (!owned) return res.status(403).json({ error: 'Forbidden' })
+
+    const updated = await Block.findByIdAndUpdate(
       req.params.id,
       { $set: req.body },
       { new: true, runValidators: true }
     ).lean()
-    if (!block) return res.status(404).json({ error: 'Block not found' })
 
     await updateEntityPreview(block.entityId, block.entityType)
 
-    return res.json({ ...block, id: block._id.toString(), _id: undefined })
+    return res.json({ ...updated, id: updated._id.toString(), _id: undefined })
   } catch (e) {
     console.error(e)
     return res.status(500).json({ error: 'Internal server error' })
@@ -157,9 +186,17 @@ router.delete('/:id', requireAuth, async (req, res) => {
   try {
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) return res.status(400).json({ error: 'Invalid ID' })
     await connectDB()
-    const block = await Block.findByIdAndDelete(req.params.id)
+    const block = await Block.findById(req.params.id).lean()
     if (!block) return res.status(404).json({ error: 'Block not found' })
 
+    // Verify ownership via entity
+    const userId = new mongoose.Types.ObjectId(req.user.id)
+    const owned = block.entityType === 'Note'
+      ? await Note.exists({ _id: block.entityId, userId })
+      : await JournalEntry.exists({ _id: block.entityId, userId })
+    if (!owned) return res.status(403).json({ error: 'Forbidden' })
+
+    await Block.findByIdAndDelete(req.params.id)
     await updateEntityPreview(block.entityId, block.entityType)
 
     return res.json({ message: 'Block deleted' })

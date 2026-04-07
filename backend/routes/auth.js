@@ -27,8 +27,7 @@ router.post('/login', async (req, res) => {
 
     await connectDB()
     const user = await User.findOne({ email: email.toLowerCase().trim() }).select('+password')
-    if (!user) return res.status(401).json({ error: 'Invalid credentials' })
-    if (!user.password) return res.status(401).json({ error: 'This account does not use password login. Please use QR or OTP.' })
+    if (!user || !user.password) return res.status(401).json({ error: 'Invalid credentials' })
 
     const valid = await bcrypt.compare(password, user.password)
     if (!valid) return res.status(401).json({ error: 'Invalid credentials' })
