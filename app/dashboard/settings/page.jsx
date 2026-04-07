@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useTheme } from 'next-themes'
 import { Monitor, Sun, Moon } from 'lucide-react'
+import { useApp } from '@/context/AppContext'
 
 const themeOptions = [
     { value: 'system', label: 'System', icon: Monitor, desc: 'Follow your device\'s system preference' },
@@ -14,6 +15,7 @@ export default function SettingsPage() {
     const [homepageDashboard, setHomepageDashboard] = useState(false)
     const [defaultPdfTheme, setDefaultPdfTheme] = useState('bright')
     const { theme, setTheme } = useTheme()
+    const { offlineMode, setOfflineMode } = useApp()
     const [mounted, setMounted] = useState(false)
 
     useEffect(() => {
@@ -34,6 +36,11 @@ export default function SettingsPage() {
     const handlePdfThemeChange = (val) => {
         setDefaultPdfTheme(val)
         localStorage.setItem('setting_pdf_theme', val)
+    }
+
+    const toggleOfflineMode = () => {
+        const next = !offlineMode
+        setOfflineMode(next)
     }
 
     return (
@@ -116,6 +123,25 @@ export default function SettingsPage() {
                                     className="sr-only peer"
                                     checked={homepageDashboard}
                                     onChange={toggleHomepageDashboard}
+                                />
+                                <div className="w-11 h-6 bg-notion-border peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-notion-accent"></div>
+                            </label>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 border border-notion-border rounded-xl bg-notion-card mt-4">
+                            <div>
+                                <h3 className="font-semibold text-notion-text text-sm">Offline Mode</h3>
+                                <p className="text-xs text-notion-muted mt-1">
+                                    Cache notes and project data for access without an internet connection.
+                                </p>
+                            </div>
+
+                            <label className="relative inline-flex items-center cursor-pointer">
+                                <input
+                                    type="checkbox"
+                                    className="sr-only peer"
+                                    checked={offlineMode}
+                                    onChange={toggleOfflineMode}
                                 />
                                 <div className="w-11 h-6 bg-notion-border peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-notion-accent"></div>
                             </label>

@@ -2,6 +2,17 @@
 
 import { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { SessionProvider, useSession } from 'next-auth/react'
+import {
+    getOfflineNotes,
+    setOfflineNotes,
+    upsertOfflineNotes,
+    getOfflineProjects,
+    setOfflineProjects,
+    upsertOfflineProjects,
+    getOfflineNoteBlocks,
+    setOfflineNoteBlocks,
+    cacheImagesFromBlocks
+} from '@/lib/offlineDb'
 // Commented out the potentially faulty storage functions
 // import { getStorage, setStorage } from '@/lib/storage'
 
@@ -54,11 +65,27 @@ function AppContextInner({ children }) {
     const [activeBlocks, setActiveBlocks] = useState([])
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
     const [focusMode, setFocusMode] = useState(false)
+    const [offlineMode, setOfflineMode] = useState(false)
+    const [isOnline, setIsOnline] = useState(true)
 
     useEffect(() => {
         const stored = safeGetStorage('sidebarCollapsed');
         if (stored !== null) {
             setSidebarCollapsed(stored);
+        }
+    }, [])
+
+    useEffect(() => {
+        if (typeof window === 'undefined') return
+        setOfflineMode(localStorage.getItem('setting_offline_mode') === 'true')
+        setIsOnline(navigator.onLine)
+        const handleOnline = () => setIsOnline(true)
+        const handleOffline = () => setIsOnline(false)
+        window.addEventListener('online', handleOnline)
+        window.addEventListener('offline', handleOffline)
+        return () => {
+            window.removeEventListener('online', handleOnline)
+            window.removeEventListener('offline', handleOffline)
         }
     }, [])
     const [loading, setLoading] = useState(true)
@@ -86,10 +113,38 @@ function AppContextInner({ children }) {
         else loadFromLocalStorage()
     }, [status, isAuthenticated])
 
+    const loadFromOfflineDb = useCallback(async () => {
+        try {
+            const [cachedNotes, cachedProjects] = await Promise.all([
+                getOfflineNotes(),
+                getOfflineProjects()
+            ])
+
+            if (cachedNotes?.length) setNotes(cachedNotes)
+            if (cachedProjects?.length) setProjects(cachedProjects)
+
+            if (cachedNotes?.length || cachedProjects?.length) {
+                setFetchedEndpoints(prev => {
+                    const next = new Set(prev)
+                    if (cachedNotes?.length) next.add('notes')
+                    if (cachedProjects?.length) next.add('projects')
+                    return next
+                })
+            }
+        } catch (err) {
+            console.error('Failed to load offline cache', err)
+        }
+    }, [])
+
     const fetchAllFromAPI = async (force = false) => {
         if (!force && fetchedEndpoints.has('all')) return
         startFetch()
         try {
+            if (typeof navigator !== 'undefined' && !navigator.onLine) {
+                await loadFromOfflineDb()
+                setIsInitialized(true)
+                return
+            }
             const pathname = typeof window !== 'undefined' ? window.location.pathname : '/'
             const pickEndpointsForPath = (p) => {
                 if (p.startsWith('/dashboard/tasks')) return ['tasks']
@@ -168,6 +223,18 @@ function AppContextInner({ children }) {
 
         try {
             startFetch()
+            if (typeof navigator !== 'undefined' && !navigator.onLine) {
+                if (endpoint.startsWith('notes')) {
+                    const cachedNotes = await getOfflineNotes()
+                    if (cachedNotes?.length) setNotes(cachedNotes)
+                }
+                if (endpoint.startsWith('projects')) {
+                    const cachedProjects = await getOfflineProjects()
+                    if (cachedProjects?.length) setProjects(cachedProjects)
+                }
+                setFetchedEndpoints(prev => new Set(prev).add(endpoint))
+                return
+            }
             const res = await fetch(`/api/${endpoint}`)
             if (!res.ok) throw new Error('API error')
             const data = await res.json()
@@ -201,7 +268,7 @@ function AppContextInner({ children }) {
 
     const fetchMedia = useCallback(() => fetchEndpoint('blocks/media'), [fetchEndpoint])
 
-    const loadFromLocalStorage = () => {
+    const loadFromLocalStorage = async () => {
         startFetch()
         const stored = safeGetStorage('appData')
 
@@ -230,6 +297,10 @@ function AppContextInner({ children }) {
             setDeletedNotes([])
         }
 
+        if (typeof navigator !== 'undefined' && !navigator.onLine) {
+            await loadFromOfflineDb()
+        }
+
         setViewPreferences(safeGetStorage('viewPreferences') || safeGetStorage('sbt_settings') || {})
         setIsInitialized(true)
         endFetch()
@@ -255,8 +326,22 @@ function AppContextInner({ children }) {
 
     useEffect(() => {
         if (!isInitialized) return
+        const syncOffline = async () => {
+            await setOfflineNotes(notes)
+            await setOfflineProjects(projects)
+        }
+        syncOffline()
+    }, [notes, projects, isInitialized])
+
+    useEffect(() => {
+        if (!isInitialized) return
         safeSetStorage('sidebarCollapsed', sidebarCollapsed)
     }, [sidebarCollapsed, isInitialized])
+
+    useEffect(() => {
+        if (typeof window === 'undefined') return
+        localStorage.setItem('setting_offline_mode', offlineMode.toString())
+    }, [offlineMode])
 
     const apiCall = useCallback(async (method, url, body) => {
         const res = await fetch(url, {
@@ -366,6 +451,19 @@ function AppContextInner({ children }) {
     const fetchEntity = useCallback(async (entityType, entityId) => {
         startFetch()
         try {
+            if (entityType === 'Note' && typeof navigator !== 'undefined' && !navigator.onLine) {
+                const cachedNotes = await getOfflineNotes()
+                const cachedNote = cachedNotes?.find(n => n.id === entityId)
+                if (cachedNote) {
+                    setNotes(prev => {
+                        const exists = prev.find(n => n.id === entityId)
+                        if (exists) return prev.map(n => n.id === entityId ? cachedNote : n)
+                        return [cachedNote, ...prev]
+                    })
+                    return cachedNote
+                }
+                return null
+            }
             const endpoint = entityType === 'Note' ? 'notes' : 'journal'
             const item = await apiCall('GET', `/api/${endpoint}/${entityId}`)
             if (entityType === 'Note') {
@@ -390,9 +488,22 @@ function AppContextInner({ children }) {
     const fetchBlocks = useCallback(async (entityId, entityType = 'Note') => {
         startFetch()
         try {
+            if (entityType === 'Note' && typeof navigator !== 'undefined' && !navigator.onLine) {
+                const cachedBlocks = await getOfflineNoteBlocks(entityId)
+                if (cachedBlocks) {
+                    setActiveBlocks(cachedBlocks)
+                    return cachedBlocks
+                }
+                setActiveBlocks([])
+                return []
+            }
             const endpoint = entityType === 'Note' ? 'notes' : 'journal'
             const blocks = await apiCall('GET', `/api/${endpoint}/${entityId}/blocks`)
             setActiveBlocks(blocks)
+            if (entityType === 'Note') {
+                await setOfflineNoteBlocks(entityId, blocks)
+                await cacheImagesFromBlocks(blocks)
+            }
             return blocks
         } finally {
             endFetch()
@@ -428,10 +539,18 @@ function AppContextInner({ children }) {
 
     const bulkUpdateBlocks = useCallback(async (entityId, entityType, blocks) => {
         setActiveBlocks(blocks)
+        if (entityType === 'Note') {
+            await setOfflineNoteBlocks(entityId, blocks)
+            await cacheImagesFromBlocks(blocks)
+        }
         try {
             const endpoint = entityType === 'Note' ? 'notes' : 'journal'
             const updated = await apiCall('PATCH', `/api/${endpoint}/${entityId}/blocks`, blocks)
             setActiveBlocks(updated)
+            if (entityType === 'Note') {
+                await setOfflineNoteBlocks(entityId, updated)
+                await cacheImagesFromBlocks(updated)
+            }
             return updated
         } catch (err) {
             console.error('Bulk update failed', err)
@@ -439,10 +558,56 @@ function AppContextInner({ children }) {
         }
     }, [apiCall])
 
+    const cacheNoteForOffline = useCallback(async (noteId, noteData) => {
+        const note = noteData || notes.find(n => n.id === noteId)
+        if (note) {
+            await upsertOfflineNotes([note])
+        }
+        if (typeof navigator !== 'undefined' && !navigator.onLine) return
+        try {
+            const cachedBlocks = await getOfflineNoteBlocks(noteId)
+            if (cachedBlocks?.length) {
+                await cacheImagesFromBlocks(cachedBlocks)
+                return
+            }
+            const blocks = await apiCall('GET', `/api/notes/${noteId}/blocks`)
+            await setOfflineNoteBlocks(noteId, blocks)
+            await cacheImagesFromBlocks(blocks)
+        } catch (err) {
+            console.error('Failed to cache note offline', err)
+        }
+    }, [notes, apiCall])
+
+    const cacheProjectForOffline = useCallback(async (projectId) => {
+        const project = projects.find(p => p.id === projectId)
+        if (project) {
+            await upsertOfflineProjects([project])
+        }
+        const projectNotes = notes.filter(n => n.projectIds?.includes(projectId))
+        await Promise.all(projectNotes.map(note => cacheNoteForOffline(note.id, note)))
+    }, [projects, notes, cacheNoteForOffline])
+
+    useEffect(() => {
+        if (!offlineMode || !isOnline || !isAuthenticated) return
+        let isCancelled = false
+        const prefetchAll = async () => {
+            for (const note of notes) {
+                if (isCancelled) return
+                await cacheNoteForOffline(note.id, note)
+            }
+        }
+        prefetchAll()
+        return () => {
+            isCancelled = true
+        }
+    }, [offlineMode, isOnline, isAuthenticated, notes, cacheNoteForOffline])
+
     const value = useMemo(() => ({
         tasks, projects, goals, notes, journal, areas, resources, archive,
         viewPreferences,
         sidebarCollapsed, setSidebarCollapsed,
+        offlineMode, setOfflineMode,
+        isOnline,
         loading,
         session,
         isAuthenticated,
@@ -491,16 +656,18 @@ function AppContextInner({ children }) {
         updateBlock,
         deleteBlock,
         bulkUpdateBlocks,
+        cacheNoteForOffline,
+        cacheProjectForOffline,
         media,
         fetchMedia,
         isFetched: (endpoint) => fetchedEndpoints.has(endpoint)
     }), [
         tasks, projects, goals, notes, journal, areas, resources, archive,
-        viewPreferences, sidebarCollapsed, loading, session, isAuthenticated,
+        viewPreferences, sidebarCollapsed, offlineMode, isOnline, loading, session, isAuthenticated,
         taskCRUD, projectCRUD, goalCRUD, noteCRUD, journalCRUD, resourceCRUD,
         fetchEndpoint, fetchMedia, archiveNote, recycleNote, restoreNote, deleteNotePermanently,
         archivedNotes, deletedNotes, activeBlocks, focusMode, fetchEntity, fetchBlocks,
-        addBlock, updateBlock, deleteBlock, bulkUpdateBlocks, media, fetchedEndpoints, isInitialized
+        addBlock, updateBlock, deleteBlock, bulkUpdateBlocks, cacheNoteForOffline, cacheProjectForOffline, media, fetchedEndpoints, isInitialized
     ])
 
     return <AppContext.Provider value={value}>{children}</AppContext.Provider>

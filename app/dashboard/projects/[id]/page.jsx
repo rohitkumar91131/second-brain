@@ -17,7 +17,7 @@ export default function ProjectDetailPage() {
     const params = useParams()
     const router = useRouter()
     const projectId = params.id
-    const { projects, tasks, notes, addTask, updateTask, deleteTask, loading, updateNote, deleteNote, fetchEndpoint, updateProject, deleteProject } = useApp()
+    const { projects, tasks, notes, addTask, updateTask, deleteTask, loading, updateNote, deleteNote, fetchEndpoint, updateProject, deleteProject, cacheProjectForOffline, cacheNoteForOffline } = useApp()
 
     const [selectedDate, setSelectedDate] = useState(new Date())
     const [project, setProject] = useState(null)
@@ -200,6 +200,26 @@ export default function ProjectDetailPage() {
 
     const handleOpenNewWindow = (note) => {
         window.open(`/dashboard/notes/${note.id}`, '_blank')
+    }
+
+    const handleMakeProjectOffline = async (targetProject) => {
+        try {
+            await cacheProjectForOffline(targetProject.id)
+            alert('Project is now available offline.')
+        } catch (err) {
+            console.error('Failed to cache project offline', err)
+            alert('Failed to make project available offline.')
+        }
+    }
+
+    const handleMakeNoteOffline = async (note) => {
+        try {
+            await cacheNoteForOffline(note.id, note)
+            alert('Note is now available offline.')
+        } catch (err) {
+            console.error('Failed to cache note offline', err)
+            alert('Failed to make note available offline.')
+        }
     }
 
     const handleRemoveSubproject = async (subprojectId) => {
@@ -454,6 +474,7 @@ export default function ProjectDetailPage() {
                     isMobile={contextMenu.isMobile}
                     onClose={() => setContextMenu(null)}
                     onEdit={() => handleEditSubproject(contextMenu.project)}
+                    onMakeOffline={() => handleMakeProjectOffline(contextMenu.project)}
                     onDelete={() => handleDeleteSubproject(contextMenu.project.id)}
                     onRemoveFromParent={() => handleRemoveSubproject(contextMenu.project.id)}
                 />
@@ -469,6 +490,7 @@ export default function ProjectDetailPage() {
                     onClose={() => setNoteContextMenu(null)}
                     onPin={() => handlePinNote(noteContextMenu.note)}
                     onCopy={() => handleCopyNoteContent(noteContextMenu.note)}
+                    onMakeOffline={() => handleMakeNoteOffline(noteContextMenu.note)}
                     onPdf={() => handleMakePdf(noteContextMenu.note)}
                     onShare={() => handleShareNote(noteContextMenu.note)}
                     onOpenNew={() => handleOpenNewWindow(noteContextMenu.note)}

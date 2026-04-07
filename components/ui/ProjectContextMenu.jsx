@@ -1,9 +1,9 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import { Edit, Trash2, FolderMinus, X, Check } from 'lucide-react'
+import { Edit, Trash2, FolderMinus, X, Check, Download } from 'lucide-react'
 
-export default function ProjectContextMenu({ x, y, onClose, onEdit, onDelete, onRemoveFromParent, isMobile }) {
+export default function ProjectContextMenu({ x, y, onClose, onEdit, onDelete, onRemoveFromParent, onMakeOffline, isMobile }) {
     const menuRef = useRef(null)
 
     useEffect(() => {
@@ -71,6 +71,14 @@ export default function ProjectContextMenu({ x, y, onClose, onEdit, onDelete, on
                         onClick={() => { onEdit(); onClose(); }}
                         isMobile={isMobile}
                     />
+                    {onMakeOffline && (
+                        <ContextItem
+                            icon={<Download size={isMobile ? 18 : 14} />}
+                            label="Make Available Offline"
+                            onClick={() => { onMakeOffline(); onClose(); }}
+                            isMobile={isMobile}
+                        />
+                    )}
                     <ContextItem
                         icon={<FolderMinus size={isMobile ? 18 : 14} />}
                         label="Remove from Parent"
