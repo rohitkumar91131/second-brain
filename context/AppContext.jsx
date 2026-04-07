@@ -96,6 +96,7 @@ function AppContextInner({ children }) {
     const [fetchedEndpoints, setFetchedEndpoints] = useState(new Set())
     const fetchRegistry = useRef(new Set())
     const offlineSyncTimer = useRef(null)
+    const offlineSyncSnapshot = useRef({ notes: new Map(), projects: new Map() })
 
     const startFetch = useCallback(() => {
         setActiveFetches(prev => prev + 1)
@@ -333,8 +334,44 @@ function AppContextInner({ children }) {
             clearTimeout(offlineSyncTimer.current)
         }
         offlineSyncTimer.current = setTimeout(() => {
-            setOfflineNotes(notes)
-            setOfflineProjects(projects)
+            const sync = async () => {
+                const noteStamp = (note) => note.updatedAt || note.createdAt || ''
+                const projectStamp = (project) => project.updatedAt || project.createdAt || ''
+
+                const noteSnapshot = offlineSyncSnapshot.current.notes
+                const projectSnapshot = offlineSyncSnapshot.current.projects
+
+                const currentNoteIds = new Set(notes.map(note => note.id))
+                const notesDeleted = Array.from(noteSnapshot.keys()).some(id => !currentNoteIds.has(id))
+
+                if (notesDeleted) {
+                    await setOfflineNotes(notes)
+                    noteSnapshot.clear()
+                    notes.forEach(note => noteSnapshot.set(note.id, noteStamp(note)))
+                } else {
+                    const notesToSync = notes.filter(note => noteSnapshot.get(note.id) !== noteStamp(note))
+                    if (notesToSync.length) {
+                        await upsertOfflineNotes(notesToSync)
+                        notesToSync.forEach(note => noteSnapshot.set(note.id, noteStamp(note)))
+                    }
+                }
+
+                const currentProjectIds = new Set(projects.map(project => project.id))
+                const projectsDeleted = Array.from(projectSnapshot.keys()).some(id => !currentProjectIds.has(id))
+
+                if (projectsDeleted) {
+                    await setOfflineProjects(projects)
+                    projectSnapshot.clear()
+                    projects.forEach(project => projectSnapshot.set(project.id, projectStamp(project)))
+                } else {
+                    const projectsToSync = projects.filter(project => projectSnapshot.get(project.id) !== projectStamp(project))
+                    if (projectsToSync.length) {
+                        await upsertOfflineProjects(projectsToSync)
+                        projectsToSync.forEach(project => projectSnapshot.set(project.id, projectStamp(project)))
+                    }
+                }
+            }
+            sync()
         }, 300)
         return () => {
             if (offlineSyncTimer.current) {
@@ -604,7 +641,7 @@ function AppContextInner({ children }) {
             for (let i = 0; i < notes.length; i += OFFLINE_CACHE_BATCH_SIZE) {
                 if (isCancelled) return
                 const batch = notes.slice(i, i + OFFLINE_CACHE_BATCH_SIZE)
-                await Promise.all(batch.map(note => cacheNoteForOffline(note.id, note)))
+                await Promise.allSettled(batch.map(note => cacheNoteForOffline(note.id, note)))
                 if (i + OFFLINE_CACHE_BATCH_SIZE < notes.length) {
                     await new Promise(resolve => setTimeout(resolve, 100))
                 }

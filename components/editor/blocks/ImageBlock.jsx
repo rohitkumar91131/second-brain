@@ -44,6 +44,13 @@ export default function ImageBlock({ block, onUpdate, onDelete, onDragHandleDown
                     applyBlob(cached)
                     return
                 }
+                if (typeof navigator !== 'undefined' && !navigator.onLine) {
+                    if (isActive) {
+                        setOfflineSrc(null)
+                        setCachedBlob(null)
+                    }
+                    return
+                }
                 const downloaded = await cacheOfflineImage(block.content)
                 if (downloaded) {
                     applyBlob(downloaded)
