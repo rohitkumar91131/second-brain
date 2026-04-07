@@ -79,7 +79,7 @@ export default function ImageBlock({ block, onUpdate, onDelete, onDragHandleDown
             if (!blob) {
                 const response = await fetch(imageUrl)
                 if (!response.ok) {
-                    throw new Error(`Failed to download image (${response.status})`)
+                    throw new Error(`Failed to download image (${response.status} ${response.statusText})`)
                 }
                 blob = await response.blob()
             }

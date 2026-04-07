@@ -38,7 +38,9 @@ const safeSetStorage = (key, value) => {
 }
 // -----------------------------------
 
-const OFFLINE_CACHE_BATCH_SIZE = 5
+const OFFLINE_CACHE_BATCH_SIZE = 3
+const OFFLINE_SYNC_DEBOUNCE_MS = 800
+const OFFLINE_PREFETCH_BATCH_DELAY_MS = 150
 
 const AppContext = createContext(null)
 
@@ -372,7 +374,7 @@ function AppContextInner({ children }) {
                 }
             }
             sync()
-        }, 800)
+        }, OFFLINE_SYNC_DEBOUNCE_MS)
         return () => {
             if (offlineSyncTimer.current) {
                 clearTimeout(offlineSyncTimer.current)
@@ -640,9 +642,11 @@ function AppContextInner({ children }) {
         const prefetchAll = async () => {
             const waitForIdle = () => new Promise(resolve => {
                 if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
-                    window.requestIdleCallback(() => resolve(), { timeout: 200 })
+                    window.requestIdleCallback(() => {
+                        setTimeout(resolve, OFFLINE_PREFETCH_BATCH_DELAY_MS)
+                    }, { timeout: OFFLINE_PREFETCH_BATCH_DELAY_MS })
                 } else {
-                    setTimeout(resolve, 100)
+                    setTimeout(resolve, OFFLINE_PREFETCH_BATCH_DELAY_MS)
                 }
             })
 
