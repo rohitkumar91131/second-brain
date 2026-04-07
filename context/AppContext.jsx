@@ -372,7 +372,7 @@ function AppContextInner({ children }) {
                 }
             }
             sync()
-        }, 300)
+        }, 800)
         return () => {
             if (offlineSyncTimer.current) {
                 clearTimeout(offlineSyncTimer.current)
@@ -638,12 +638,20 @@ function AppContextInner({ children }) {
         if (!offlineMode || !isOnline || !isAuthenticated) return
         let isCancelled = false
         const prefetchAll = async () => {
+            const waitForIdle = () => new Promise(resolve => {
+                if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+                    window.requestIdleCallback(() => resolve(), { timeout: 200 })
+                } else {
+                    setTimeout(resolve, 100)
+                }
+            })
+
             for (let i = 0; i < notes.length; i += OFFLINE_CACHE_BATCH_SIZE) {
                 if (isCancelled) return
                 const batch = notes.slice(i, i + OFFLINE_CACHE_BATCH_SIZE)
                 await Promise.allSettled(batch.map(note => cacheNoteForOffline(note.id, note)))
                 if (i + OFFLINE_CACHE_BATCH_SIZE < notes.length) {
-                    await new Promise(resolve => setTimeout(resolve, 100))
+                    await waitForIdle()
                 }
             }
         }

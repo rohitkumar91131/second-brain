@@ -11,8 +11,7 @@ import { cacheOfflineImage, getOfflineImage } from '@/lib/offlineDb'
 export default function ImageBlock({ block, onUpdate, onDelete, onDragHandleDown, onDragHandleUp }) {
     const [isFullScreen, setIsFullScreen] = useState(false)
     const [isDownloading, setIsDownloading] = useState(false)
-    const [offlineSrc, setOfflineSrc] = useState(null)
-    const [cachedBlob, setCachedBlob] = useState(null)
+    const [cachedImage, setCachedImage] = useState({ blob: null, url: null })
 
     useEffect(() => {
         const handleEsc = (e) => {
@@ -27,15 +26,13 @@ export default function ImageBlock({ block, onUpdate, onDelete, onDragHandleDown
         let objectUrl = null
         const resolveImage = async () => {
             if (!block.content) {
-                setOfflineSrc(null)
-                setCachedBlob(null)
+                setCachedImage({ blob: null, url: null })
                 return
             }
             const applyBlob = (blob) => {
                 objectUrl = URL.createObjectURL(blob)
                 if (isActive) {
-                    setOfflineSrc(objectUrl)
-                    setCachedBlob(blob)
+                    setCachedImage({ blob, url: objectUrl })
                 }
             }
             try {
@@ -46,8 +43,7 @@ export default function ImageBlock({ block, onUpdate, onDelete, onDragHandleDown
                 }
                 if (typeof navigator !== 'undefined' && !navigator.onLine) {
                     if (isActive) {
-                        setOfflineSrc(null)
-                        setCachedBlob(null)
+                        setCachedImage({ blob: null, url: null })
                     }
                     return
                 }
@@ -57,14 +53,12 @@ export default function ImageBlock({ block, onUpdate, onDelete, onDragHandleDown
                     return
                 }
                 if (isActive) {
-                    setOfflineSrc(null)
-                    setCachedBlob(null)
+                    setCachedImage({ blob: null, url: null })
                 }
             } catch (error) {
                 console.error('Failed to resolve offline image', block.content, error)
                 if (isActive) {
-                    setOfflineSrc(null)
-                    setCachedBlob(null)
+                    setCachedImage({ blob: null, url: null })
                 }
             }
         }
@@ -81,9 +75,12 @@ export default function ImageBlock({ block, onUpdate, onDelete, onDragHandleDown
     const handleDownload = async (imageUrl) => {
         try {
             setIsDownloading(true)
-            let blob = cachedBlob
+            let blob = cachedImage.blob
             if (!blob) {
                 const response = await fetch(imageUrl)
+                if (!response.ok) {
+                    throw new Error(`Failed to download image (${response.status})`)
+                }
                 blob = await response.blob()
             }
             const url = window.URL.createObjectURL(blob);
@@ -97,6 +94,7 @@ export default function ImageBlock({ block, onUpdate, onDelete, onDragHandleDown
             window.URL.revokeObjectURL(url);
         } catch (error) {
             console.error("Download failed:", error);
+            toast.error('Image download failed. Opening original.')
             window.open(imageUrl, '_blank');
         } finally {
             setIsDownloading(false)
@@ -122,7 +120,7 @@ export default function ImageBlock({ block, onUpdate, onDelete, onDragHandleDown
                 {block.content ? (
                     <div className="relative inline-flex w-full justify-center group/img">
                         <Image
-                            src={offlineSrc || block.content}
+                            src={cachedImage.url || block.content}
                             alt="Note image"
                             width={800}
                             height={600}
@@ -169,7 +167,7 @@ export default function ImageBlock({ block, onUpdate, onDelete, onDragHandleDown
                                 </button>
 
                                 <Image
-                                    src={offlineSrc || block.content}
+                                    src={cachedImage.url || block.content}
                                     alt="Full view"
                                     width={1200}
                                     height={800}
