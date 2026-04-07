@@ -77,18 +77,10 @@ export function AuthProvider({ children }) {
         try {
           const statusRes = await authAPI.checkDeviceVerificationStatus(requestId)
 
-          if (statusRes.status === 'approved' && statusRes.userId) {
+          if (statusRes.status === 'approved' && statusRes.accessToken) {
             clearInterval(interval)
-
-            // Get the access token by calling approve endpoint
-            const approveRes = await authAPI.approveDeviceVerification(requestId)
-
-            if (approveRes.accessToken) {
-              await persistSession(approveRes.accessToken, approveRes.user)
-              resolve(approveRes)
-            } else {
-              reject(new Error('Failed to get access token'))
-            }
+            await persistSession(statusRes.accessToken, statusRes.user)
+            resolve(statusRes)
           } else if (statusRes.status === 'expired' || statusRes.status === 'rejected') {
             clearInterval(interval)
             reject(new Error(`Device verification ${statusRes.status}`))

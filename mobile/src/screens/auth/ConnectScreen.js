@@ -41,8 +41,9 @@ export default function ConnectScreen({ navigation }) {
         return
       }
 
-      // Dynamically update API base URL from QR
+      // Dynamically use the server from QR for the verify call only
       const { default: api } = await import('../../services/api')
+      const prevBaseURL = api.defaults.baseURL
       api.defaults.baseURL = server
 
       const deviceId =
@@ -51,8 +52,12 @@ export default function ConnectScreen({ navigation }) {
           : Application?.applicationId ?? `ios-${Date.now()}`
 
       setLoading(true)
-      await loginWithQR(token, 'My Phone', Platform.OS, deviceId)
-      // Navigation handled by root navigator when auth state changes
+      try {
+        await loginWithQR(token, 'My Phone', Platform.OS, deviceId)
+        // Navigation handled by root navigator when auth state changes
+      } finally {
+        api.defaults.baseURL = prevBaseURL
+      }
     } catch (e) {
       Alert.alert('Connection Failed', e?.response?.data?.error ?? e.message ?? 'Unknown error', [
         { text: 'Try Again', onPress: () => { setScanned(false); setLoading(false) } },
