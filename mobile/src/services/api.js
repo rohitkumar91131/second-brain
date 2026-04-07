@@ -29,6 +29,9 @@ export const authAPI = {
   verifyQR: (token, deviceName, platform, deviceId) =>
     api.post('/api/device/verify', { token, deviceName, platform, deviceId }).then(r => r.data),
 
+  verifyOTP: (email, otp, deviceName, platform, deviceId) =>
+    api.post('/api/auth/device/otp/verify', { email, otp, deviceName, platform, deviceId }).then(r => r.data),
+
   initiateDeviceVerification: (data) =>
     api.post('/api/device/verify/initiate', data).then(r => r.data),
 

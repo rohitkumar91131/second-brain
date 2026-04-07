@@ -38,6 +38,13 @@ export function AuthProvider({ children }) {
     return data
   }
 
+  const loginWithOTP = async (email, otp, deviceName, platform, deviceId) => {
+    const data = await authAPI.verifyOTP(email, otp, deviceName, platform, deviceId)
+    if (!data.accessToken) throw new Error('OTP verification failed')
+    await persistSession(data.accessToken, data.user)
+    return data
+  }
+
   const loginWithBrowser = async (deviceName, platform, deviceId, fcmToken) => {
     // Initiate verification request
     const initiateRes = await authAPI.initiateDeviceVerification({
@@ -111,7 +118,7 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, loginWithQR, loginWithBrowser, logout, setUser }}>
+    <AuthContext.Provider value={{ user, token, loading, loginWithQR, loginWithOTP, loginWithBrowser, logout, setUser }}>
       {children}
     </AuthContext.Provider>
   )

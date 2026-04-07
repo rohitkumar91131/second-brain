@@ -96,6 +96,12 @@ export default function SettingsScreen({ navigation }) {
           subtitle="Re-pair this device with the web app"
           onPress={() => navigation.navigate('Connect')}
         />
+        <SettingRow
+          icon="keypad-outline"
+          label="Connect via OTP"
+          subtitle="Use a 6-digit code from the website"
+          onPress={() => navigation.navigate('OtpConnect')}
+        />
       </Section>
 
       {/* Devices */}
