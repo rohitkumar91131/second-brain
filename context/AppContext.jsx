@@ -9,6 +9,9 @@ import {
     getOfflineProjects,
     setOfflineProjects,
     upsertOfflineProjects,
+    getOfflineTasks,
+    setOfflineTasks,
+    upsertOfflineTasks,
     getOfflineNoteBlocks,
     setOfflineNoteBlocks,
     cacheImagesFromBlocks
@@ -98,7 +101,7 @@ function AppContextInner({ children }) {
     const [fetchedEndpoints, setFetchedEndpoints] = useState(new Set())
     const fetchRegistry = useRef(new Set())
     const offlineSyncTimer = useRef(null)
-    const offlineSyncSnapshot = useRef({ notes: new Map(), projects: new Map() })
+    const offlineSyncSnapshot = useRef({ notes: new Map(), projects: new Map(), tasks: new Map() })
 
     const startFetch = useCallback(() => {
         setActiveFetches(prev => prev + 1)
@@ -121,24 +124,45 @@ function AppContextInner({ children }) {
 
     const loadFromOfflineDb = useCallback(async () => {
         try {
-            const [cachedNotes, cachedProjects] = await Promise.all([
+            // Load data that is only in localStorage (goals, journal, areas, resources, etc.)
+            const stored = safeGetStorage('appData') || {}
+            if (stored.goals?.length) setGoals(stored.goals)
+            if (stored.journal?.length) setJournal(stored.journal)
+            if (stored.areas?.length) setAreas(stored.areas)
+            if (stored.resources?.length) setResources(stored.resources)
+            if (stored.media?.length) setMedia(stored.media)
+            if (stored.archive?.length) setArchive(stored.archive)
+            if (stored.archivedNotes?.length) setArchivedNotes(stored.archivedNotes)
+            if (stored.deletedNotes?.length) setDeletedNotes(stored.deletedNotes)
+
+            // Load from IndexedDB — notes, projects and tasks have dedicated stores
+            const [cachedNotes, cachedProjects, cachedTasks] = await Promise.all([
                 getOfflineNotes(),
-                getOfflineProjects()
+                getOfflineProjects(),
+                getOfflineTasks()
             ])
 
+            // IndexedDB data takes priority over localStorage (it's kept more in sync)
             if (cachedNotes?.length) setNotes(cachedNotes)
-            if (cachedProjects?.length) setProjects(cachedProjects)
+            else if (stored.notes?.length) setNotes(stored.notes)
 
-            if (cachedNotes?.length || cachedProjects?.length) {
+            if (cachedProjects?.length) setProjects(cachedProjects)
+            else if (stored.projects?.length) setProjects(stored.projects)
+
+            if (cachedTasks?.length) setTasks(cachedTasks)
+            else if (stored.tasks?.length) setTasks(stored.tasks)
+
+            if (cachedNotes?.length || cachedProjects?.length || cachedTasks?.length) {
                 setFetchedEndpoints(prev => {
                     const next = new Set(prev)
                     if (cachedNotes?.length) next.add('notes')
                     if (cachedProjects?.length) next.add('projects')
+                    if (cachedTasks?.length) next.add('tasks')
                     return next
                 })
             }
         } catch (err) {
-            console.error('Failed to load offline notes and projects', err)
+            console.error('Failed to load offline data', err)
         }
     }, [])
 
@@ -237,6 +261,15 @@ function AppContextInner({ children }) {
                 if (endpoint.startsWith('projects')) {
                     const cachedProjects = await getOfflineProjects()
                     if (cachedProjects?.length) setProjects(cachedProjects)
+                }
+                if (endpoint === 'tasks') {
+                    const cachedTasks = await getOfflineTasks()
+                    if (cachedTasks?.length) {
+                        setTasks(cachedTasks)
+                    } else {
+                        const stored = safeGetStorage('appData')
+                        if (stored?.tasks?.length) setTasks(stored.tasks)
+                    }
                 }
                 setFetchedEndpoints(prev => new Set(prev).add(endpoint))
                 return
@@ -339,9 +372,11 @@ function AppContextInner({ children }) {
             const sync = async () => {
                 const noteStamp = (note) => note.updatedAt || note.createdAt || ''
                 const projectStamp = (project) => project.updatedAt || project.createdAt || ''
+                const taskStamp = (task) => task.updatedAt || task.createdAt || ''
 
                 const noteSnapshot = offlineSyncSnapshot.current.notes
                 const projectSnapshot = offlineSyncSnapshot.current.projects
+                const taskSnapshot = offlineSyncSnapshot.current.tasks
 
                 const currentNoteIds = new Set(notes.map(note => note.id))
                 const notesDeleted = Array.from(noteSnapshot.keys()).some(id => !currentNoteIds.has(id))
@@ -372,6 +407,21 @@ function AppContextInner({ children }) {
                         projectsToSync.forEach(project => projectSnapshot.set(project.id, projectStamp(project)))
                     }
                 }
+
+                const currentTaskIds = new Set(tasks.map(task => task.id))
+                const tasksDeleted = Array.from(taskSnapshot.keys()).some(id => !currentTaskIds.has(id))
+
+                if (tasksDeleted) {
+                    await setOfflineTasks(tasks)
+                    taskSnapshot.clear()
+                    tasks.forEach(task => taskSnapshot.set(task.id, taskStamp(task)))
+                } else {
+                    const tasksToSync = tasks.filter(task => taskSnapshot.get(task.id) !== taskStamp(task))
+                    if (tasksToSync.length) {
+                        await upsertOfflineTasks(tasksToSync)
+                        tasksToSync.forEach(task => taskSnapshot.set(task.id, taskStamp(task)))
+                    }
+                }
             }
             sync()
         }, OFFLINE_SYNC_DEBOUNCE_MS)
@@ -380,7 +430,7 @@ function AppContextInner({ children }) {
                 clearTimeout(offlineSyncTimer.current)
             }
         }
-    }, [notes, projects, isInitialized])
+    }, [notes, projects, tasks, isInitialized])
 
     useEffect(() => {
         if (!isInitialized) return
