@@ -1,9 +1,9 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import { Pin, PinOff, Copy, FileDown, Share2, ExternalLink, X, Trash2 } from 'lucide-react'
+import { Pin, PinOff, Copy, FileDown, Share2, ExternalLink, X, Trash2, Download } from 'lucide-react'
 
-export default function NoteContextMenu({ x, y, onClose, onPin, onCopy, onPdf, onShare, onOpenNew, onDelete, isMobile, isPinned }) {
+export default function NoteContextMenu({ x, y, onClose, onPin, onCopy, onPdf, onShare, onOpenNew, onDelete, onMakeOffline, isMobile, isPinned }) {
     const menuRef = useRef(null)
 
     useEffect(() => {
@@ -77,6 +77,14 @@ export default function NoteContextMenu({ x, y, onClose, onPin, onCopy, onPdf, o
                         onClick={() => { onCopy(); onClose(); }}
                         isMobile={isMobile}
                     />
+                    {onMakeOffline && (
+                        <ContextItem
+                            icon={<Download size={isMobile ? 18 : 14} />}
+                            label="Make Available Offline"
+                            onClick={() => { onMakeOffline(); onClose(); }}
+                            isMobile={isMobile}
+                        />
+                    )}
                     <ContextItem
                         icon={<FileDown size={isMobile ? 18 : 14} />}
                         label="Make PDF"

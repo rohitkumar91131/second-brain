@@ -5,11 +5,13 @@ import Image from 'next/image'
 import { Image as ImageIcon, Minus, Maximize2, X, Download, GripVertical } from 'lucide-react' // GripVertical import kiya
 import { CldUploadWidget } from 'next-cloudinary'
 import { toast } from 'sonner'
+import { cacheOfflineImage, getOfflineImage } from '@/lib/offlineDb'
 
 // Naye props onDragHandleDown aur onDragHandleUp receive kiye
 export default function ImageBlock({ block, onUpdate, onDelete, onDragHandleDown, onDragHandleUp }) {
     const [isFullScreen, setIsFullScreen] = useState(false)
     const [isDownloading, setIsDownloading] = useState(false)
+    const [cachedImage, setCachedImage] = useState({ blob: null, url: null })
 
     useEffect(() => {
         const handleEsc = (e) => {
@@ -19,11 +21,68 @@ export default function ImageBlock({ block, onUpdate, onDelete, onDragHandleDown
         return () => window.removeEventListener('keydown', handleEsc)
     }, [])
 
+    useEffect(() => {
+        let isActive = true
+        let objectUrl = null
+        const resolveImage = async () => {
+            if (!block.content) {
+                setCachedImage({ blob: null, url: null })
+                return
+            }
+            const applyBlob = (blob) => {
+                objectUrl = URL.createObjectURL(blob)
+                if (isActive) {
+                    setCachedImage({ blob, url: objectUrl })
+                }
+            }
+            try {
+                const cached = await getOfflineImage(block.content)
+                if (cached) {
+                    applyBlob(cached)
+                    return
+                }
+                if (typeof navigator !== 'undefined' && !navigator.onLine) {
+                    if (isActive) {
+                        setCachedImage({ blob: null, url: null })
+                    }
+                    return
+                }
+                const downloaded = await cacheOfflineImage(block.content)
+                if (downloaded) {
+                    applyBlob(downloaded)
+                    return
+                }
+                if (isActive) {
+                    setCachedImage({ blob: null, url: null })
+                }
+            } catch (error) {
+                console.error('Failed to resolve offline image', block.content, error)
+                if (isActive) {
+                    setCachedImage({ blob: null, url: null })
+                }
+            }
+        }
+
+        resolveImage()
+        return () => {
+            isActive = false
+            if (objectUrl) {
+                URL.revokeObjectURL(objectUrl)
+            }
+        }
+    }, [block.content])
+
     const handleDownload = async (imageUrl) => {
         try {
             setIsDownloading(true)
-            const response = await fetch(imageUrl);
-            const blob = await response.blob();
+            let blob = cachedImage.blob
+            if (!blob) {
+                const response = await fetch(imageUrl)
+                if (!response.ok) {
+                    throw new Error(`Failed to download image (${response.status} ${response.statusText})`)
+                }
+                blob = await response.blob()
+            }
             const url = window.URL.createObjectURL(blob);
 
             const link = document.createElement('a');
@@ -35,6 +94,7 @@ export default function ImageBlock({ block, onUpdate, onDelete, onDragHandleDown
             window.URL.revokeObjectURL(url);
         } catch (error) {
             console.error("Download failed:", error);
+            toast.error('Image download failed. Opening original.')
             window.open(imageUrl, '_blank');
         } finally {
             setIsDownloading(false)
@@ -60,7 +120,7 @@ export default function ImageBlock({ block, onUpdate, onDelete, onDragHandleDown
                 {block.content ? (
                     <div className="relative inline-flex w-full justify-center group/img">
                         <Image
-                            src={block.content}
+                            src={cachedImage.url || block.content}
                             alt="Note image"
                             width={800}
                             height={600}
@@ -107,7 +167,7 @@ export default function ImageBlock({ block, onUpdate, onDelete, onDragHandleDown
                                 </button>
 
                                 <Image
-                                    src={block.content}
+                                    src={cachedImage.url || block.content}
                                     alt="Full view"
                                     width={1200}
                                     height={800}
