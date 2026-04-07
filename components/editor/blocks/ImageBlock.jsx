@@ -31,23 +31,22 @@ export default function ImageBlock({ block, onUpdate, onDelete, onDragHandleDown
                 setCachedBlob(null)
                 return
             }
+            const applyBlob = (blob) => {
+                objectUrl = URL.createObjectURL(blob)
+                if (isActive) {
+                    setOfflineSrc(objectUrl)
+                    setCachedBlob(blob)
+                }
+            }
             try {
                 const cached = await getOfflineImage(block.content)
                 if (cached) {
-                    objectUrl = URL.createObjectURL(cached)
-                    if (isActive) {
-                        setOfflineSrc(objectUrl)
-                        setCachedBlob(cached)
-                    }
+                    applyBlob(cached)
                     return
                 }
                 const downloaded = await cacheOfflineImage(block.content)
                 if (downloaded) {
-                    objectUrl = URL.createObjectURL(downloaded)
-                    if (isActive) {
-                        setOfflineSrc(objectUrl)
-                        setCachedBlob(downloaded)
-                    }
+                    applyBlob(downloaded)
                     return
                 }
                 if (isActive) {

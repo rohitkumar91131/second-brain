@@ -95,6 +95,7 @@ function AppContextInner({ children }) {
     const [activeFetches, setActiveFetches] = useState(0)
     const [fetchedEndpoints, setFetchedEndpoints] = useState(new Set())
     const fetchRegistry = useRef(new Set())
+    const offlineSyncTimer = useRef(null)
 
     const startFetch = useCallback(() => {
         setActiveFetches(prev => prev + 1)
@@ -328,11 +329,18 @@ function AppContextInner({ children }) {
 
     useEffect(() => {
         if (!isInitialized) return
-        const syncOffline = async () => {
-            await setOfflineNotes(notes)
-            await setOfflineProjects(projects)
+        if (offlineSyncTimer.current) {
+            clearTimeout(offlineSyncTimer.current)
         }
-        syncOffline()
+        offlineSyncTimer.current = setTimeout(() => {
+            setOfflineNotes(notes)
+            setOfflineProjects(projects)
+        }, 300)
+        return () => {
+            if (offlineSyncTimer.current) {
+                clearTimeout(offlineSyncTimer.current)
+            }
+        }
     }, [notes, projects, isInitialized])
 
     useEffect(() => {
@@ -597,6 +605,9 @@ function AppContextInner({ children }) {
                 if (isCancelled) return
                 const batch = notes.slice(i, i + OFFLINE_CACHE_BATCH_SIZE)
                 await Promise.all(batch.map(note => cacheNoteForOffline(note.id, note)))
+                if (i + OFFLINE_CACHE_BATCH_SIZE < notes.length) {
+                    await new Promise(resolve => setTimeout(resolve, 100))
+                }
             }
         }
         prefetchAll()
