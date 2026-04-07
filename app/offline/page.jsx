@@ -38,6 +38,7 @@ export default function OfflinePage() {
                 <div className="flex flex-col sm:flex-row gap-3 justify-center">
                     <Link
                         href="/dashboard"
+                        aria-label="Navigate to dashboard to access cached content"
                         className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors"
                     >
                         Open Dashboard

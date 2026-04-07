@@ -22,7 +22,7 @@ const withPWA = require('@ducanh2912/next-pwa').default({
                     },
                 },
             },
-            // Cache Next.js image optimisation responses
+            // Cache Next.js image optimization responses
             {
                 urlPattern: /^\/_next\/image\?.*/i,
                 handler: 'StaleWhileRevalidate',
