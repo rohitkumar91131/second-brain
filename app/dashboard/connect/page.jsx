@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import Image from 'next/image'
-import { Smartphone, RefreshCw, Trash2, CheckCircle2, Clock, Wifi } from 'lucide-react'
+import Link from 'next/link'
+import { Smartphone, RefreshCw, Trash2, CheckCircle2, Clock, Wifi, Key } from 'lucide-react'
 import { format } from 'date-fns'
 
 // ─── QR Code renderer (pure-SVG, no external library needed) ──────────────
@@ -151,6 +152,18 @@ export default function ConnectPage() {
                         <p>1. Open the Second Brain app on your phone</p>
                         <p>2. Go to <strong className="text-slate-400">Settings → Connect to Web</strong></p>
                         <p>3. Tap <strong className="text-slate-400">Scan QR Code</strong></p>
+                    </div>
+
+                    {/* OTP alternative */}
+                    <div className="w-full border-t border-white/5 pt-4 mt-2">
+                        <p className="text-xs text-slate-500 text-center mb-3">Can't scan? Use OTP instead</p>
+                        <Link
+                            href="/dashboard/connect/otp"
+                            className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-2xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 text-sm font-semibold transition-all border border-indigo-500/20"
+                        >
+                            <Key size={16} />
+                            Connect via 6-Digit OTP
+                        </Link>
                     </div>
                 </div>
 

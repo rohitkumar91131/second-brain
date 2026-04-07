@@ -129,6 +129,14 @@ export default function ConnectScreen({ navigation }) {
           <Ionicons name="globe-outline" size={18} color={COLORS.white} />
           <Text style={styles.browserBtnText}>Sign In with Browser</Text>
         </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.otpBtn}
+          onPress={() => navigation.navigate('OtpConnect')}
+        >
+          <Ionicons name="keypad-outline" size={18} color={COLORS.primary} />
+          <Text style={styles.otpBtnText}>Connect via 6-Digit OTP</Text>
+        </TouchableOpacity>
       </View>
     </View>
   )
@@ -198,4 +206,21 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255,255,255,0.3)',
   },
   browserBtnText: { color: COLORS.white, fontSize: FONT_SIZE.sm, fontWeight: '600' },
+  otpBtn: {
+    position: 'absolute',
+    bottom: SPACING.lg + 60,
+    left: SPACING.lg,
+    right: SPACING.lg,
+    backgroundColor: 'rgba(99,102,241,0.2)',
+    borderRadius: RADIUS.lg,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.md,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: SPACING.xs,
+    borderWidth: 1,
+    borderColor: 'rgba(99,102,241,0.4)',
+  },
+  otpBtnText: { color: COLORS.primary, fontSize: FONT_SIZE.sm, fontWeight: '600' },
 })

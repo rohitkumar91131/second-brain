@@ -19,6 +19,7 @@ import ResourcesScreen from '../screens/ResourcesScreen'
 import MediaScreen from '../screens/MediaScreen'
 import SettingsScreen from '../screens/SettingsScreen'
 import ConnectScreen from '../screens/auth/ConnectScreen'
+import OtpConnectScreen from '../screens/auth/OtpConnectScreen'
 
 const Tab = createBottomTabNavigator()
 const Stack = createNativeStackNavigator()
@@ -92,6 +93,7 @@ function MoreStack() {
       <S.Screen name="Media" component={MediaScreen} />
       <S.Screen name="Settings" component={SettingsScreen} />
       <S.Screen name="Connect" component={ConnectScreen} />
+      <S.Screen name="OtpConnect" component={OtpConnectScreen} />
     </S.Navigator>
   )
 }
