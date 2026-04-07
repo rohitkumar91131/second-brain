@@ -208,7 +208,7 @@ export default function ProjectDetailPage() {
             await cacheProjectForOffline(targetProject.id)
             toast.success('Project is now available offline.')
         } catch (err) {
-            console.error('Failed to cache project offline', err)
+            console.error('Failed to cache project offline', targetProject.id, err)
             toast.error('Failed to make project available offline.')
         }
     }
@@ -218,7 +218,7 @@ export default function ProjectDetailPage() {
             await cacheNoteForOffline(note.id, note)
             toast.success('Note is now available offline.')
         } catch (err) {
-            console.error('Failed to cache note offline', err)
+            console.error('Failed to cache note offline', note.id, err)
             toast.error('Failed to make note available offline.')
         }
     }

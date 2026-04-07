@@ -55,7 +55,7 @@ export default function ImageBlock({ block, onUpdate, onDelete, onDragHandleDown
                     setCachedBlob(null)
                 }
             } catch (error) {
-                console.error('Failed to resolve offline image', error)
+                console.error('Failed to resolve offline image', block.content, error)
                 if (isActive) {
                     setOfflineSrc(null)
                     setCachedBlob(null)

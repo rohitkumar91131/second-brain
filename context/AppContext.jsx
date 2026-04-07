@@ -38,6 +38,8 @@ const safeSetStorage = (key, value) => {
 }
 // -----------------------------------
 
+const OFFLINE_CACHE_BATCH_SIZE = 5
+
 const AppContext = createContext(null)
 
 export function useApp() {
@@ -132,7 +134,7 @@ function AppContextInner({ children }) {
                 })
             }
         } catch (err) {
-            console.error('Failed to load offline cache', err)
+            console.error('Failed to load offline notes and projects', err)
         }
     }, [])
 
@@ -574,7 +576,7 @@ function AppContextInner({ children }) {
             await setOfflineNoteBlocks(noteId, blocks)
             await cacheImagesFromBlocks(blocks)
         } catch (err) {
-            console.error('Failed to cache note offline', err)
+            console.error('Failed to cache note offline', noteId, err)
         }
     }, [notes, apiCall])
 
@@ -591,10 +593,9 @@ function AppContextInner({ children }) {
         if (!offlineMode || !isOnline || !isAuthenticated) return
         let isCancelled = false
         const prefetchAll = async () => {
-            const batchSize = 5
-            for (let i = 0; i < notes.length; i += batchSize) {
+            for (let i = 0; i < notes.length; i += OFFLINE_CACHE_BATCH_SIZE) {
                 if (isCancelled) return
-                const batch = notes.slice(i, i + batchSize)
+                const batch = notes.slice(i, i + OFFLINE_CACHE_BATCH_SIZE)
                 await Promise.all(batch.map(note => cacheNoteForOffline(note.id, note)))
             }
         }
