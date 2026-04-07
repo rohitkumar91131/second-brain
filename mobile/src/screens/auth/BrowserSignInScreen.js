@@ -7,9 +7,9 @@ import { Ionicons } from '@expo/vector-icons'
 import * as SecureStore from 'expo-secure-store'
 import * as Device from 'expo-device'
 import * as Application from 'expo-application'
-import * as Crypto from 'expo-crypto'
 import { useAuth } from '../../context/AuthContext'
 import { COLORS, FONT_SIZE, RADIUS, SPACING } from '../../constants/theme'
+import { v4 as uuidv4 } from 'uuid'
 
 export default function BrowserSignInScreen({ navigation }) {
   const { loginWithBrowser } = useAuth()
@@ -21,7 +21,7 @@ export default function BrowserSignInScreen({ navigation }) {
       // Get device info
       const platform = Platform.OS === 'ios' ? 'ios' : 'android'
       const deviceName = Device.deviceName || `${Platform.OS} Device`
-      const deviceId = Application.androidId || (await SecureStore.getItemAsync('deviceId')) || Crypto.randomUUID()
+      const deviceId = Application.androidId || (await SecureStore.getItemAsync('deviceId')) || uuidv4()
 
       // Store device ID for future reference
       await SecureStore.setItemAsync('deviceId', deviceId)

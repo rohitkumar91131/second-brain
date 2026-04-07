@@ -50,6 +50,12 @@
           "android": {}
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "347e5625-ffbb-413c-89ea-dc13a7aee991"
+      }
+    },
+    "owner": "rohit_kumar_911"
   }
 }
