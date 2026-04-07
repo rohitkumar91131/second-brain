@@ -12,6 +12,7 @@ import Loader from '@/components/ui/Loader'
 import ProjectContextMenu from '@/components/ui/ProjectContextMenu'
 import NoteContextMenu from '@/components/ui/NoteContextMenu'
 import { Pin } from 'lucide-react'
+import { toast } from 'sonner'
 
 export default function ProjectDetailPage() {
     const params = useParams()
@@ -205,20 +206,20 @@ export default function ProjectDetailPage() {
     const handleMakeProjectOffline = async (targetProject) => {
         try {
             await cacheProjectForOffline(targetProject.id)
-            alert('Project is now available offline.')
+            toast.success('Project is now available offline.')
         } catch (err) {
             console.error('Failed to cache project offline', err)
-            alert('Failed to make project available offline.')
+            toast.error('Failed to make project available offline.')
         }
     }
 
     const handleMakeNoteOffline = async (note) => {
         try {
             await cacheNoteForOffline(note.id, note)
-            alert('Note is now available offline.')
+            toast.success('Note is now available offline.')
         } catch (err) {
             console.error('Failed to cache note offline', err)
-            alert('Failed to make note available offline.')
+            toast.error('Failed to make note available offline.')
         }
     }
 

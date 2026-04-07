@@ -591,9 +591,11 @@ function AppContextInner({ children }) {
         if (!offlineMode || !isOnline || !isAuthenticated) return
         let isCancelled = false
         const prefetchAll = async () => {
-            for (const note of notes) {
+            const batchSize = 5
+            for (let i = 0; i < notes.length; i += batchSize) {
                 if (isCancelled) return
-                await cacheNoteForOffline(note.id, note)
+                const batch = notes.slice(i, i + batchSize)
+                await Promise.all(batch.map(note => cacheNoteForOffline(note.id, note)))
             }
         }
         prefetchAll()
