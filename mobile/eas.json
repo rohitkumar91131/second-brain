@@ -1,18 +1,28 @@
 {
   "cli": {
-    "version": ">= 5.0.0"
+    "version": ">= 5.0.0",
+    "appVersionSource": "local"
   },
   "build": {
     "preview": {
       "distribution": "internal",
       "env": {
-        "NPM_CONFIG_LEGACY_PEER_DEPS": "true"
+        "NPM_CONFIG_LEGACY_PEER_DEPS": "true",
+        "EAS_BUILD_NO_EXPO_GO_WARNING": "true"
       },
       "android": {
-        "withoutCredentials": true
+        "buildType": "apk"
       }
     },
-    "production": {}
+    "production": {
+      "env": {
+        "NPM_CONFIG_LEGACY_PEER_DEPS": "true",
+        "EAS_BUILD_NO_EXPO_GO_WARNING": "true"
+      },
+      "android": {
+        "buildType": "apk"
+      }
+    }
   },
   "submit": {
     "production": {}
