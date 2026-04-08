@@ -12,22 +12,18 @@ function formatNote(n) {
 }
 
 // GET /api/notes
-// TEMPORARY: All users can access all notes (exam prep)
+// TEMPORARY: All users can access all notes (exam prep, but NOT deleted ones)
 router.get('/', requireAuth, async (req, res) => {
   try {
     await connectDB()
     const { archived, deleted } = req.query
-    // TEMP: No filters - show ALL notes for exam prep
-    const query = {}
+    // TEMP: No userId filter, but exclude deleted notes
+    const query = { deletedAt: null }
 
-    // Only filter if specifically requested
-    if (deleted === 'true') {
-      query.deletedAt = { $ne: null }
-    } else if (archived === 'true') {
+    if (archived === 'true') {
       query.isArchived = true
-    } else if (deleted !== 'true' && archived !== 'true') {
-      // Don't filter by default - show everything
-      // query stays empty to get all notes
+    } else {
+      query.isArchived = false
     }
 
     const notes = await Note.find(query).sort({ updatedAt: -1 }).lean()
