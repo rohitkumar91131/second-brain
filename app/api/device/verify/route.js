@@ -42,6 +42,7 @@ export async function POST(request) {
 
         // Check expiration
         if (Date.now() > new Date(deviceToken.expiresAt).getTime()) {
+            console.error(`[QR] Token expired: ${token.substring(0, 20)}...`)
             return NextResponse.json(
                 { error: 'Token has expired' },
                 { status: 401 }
@@ -49,12 +50,19 @@ export async function POST(request) {
         }
 
         // Fetch user data separately (finding by ObjectId, or fallback to email)
-        const userData = await User.findById(deviceToken.userId).select('_id email name image') ||
-            await User.findOne({ email: deviceToken.userEmail }).select('_id email name image')
+        console.log(`[QR] Token verified. Looking up user: ${deviceToken.userId}`)
+        let userData = await User.findById(deviceToken.userId).select('_id email name image')
+        
+        // Fallback to email if ID lookup fails
+        if (!userData) {
+            console.log(`[QR] User not found by ID (${deviceToken.userId}), trying email fallback...`)
+            userData = await User.findOne({ email: deviceToken.userEmail }).select('_id email name image')
+        }
 
         if (!userData) {
+            console.error(`[QR] User not found for ID: ${deviceToken.userId}, email: ${deviceToken.userEmail}`)
             return NextResponse.json(
-                { error: 'User not found' },
+                { error: 'User not found - please register first' },
                 { status: 404 }
             )
         }

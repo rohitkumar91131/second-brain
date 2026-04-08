@@ -7,7 +7,12 @@ function requireAuth(req, res, next) {
   }
   const token = authHeader.slice(7)
   try {
-    const payload = jwt.verify(token, process.env.JWT_SECRET)
+    const secret = process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET
+    if (!secret) {
+      console.error('[AUTH] No JWT secret configured')
+      return res.status(500).json({ error: 'Server configuration error' })
+    }
+    const payload = jwt.verify(token, secret)
     req.user = {
       id: payload.id,
       email: payload.email,

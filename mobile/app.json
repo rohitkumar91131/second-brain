@@ -51,5 +51,11 @@
         }
       ]
     ],
+    "extra": {
+      "eas": {
+        "projectId": "284b6b82-c332-4e3a-b625-b6a42eb293cc"
+      }
+    },
+    "owner": "cvpilot"
   }
 }

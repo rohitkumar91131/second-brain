@@ -40,15 +40,24 @@ router.get('/', requireAuth, async (req, res) => {
 // POST /api/device/verify/initiate — create a browser-based verification request (no auth required)
 router.post('/verify/initiate', initiateRateLimit, async (req, res) => {
   try {
+    console.log('[DEVICE INITIATE] Request received')
     const { deviceName, platform, deviceId, fcmToken } = req.body
-    if (!deviceName || !deviceId) return res.status(400).json({ error: 'deviceName and deviceId are required' })
+    console.log('[DEVICE INITIATE] Device:', { deviceName, platform, deviceId })
+    
+    if (!deviceName || !deviceId) {
+      console.log('[DEVICE INITIATE] Missing deviceName or deviceId')
+      return res.status(400).json({ error: 'deviceName and deviceId are required' })
+    }
 
+    console.log('[DEVICE INITIATE] Connecting to database...')
     await connectDB()
+    console.log('[DEVICE INITIATE] Database connected')
 
     const requestId = crypto.randomUUID()
     const expiresAt = new Date(Date.now() + 5 * 60 * 1000) // 5 minutes
 
-    await DeviceVerification.create({
+    console.log('[DEVICE INITIATE] Creating verification record...')
+    const verification = await DeviceVerification.create({
       requestId,
       deviceName,
       platform: platform || 'unknown',
@@ -56,17 +65,20 @@ router.post('/verify/initiate', initiateRateLimit, async (req, res) => {
       fcmToken: fcmToken || null,
       expiresAt,
     })
+    console.log('[DEVICE INITIATE] Verification record created:', requestId)
 
     const webAppUrl = process.env.WEB_APP_URL
     if (!webAppUrl) {
-      console.error('WEB_APP_URL environment variable is not set')
+      console.error('[DEVICE INITIATE] WEB_APP_URL environment variable is not set')
       return res.status(500).json({ error: 'WEB_APP_URL environment variable is not configured' })
     }
     const verificationUrl = `${webAppUrl}/dashboard/device/adddevice?requestId=${requestId}`
+    console.log('[DEVICE INITIATE] Verification URL generated:', verificationUrl)
 
+    console.log('[DEVICE INITIATE] Initiate successful')
     return res.status(201).json({ requestId, verificationUrl, expiresIn: 300 })
   } catch (e) {
-    console.error('Initiate verify error:', e)
+    console.error('[DEVICE INITIATE] Error:', e)
     return res.status(500).json({ error: 'Internal server error' })
   }
 })
@@ -76,27 +88,54 @@ router.post('/verify/initiate', initiateRateLimit, async (req, res) => {
 router.get('/verify/:requestId', verifyStatusRateLimit, async (req, res) => {
   try {
     const { requestId } = req.params
-    if (!requestId) return res.status(400).json({ error: 'Request ID required' })
+    console.log('[DEVICE STATUS CHECK] Request ID:', requestId)
+    if (!requestId) {
+      console.log('[DEVICE STATUS CHECK] Missing request ID')
+      return res.status(400).json({ error: 'Request ID required' })
+    }
 
+    console.log('[DEVICE STATUS CHECK] Connecting to database...')
     await connectDB()
+    console.log('[DEVICE STATUS CHECK] Database connected')
 
+    console.log('[DEVICE STATUS CHECK] Looking up verification record...')
     const verification = await DeviceVerification.findOne({ requestId })
-    if (!verification) return res.status(404).json({ error: 'Verification request not found' })
+    if (!verification) {
+      console.error(`[DEVICE STATUS CHECK] Verification not found: ${requestId}`)
+      return res.status(404).json({ error: 'Verification request not found' })
+    }
+    console.log('[DEVICE STATUS CHECK] Verification record found. Status:', verification.status)
 
+    console.log('[DEVICE STATUS CHECK] Checking expiry...')
     if (new Date() > verification.expiresAt) {
+      console.log('[DEVICE STATUS CHECK] Request expired')
       await DeviceVerification.updateOne({ requestId }, { status: 'expired' })
       return res.json({ status: 'expired' })
     }
+    console.log('[DEVICE STATUS CHECK] Request still valid')
 
     if (verification.status === 'approved' && verification.userId) {
+      console.log('[DEVICE STATUS CHECK] Request is approved. Looking up user:', verification.userId)
       const user = await User.findById(verification.userId).select('_id email name image')
-      if (!user) return res.status(404).json({ error: 'User not found' })
+      if (!user) {
+        console.error(`[DEVICE STATUS CHECK] User not found: ${verification.userId}`)
+        return res.status(404).json({ error: 'User not found' })
+      }
+      console.log('[DEVICE STATUS CHECK] User found:', user.email)
 
+      const secret = process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET
+      if (!secret) {
+        console.error('[DEVICE STATUS CHECK] No JWT secret configured')
+        return res.status(500).json({ error: 'Server configuration error' })
+      }
+
+      console.log('[DEVICE STATUS CHECK] Generating access token...')
       const accessToken = jwt.sign(
         { id: user._id.toString(), email: user.email, name: user.name, provider: 'device', deviceId: verification.deviceId },
-        process.env.JWT_SECRET,
+        secret,
         { expiresIn: '30d' }
       )
+      console.log('[DEVICE STATUS CHECK] Access token generated. Sending response...')
 
       return res.json({
         status: 'approved',
@@ -105,9 +144,10 @@ router.get('/verify/:requestId', verifyStatusRateLimit, async (req, res) => {
       })
     }
 
+    console.log('[DEVICE STATUS CHECK] Current status:', verification.status)
     return res.json({ status: verification.status })
   } catch (e) {
-    console.error('Verify status error:', e)
+    console.error('[DEVICE STATUS CHECK] Error:', e)
     return res.status(500).json({ error: 'Internal server error' })
   }
 })
