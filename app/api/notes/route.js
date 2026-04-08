@@ -12,16 +12,15 @@ export const GET = withErrorHandler(async (request) => {
     const deleted = searchParams.get('deleted') === 'true'
 
     await connectDB()
-    const query = { userId: session.user.id }
+    // TEMP: Show all notes for exam prep
+    const query = {}
 
     if (deleted) {
         query.deletedAt = { $ne: null }
     } else if (archived) {
         query.isArchived = true
-        query.deletedAt = null
-    } else {
-        query.isArchived = false
-        query.deletedAt = null
+    } else if (deleted !== 'true' && archived !== 'true') {
+        // Show all by default, no filters
     }
 
     const notes = await Note.find(query).sort({ updatedAt: -1 }).lean()

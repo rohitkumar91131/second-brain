@@ -8,7 +8,8 @@ export const GET = withErrorHandler(async () => {
     if (error) return error
 
     await connectDB()
-    const projects = await Project.find({ userId: session.user.id }).sort({ createdAt: -1 }).lean()
+    // TEMP: Show all projects for exam prep
+    const projects = await Project.find({}).sort({ createdAt: -1 }).lean()
     return ok(projects.map(p => ({ ...p, id: p._id.toString(), _id: undefined })))
 })
 
