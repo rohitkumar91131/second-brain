@@ -12,11 +12,13 @@ function formatNote(n) {
 }
 
 // GET /api/notes
+// TEMPORARY: All users can access all notes (exam prep)
 router.get('/', requireAuth, async (req, res) => {
   try {
     await connectDB()
     const { archived, deleted } = req.query
-    const query = { userId: req.user.id }
+    // TEMP: Removed userId filter to share all notes
+    const query = {}
 
     if (deleted === 'true') {
       query.deletedAt = { $ne: null }
@@ -60,11 +62,13 @@ router.post('/', requireAuth, async (req, res) => {
 })
 
 // GET /api/notes/:id
+// TEMPORARY: All users can access all notes
 router.get('/:id', requireAuth, async (req, res) => {
   try {
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) return res.status(400).json({ error: 'Invalid ID' })
     await connectDB()
-    const note = await Note.findOne({ _id: req.params.id, userId: req.user.id }).lean()
+    // TEMP: Removed userId check to allow sharing
+    const note = await Note.findOne({ _id: req.params.id }).lean()
     if (!note) return res.status(404).json({ error: 'Note not found' })
     return res.json(formatNote(note))
   } catch (e) {
@@ -108,11 +112,13 @@ router.delete('/:id', requireAuth, async (req, res) => {
 })
 
 // GET /api/notes/:id/blocks
+// TEMPORARY: All users can access all notes
 router.get('/:id/blocks', requireAuth, async (req, res) => {
   try {
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) return res.status(400).json({ error: 'Invalid ID' })
     await connectDB()
-    const note = await Note.findOne({ _id: req.params.id, userId: req.user.id }).lean()
+    // TEMP: Removed userId check
+    const note = await Note.findOne({ _id: req.params.id }).lean()
     if (!note) return res.status(404).json({ error: 'Note not found' })
     const blocks = await Block.find({ entityId: req.params.id, entityType: 'Note' }).sort({ order: 1 }).lean()
     return res.json(blocks.map(b => ({ ...b, id: b._id.toString(), _id: undefined })))

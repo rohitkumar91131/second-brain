@@ -8,10 +8,12 @@ const router = express.Router()
 
 function fmt(p) { return { ...p, id: p._id.toString(), _id: undefined } }
 
+// TEMPORARY: All users can access all projects (exam prep)
 router.get('/', requireAuth, async (req, res) => {
   try {
     await connectDB()
-    const projects = await Project.find({ userId: req.user.id }).sort({ createdAt: -1 }).lean()
+    // TEMP: Removed userId filter
+    const projects = await Project.find({}).sort({ createdAt: -1 }).lean()
     return res.json(projects.map(fmt))
   } catch (e) { return res.status(500).json({ error: 'Internal server error' }) }
 })
@@ -26,11 +28,13 @@ router.post('/', requireAuth, async (req, res) => {
   } catch (e) { return res.status(500).json({ error: 'Internal server error' }) }
 })
 
+// TEMPORARY: All users can access all projects
 router.get('/:id', requireAuth, async (req, res) => {
   try {
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) return res.status(400).json({ error: 'Invalid ID' })
     await connectDB()
-    const project = await Project.findOne({ _id: req.params.id, userId: req.user.id }).lean()
+    // TEMP: Removed userId check
+    const project = await Project.findOne({ _id: req.params.id }).lean()
     if (!project) return res.status(404).json({ error: 'Project not found' })
     return res.json(fmt(project))
   } catch (e) { return res.status(500).json({ error: 'Internal server error' }) }
