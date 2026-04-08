@@ -17,17 +17,17 @@ router.get('/', requireAuth, async (req, res) => {
   try {
     await connectDB()
     const { archived, deleted } = req.query
-    // TEMP: Removed userId filter to share all notes
+    // TEMP: No filters - show ALL notes for exam prep
     const query = {}
 
+    // Only filter if specifically requested
     if (deleted === 'true') {
       query.deletedAt = { $ne: null }
     } else if (archived === 'true') {
       query.isArchived = true
-      query.deletedAt = null
-    } else {
-      query.isArchived = false
-      query.deletedAt = null
+    } else if (deleted !== 'true' && archived !== 'true') {
+      // Don't filter by default - show everything
+      // query stays empty to get all notes
     }
 
     const notes = await Note.find(query).sort({ updatedAt: -1 }).lean()
