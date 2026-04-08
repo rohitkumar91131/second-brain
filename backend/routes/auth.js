@@ -243,6 +243,7 @@ router.post('/device/otp/verify', async (req, res) => {
       return res.status(401).json({ error: 'Invalid OTP' })
     }
     console.log('[OTP VERIFY] OTP record found:', otpRecord._id)
+    console.log('[OTP VERIFY] OTP record - userId:', otpRecord.userId, 'userEmail:', otpRecord.userEmail)
     
     console.log('[OTP VERIFY] Checking OTP expiry...')
     if (Date.now() > new Date(otpRecord.expiresAt).getTime()) {
@@ -253,6 +254,7 @@ router.post('/device/otp/verify', async (req, res) => {
 
     console.log(`[OTP VERIFY] OTP verified. Looking up user: ${otpRecord.userId}`)
     const userData = await User.findById(otpRecord.userId).select('_id email name image')
+    console.log('[OTP VERIFY] User lookup result:', userData ? `Found (${userData.email})` : 'NOT FOUND')
     
     // If user not found by ID, try fallback by email
     let user = userData

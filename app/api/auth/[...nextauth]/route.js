@@ -105,6 +105,43 @@ export const authOptions = {
         },
 
         async signIn({ user, account, profile }) {
+            console.log('[NEXTAUTH SIGNIN] User:', user?.email, 'Provider:', account?.provider)
+            
+            // For OAuth providers, ensure user exists in Mongoose User collection
+            if (account?.type === 'oauth' && user?.id) {
+                try {
+                    console.log('[NEXTAUTH SIGNIN] Syncing user to MongoDB...')
+                    await connectDB()
+                    
+                    // Check if user exists in Mongoose collection
+                    const existingUser = await User.findOne({ email: user.email })
+                    
+                    if (!existingUser) {
+                        console.log('[NEXTAUTH SIGNIN] Creating user in Mongoose:', user.email)
+                        // Create user in Mongoose if doesn't exist
+                        await User.create({
+                            _id: user.id,
+                            name: user.name || '',
+                            email: user.email,
+                            image: user.image,
+                            provider: account.provider,
+                            emailVerified: new Date(),
+                        })
+                        console.log('[NEXTAUTH SIGNIN] User created in MongoDB:', user.email)
+                    } else {
+                        console.log('[NEXTAUTH SIGNIN] User already exists:', user.email)
+                        // Update provider if signing in with different provider
+                        if (existingUser._id.toString() !== user.id) {
+                            console.log('[NEXTAUTH SIGNIN] Updating user ID mapping...')
+                            // If IDs don't match, this is a new session for existing user
+                        }
+                    }
+                } catch (error) {
+                    console.error('[NEXTAUTH SIGNIN] Error syncing user:', error)
+                    // Don't fail signin, just log the error
+                }
+            }
+            
             // Allow all OAuth sign-ins
             if (account?.type === 'oauth') {
                 return true
