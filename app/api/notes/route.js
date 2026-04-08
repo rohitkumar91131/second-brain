@@ -12,13 +12,20 @@ export const GET = withErrorHandler(async (request) => {
     const deleted = searchParams.get('deleted') === 'true'
 
     await connectDB()
-    // TEMP: Show all notes (no userId), but exclude deleted ones
-    const query = { deletedAt: null }
+    // TEMP: Show all notes (no userId), but respect deleted filter
+    const query = {}
 
-    if (archived) {
+    if (deleted) {
+        // Show ONLY deleted notes
+        query.deletedAt = { $ne: null }
+    } else if (archived) {
+        // Show archived notes
         query.isArchived = true
+        query.deletedAt = null
     } else {
+        // Show active notes (not deleted, not archived)
         query.isArchived = false
+        query.deletedAt = null
     }
 
     const notes = await Note.find(query).sort({ updatedAt: -1 }).lean()
