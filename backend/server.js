@@ -16,6 +16,10 @@ const userRoutes = require('./routes/user')
 
 const app = express()
 
+// Trust proxy - required when behind reverse proxy (Render, Heroku, etc.)
+// This allows express-rate-limit to correctly identify client IP from X-Forwarded-For header
+app.set('trust proxy', 1)
+
 const ALLOWED_ORIGINS = [
   'https://secondbrain.rohits.online',
   'http://localhost:3000',

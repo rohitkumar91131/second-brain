@@ -18,6 +18,18 @@ const initiateRateLimit = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'Too many verification requests, please try again later' },
+  skip: (req, res) => {
+    // Log rate limit details for debugging
+    console.log('[RATE LIMIT] initiateRateLimit - IP:', req.ip, 'X-Forwarded-For:', req.get('X-Forwarded-For'))
+    return false
+  },
+  keyGenerator: (req, res) => {
+    // Use X-Forwarded-For if available (when behind proxy), otherwise use IP
+    const forwardedFor = req.get('X-Forwarded-For')
+    const clientIp = forwardedFor ? forwardedFor.split(',')[0].trim() : req.ip
+    console.log('[RATE LIMIT] Using IP:', clientIp)
+    return clientIp
+  }
 })
 
 const verifyStatusRateLimit = rateLimit({
@@ -26,6 +38,16 @@ const verifyStatusRateLimit = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'Too many status checks, please slow down' },
+  skip: (req, res) => {
+    console.log('[RATE LIMIT] verifyStatusRateLimit - IP:', req.ip)
+    return false
+  },
+  keyGenerator: (req, res) => {
+    // Use X-Forwarded-For if available (when behind proxy), otherwise use IP
+    const forwardedFor = req.get('X-Forwarded-For')
+    const clientIp = forwardedFor ? forwardedFor.split(',')[0].trim() : req.ip
+    return clientIp
+  }
 })
 
 // GET /api/device — list devices
@@ -67,10 +89,15 @@ router.post('/verify/initiate', initiateRateLimit, async (req, res) => {
     })
     console.log('[DEVICE INITIATE] Verification record created:', requestId)
 
-    const webAppUrl = process.env.WEB_APP_URL
-    if (!webAppUrl) {
+    const webAppUrl = process.env.WEB_APP_URL || process.env.FRONTEND_URL || 'https://secondbrain.rohits.online'
+    if (!webAppUrl || webAppUrl === 'undefined') {
       console.error('[DEVICE INITIATE] WEB_APP_URL environment variable is not set')
-      return res.status(500).json({ error: 'WEB_APP_URL environment variable is not configured' })
+      console.error('[DEVICE INITIATE] Please set WEB_APP_URL in .env or deployment config')
+      console.error('[DEVICE INITIATE] Example: WEB_APP_URL=https://yourdomain.com')
+      return res.status(500).json({ 
+        error: 'Server configuration error: WEB_APP_URL not set',
+        details: 'Contact administrator to configure WEB_APP_URL environment variable'
+      })
     }
     const verificationUrl = `${webAppUrl}/dashboard/device/adddevice?requestId=${requestId}`
     console.log('[DEVICE INITIATE] Verification URL generated:', verificationUrl)
